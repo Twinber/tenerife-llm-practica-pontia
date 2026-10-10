@@ -56,10 +56,11 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
     [x] 1.6 Sesión 06: Multiagente, MCP y Skills Modulares (Completada y Aprobada)
 
 [>] FASE 2: Diseño y Arquitectura de la Solución
-    [x] 2.0 Arquitectura Limpia por Capas y Elección de UI (Aprobada)
-        * Separación estricta Backend (`src/`) y UI agnóstica (`TurnResult`).
-        * Gradio seleccionado como motor de interfaz oficial retro (SCUMM Point & Click).
-        * 3 Modos de ejecución: App Web independiente (`python -m src.ui.web_retro_app`), Celda Jupyter (`launch_game(inline=True)`) y Terminal CLI.
+    [x] 2.0 Arquitectura Limpia Desacoplada Cliente-Servidor y Frontend Nativo (Aprobada)
+        * Separación estricta Backend (`src/`) y Frontend ligero (`frontend/`) vía API REST y Server-Sent Events (SSE).
+        * Justificación de diseño para el tribunal: supera el notebook monolítico permitiendo portabilidad futura a App Móvil o Unreal Engine 5.
+        * Backend en FastAPI (`src/api/`) sirviendo API agnóstica y estáticos web.
+        * Frontend en HTML5 semántico, CSS3 retro con scanlines CRT y Vanilla JavaScript ES6 (sin frameworks pesados ni NodeJS).
     [x] 2.1 Análisis documental de TENERIFE.pdf y Pipeline de Ingesta/Extracción de Assets (Aprobado)
         * Chunking semántico por enclaves (unidades temáticas completas por lugar sin troceo ciego).
         * Almacenamiento dual en Chroma DB: Embeddings (búsqueda) + Documento textual literal (inyección en prompt) + Metadatos (`pagina`, `zona`, `lugar`, `image_path`).
@@ -67,12 +68,13 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
     [x] 2.2 Selección del stack tecnológico (Aprobado)
         * Carpeta canónica del proyecto: `proyecto-tenerife/`.
         * Proveedor y arquitectura: OpenAI con SDK nativo directo (`openai>=1.40.0`, Pydantic V2, sin LangChain).
+        * Servidor API: FastAPI (`fastapi>=0.110.0`) y Uvicorn (`uvicorn>=0.28.0`).
         * Modelos base de desarrollo (vía `.env`):
           - Motor principal: `gpt-4o-mini` (`OPENAI_MODEL_MAIN`).
           - Guardrail rápido: `gpt-4o-mini` (`OPENAI_MODEL_FAST`).
           - Embeddings: `text-embedding-3-small` (`OPENAI_EMBEDDING_MODEL`).
         * Vector Store: Chroma DB local (`chromadb`).
-        * UI: Gradio con soporte dual (web standalone y celda inline).
+        * Frontend: HTML5, CSS3, Vanilla JS ES6 y Web Audio API.
     [x] 2.3 Especificación del guión narrativo y mecánicas de la aventura (Aprobado)
         * Objetivo Principal: Pasaporte de Explorador con 10+1 pantallas visitables (5 Norte, 5 Sur y El Teide como clímax final).
         * Objetivo Secundario (Coleccionable Multimodal): Álbum de Fotos de Tenerife (28 fotos desbloqueables interrogando al RAG).

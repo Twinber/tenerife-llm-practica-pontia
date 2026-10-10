@@ -7,50 +7,65 @@
 
 ---
 
-## 0. Arquitectura de Software Limpia (Clean Architecture) y Desacoplamiento de UI
+## 0. Arquitectura de Software Limpia (Clean Architecture) y Desacoplamiento Cliente-Servidor
 
-* **Filosofía de Diseño:**
-  * La "aventura gráfica retro" o cualquier presentación visual es un **adaptador de interfaz (UI)** intercambiable.
-  * El **núcleo de la práctica es un backend agéntico en Python puro**, estructurado por capas y con estricta separación de responsabilidades e inversión de dependencias.
-  * Permite ser consumido sin cambios por:
-    1. Un bucle interactivo de celdas en el Jupyter Notebook (`notebook_principal.ipynb`, entrega oficial).
-    2. Una consola de terminal CLI interactiva.
-    3. Una aplicación web (Gradio / Streamlit).
+* **Filosofía de Diseño y Justificación para el Tribunal del Máster:**
+  * **Superación del Enfoque Monolítico (Gradio / Notebook-Only):**
+    * Se descartan herramientas de prototipado monolítico como Gradio o Streamlit en favor de una **arquitectura desacoplada Cliente-Servidor (SOA / REST + Server-Sent Events)** con **Clean Architecture**.
+    * **Justificación de Ingeniería:** La IA generativa, el motor RAG vectorial y la máquina de estados residen en un **Backend agéntico en Python puro**, expuesto mediante una API HTTP agnóstica.
+    * **Preparado para el Futuro (*Future-Proofing*):** Al desacoplar completamente la lógica de negocio de la presentación, cualquier cliente ligero puede consumir el universo de Twinber sin alterar el backend:
+      1. Un frontend web retro nativo (HTML5 / CSS / Vanilla JS) hoy.
+      2. Una aplicación móvil nativa (Flutter / React Native) mañana.
+      3. Un motor de videojuegos 3D profesional (Unreal Engine 5 / Unity / Godot) en el futuro.
+    * **Cumplimiento Académico:** El profesor permite no ceñirse al notebook siempre que las decisiones de arquitectura estén formalmente justificadas en la documentación técnica, garantizando el máximo rigor de software.
 
-* **Capas de la Arquitectura:**
-  1. **Capa 1: Dominio y Contratos (Core):**
-     * Modelos de datos inmutables y esquemas Pydantic (`GameState`, `Inventory`, `LocationNode`, `WeatherInfo`, `CalimaAlert`, `StarlightInfo`).
-     * Sin dependencias externas ni acoplamientos a frameworks.
-  2. **Capa 2: Infraestructura y Adaptadores (Ports & Adapters):**
-     * Adaptadores externos: `OpenMeteoClient` (HTTP con fallback offline resiliente), `ChromaVectorStoreAdapter` (embeddings y base vectorial), `LLMClientAdapter` (OpenAI SDK), `PDFExtractor` (parser de texto e imágenes), `AuditLogger` (`game_audit.log`).
-  3. **Capa 3: Aplicación y Casos de Uso (Services & Orchestration):**
-     * `AssistantEngine` (orquestador del bucle conversacional del turno).
-     * `RAGService` (búsqueda semántica, filtrado por metadatos y citación formal obligatoria).
-     * `GuardrailService` (portero ligero de entrada y validador semántico/regex de salida).
-     * `ToolDispatcher / MCPService` (resolución y ejecución de tools y recursos MCP).
-     * `MemoryService` (gestión de ventana deslizante + Narrative Summary Buffer).
-  4. **Capa 4: Presentación y Entrega (UI - Gradio Seleccionado):**
-     * **Marco Elegido:** Gradio (soporte nativo de streaming, CSS retro inyectable, componentes reactivos y compatibilidad dual).
-     * **3 Modos de Ejecución Independientes:**
-       1. *Modo Aplicación Web Independiente:* `python -m src.ui.web_retro_app` (se ejecuta a pantalla completa en `http://localhost:7860`).
-       2. *Modo Evaluación en Jupyter Notebook:* `launch_game(inline=True)` (se incrusta en la celda de salida para corrección directa del evaluador).
-       3. *Modo Terminal / CLI:* `python -m src.ui.terminal_cli` (interfaz ligera por consola para pruebas y depuración ágil).
+* **Capas de la Arquitectura Limpia:**
+  1. **Capa 1: Dominio y Contratos (Core - `src/domain/`):**
+     * Modelos de datos inmutables y esquemas Pydantic (`GameState`, `Inventory`, `LocationNode`, `SceneHotspot`, `WeatherInfo`, `CalimaAlert`, `StarlightInfo`, `TurnResult`).
+     * Cero dependencias externas o de frameworks de transporte.
+  2. **Capa 2: Infraestructura y Adaptadores (`src/infrastructure/`):**
+     * `OpenMeteoClient` (HTTP con fallback offline resiliente).
+     * `ChromaVectorStoreAdapter` (embeddings y base vectorial persistente).
+     * `LLMClientAdapter` (SDK oficial OpenAI directo para completados y streaming).
+     * `PDFExtractor` (parser estructurado de texto y extractor de las 28 fotos de `TENERIFE.pdf`).
+     * `AuditLogger` (escritura en disco de telemetría estructurada `game_audit.log`).
+  3. **Capa 3: Aplicación y Casos de Uso (`src/application/`):**
+     * `AssistantEngine` (orquestador del bucle conversacional y resolución de turnos).
+     * `RAGService` (búsqueda semántica geocercada, filtrado y citación formal de fuentes).
+     * `GuardrailService` (portero ligero `gpt-4o-mini` y validador de salida).
+     * `ToolDispatcher / MCPService` (ejecución de tools de Open-Meteo y recursos MCP).
+     * `MemoryService` (gestión de ventana deslizante + Summary Buffer acumulativo).
+  4. **Capa 4: Servidor API (`src/api/` - FastAPI + Uvicorn):**
+     * Servidor HTTP asíncrono que expone la API REST y los streams de eventos.
+     * Sirve además la aplicación web estática (`frontend/`) en `http://localhost:8000`.
+  5. **Capa 5: Cliente Web Retro Nativo (`frontend/`):**
+     * Frontend ligero en HTML5 semántico, CSS3 retro con scanlines CRT y Vanilla JavaScript ES6 (sin Node.js ni empaquetadores pesados).
+
+* **Contratos de la API REST & Streaming (FastAPI):**
+  * `POST /api/action`: Envía una orden del jugador (`verbo`, `item_id`, `target_hotspot_id`, `texto_libre`) y procesa el turno en el backend.
+  * `GET /api/stream`: Canal de **Server-Sent Events (SSE)** (`text/event-stream`) para transmitir el texto del Narrador/NPC en tiempo real letra a letra.
+  * `GET /api/state`: Retorna el estado completo del juego (`GameState`: sellos, fotos, monedas, mochila).
+  * `GET /api/scene/{enclave_id}`: Retorna los datos de la escena actual (postal RAG, hotspots interactivos, bucles ambientales y NPCs presentes).
+  * `GET /api/mcp/connections`: Grafo de carreteras insulares (TF-1, TF-5, TF-24) para el mapa interactivo.
+  * `GET /api/audit`: Retorna la telemetría acumulada para la consola retro `~`.
 
 * **Ubicación Canónica del Proyecto:**
   * Carpeta raíz independiente: `proyecto-tenerife/`
-  * Contiene todo el código fuente del backend (`src/`), assets, datos, libreta de entrega y entorno.
+  * Backend: `proyecto-tenerife/src/`
+  * Frontend: `proyecto-tenerife/frontend/`
 
 * **Stack Tecnológico Oficial Seleccionado:**
-  * **Proveedor LLM:** OpenAI (SDK nativo directo `openai`, sin frameworks intermedios).
-  * **Modelo Principal (Narrativa & Tools):** `gpt-4o-mini` (configurable vía `OPENAI_MODEL_MAIN` en `.env`).
-  * **Modelo Rápido (Guardrail Bouncer):** `gpt-4o-mini` (configurable vía `OPENAI_MODEL_FAST` en `.env`).
-  * **Modelo de Embeddings:** `text-embedding-3-small` (configurable vía `OPENAI_EMBEDDING_MODEL` en `.env`).
-  * **Base de Datos Vectorial:** Chroma DB local (`chromadb`).
-  * **APIs Externas:** Open-Meteo (Weather Forecast & Air Quality, sin API key, pública).
-  * **Framework de Interfaz:** Gradio (Point & Click retro, modo app web y celda inline).
+  * **Servidor Web y API:** FastAPI (`fastapi>=0.110.0`) + Uvicorn (`uvicorn>=0.28.0`).
+  * **Proveedor LLM:** OpenAI SDK nativo (`openai>=1.40.0`).
+  * **Modelo Principal (Narrativa & Tools):** `gpt-4o-mini` (`OPENAI_MODEL_MAIN`).
+  * **Modelo Rápido (Guardrail Bouncer):** `gpt-4o-mini` (`OPENAI_MODEL_FAST`).
+  * **Modelo de Embeddings:** `text-embedding-3-small` (`OPENAI_EMBEDDING_MODEL`).
+  * **Base de Datos Vectorial:** Chroma DB local (`chromadb>=0.4.24`).
+  * **Validación & Settings:** Pydantic V2 (`pydantic>=2.7.0`, `pydantic-settings>=2.2.0`).
+  * **APIs Externas:** Open-Meteo (Weather Forecast & Air Quality, pública y gratuita).
+  * **Frontend:** HTML5, CSS3, JavaScript nativo ES6 (Web Audio API para SFX).
 
-* **Contrato Público de Comunicación:**
-  * La UI interactúa con el backend a través de una única interfaz: `engine.step(user_message: str) -> TurnResult`.
+* **Contrato Público Interno de Comunicación:**
   * `TurnResult` devuelve: `narrative: str`, `state: GameState`, `visual_asset: Optional[str]`, `citations: list[RespuestaCodice]`, `audit_events: list[AuditEvent]`, `sfx_to_play: list[str]`.
 
 ---
@@ -471,11 +486,11 @@ Para evitar la frustración clásica de las aventuras gráficas:
   | `sfx_hint` | Clic en botón `[💡 PENSAR]` | Campanilla mágica ascendente (*"¡Dlinnn!"*) |
   | `sfx_victory`| Final del juego superado | Fanfarria arpegiada chiptune triunfal (5 seg) |
 
-* **Arquitectura de Audio No Bloqueante en Gradio:**
+* **Arquitectura de Audio No Bloqueante (Web Audio API en el Frontend):**
   * Archivos minúsculos (5-15 KB cada uno) en `assets/audio/` (`.wav`/`.mp3` mono a 8 kHz).
   * El contrato `TurnResult` devuelve la lista de sonidos a disparar: `sfx_to_play: list[str]`.
-  * La capa de UI ejecuta la reproducción de forma asíncrona mediante HTML5 Web Audio (`new Audio(...).play()`), sin bloquear nunca el backend ni la renderización del notebook.
-  * Botón de accesibilidad `[ 🔊 / 🔇 ]` para silenciar el juego con un solo clic.
+  * El módulo `frontend/js/audio.js` ejecuta la reproducción de forma asíncrona mediante HTML5 Web Audio (`new Audio(...).play()`), sin bloquear nunca el hilo principal ni la interfaz.
+  * Botón de accesibilidad `[ 🔊 / 🔇 ]` en la barra superior para silenciar el juego con un solo clic.
 
 ---
 
@@ -500,12 +515,19 @@ Para evitar la frustración clásica de las aventuras gráficas:
 
 ---
 
-## 3. UI y Estética Retro: El Homenaje a LucasArts (SCUMM Point & Click)
+## 3. UI y Estética Retro: El Homenaje a LucasArts (SCUMM Point & Click Nativo)
 
 * **Filosofía de Interfaz (Homenaje a *Monkey Island* e *Indiana Jones*):**
   * Dinámica auténtica **Point & Click**: el escenario muestra los personajes, objetos y salidas interactuables de la zona actual.
   * **Diálogos Vivos por LLM:** En lugar de árboles de diálogo rígidos con frases enlatadas, al hacer clic en un personaje se abre un canal de conversación libre e inteligente donde el LLM encarna al NPC con su personalidad, acento canario y conocimientos del Códice RAG.
-  * Implementación en **Gradio** (`launch(inline=True)` dentro de celda Jupyter) con estilos CSS retro (Google Fonts pixeladas, marco VGA, paleta clásica de 256 colores).
+  * Implementación en **Frontend Web Nativo Desacoplado (`frontend/`)** servido por **FastAPI**, con estilos CSS retro puros (Google Fonts pixeladas 'Press Start 2P', marco VGA 320x200 escalado con `image-rendering: pixelated`, paleta clásica de 256 colores y scanlines CRT).
+
+* **Estructura Modular del Frontend (`frontend/`):**
+  * `frontend/index.html`: Marcado semántico del escenario, lienzo multicapa, matriz de verbos, inventario y consola CRT.
+  * `frontend/css/retro.css`: Estilos visuales retro, animaciones de sprites (`steps`), scanlines CRT y diseño adaptable.
+  * `frontend/js/game.js`: Control del micro-movimiento de Twinber, selección de hotspots y renderizado de la escena.
+  * `frontend/js/api.js`: Cliente HTTP REST y consumidor de Server-Sent Events (SSE) para streaming de tokens.
+  * `frontend/js/audio.js`: Gestor Web Audio API para disparar efectos de sonido SFX sin latencia.
 
 * **Distribución de la Pantalla SCUMM:**
   1. **El Visor Gráfico (60% superior):** Postal visual de la zona (fotos extraídas de `TENERIFE.pdf` con marco clásico).
