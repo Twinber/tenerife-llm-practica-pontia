@@ -529,15 +529,40 @@ Para evitar la frustración clásica de las aventuras gráficas:
   * `frontend/js/api.js`: Cliente HTTP REST y consumidor de Server-Sent Events (SSE) para streaming de tokens.
   * `frontend/js/audio.js`: Gestor Web Audio API para disparar efectos de sonido SFX sin latencia.
 
-* **Distribución de la Pantalla SCUMM:**
-  1. **El Visor Gráfico (60% superior):** Postal visual de la zona (fotos extraídas de `TENERIFE.pdf` con marco clásico).
-  2. **Subtítulos y Diálogos:** Texto de narrador y personajes en color amarillo Monkey Island y cyan.
-  3. **Línea de Frase e Input Libre:** Caja de texto para hablar con el NPC activo o dar órdenes libres.
-  4. **Matriz de Acciones / Verbos (Abajo-Izquierda):** Botones directos `[HABLAR]`, `[MIRAR]`, `[USAR]`, `[VIAJAR]`, `[CLIMA]`, `[CALIMA]`.
-  5. **Inventario de Twinber (Abajo-Derecha):** Cuadrícula visual con los objetos coleccionados (*Pasaporte, Álbum de fotos, monedas, bolsa de gofio*).
-  6. **Consola CRT de Auditoría (`~`):** Terminal desplegable con logs estructurados en tiempo real (llamadas a tools de Open-Meteo, latencia, tokens y citas RAG).
+* **Distribución y Cuadrícula del Layout Oficial (Base 640 x 360 px, 16:9):**
+  ```text
+   0 px ┌────────────────────────────────────────────────────────────────────────┐
+        │  ZONA 1: EL ESCENARIO GRÁFICO (VIEWPORT)                               │
+        │  Tamaño: 640 x 240 px (66.6% del alto total)                           │
+        │  - Fondo del enclave: 640 x 240 px                                     │
+        │  - Sprites de personajes: ~ 48 x 96 px                                 │
+        │  - Subtítulos flotantes de diálogo (amarillo / cyan)                   │
+  240 px ├────────────────────────────────────────────────────────────────────────┤
+        │  ZONA 2: LÍNEA DE FRASE DINÁMICA & INPUT                               │
+        │  Tamaño: 640 x 24 px (Texto en color ámbar / cian: "Hablar con...")    │
+  264 px ├───────────────────────────────┬────────────────────────────────────────┤
+        │  ZONA 3A: MATRIZ DE VERBOS    │  ZONA 3B: INVENTARIO GRÁFICO           │
+        │  Tamaño: 320 x 96 px          │  Tamaño: 320 x 96 px                   │
+        │  - Cuadrícula de 6 botones    │  - Cuadrícula 2 filas x 4 columnas     │
+        │    (HABLAR, MIRAR, USAR,      │  - 8 casillas de 36 x 36 px (o 48x48)  │
+        │     IR A, CLIMA, PENSAR)      │    (Monedas, Pasaporte, Álbum, Gofio)  │
+  360 px └───────────────────────────────┴────────────────────────────────────────┘
+  ```
+
+* **Ficha Técnica Oficial de Tamaño de Assets:**
+
+| Tipo de Asset | Dimensiones Nativas (Píxeles) | Proporción | Formato | Uso en el Juego |
+| :--- | :---: | :---: | :---: | :--- |
+| **Fondos de Escenario (10+1 enclaves)** | **$640 \times 240$ px** | $8:3$ (~2.67:1) | `.png` / `.webp` | Fondo panorámico de la escena visible. |
+| **Sprite de Twinber (Protagonista)** | **$48 \times 96$ px** | $1:2$ | `.png` transparente | Altura equivalente al 40% del escenario. |
+| **Sprites de NPCs** | **$48 \times 96$ px** (o $64 \times 96$) | $\sim 1:2$ | `.png` transparente | Chano, Manolo, Operario, Paco, Yeray. |
+| **Iconos de Inventario** | **$36 \times 36$ px** (o $48 \times 48$) | $1:1$ | `.png` transparente | Bolsa de monedas, gofio, nota, billete. |
+| **Sellos del Pasaporte** | **$40 \times 40$ px** | $1:1$ | `.png` transparente | Estampas de tinta roja/azul. |
+| **Postales del Álbum RAG (Miniatura)** | **$80 \times 60$ px** | $4:3$ | `.png` / `.webp` | Casilla del álbum en cuadrícula. |
+| **Postales del Álbum RAG (Zoom Modal)**| **$480 \times 320$ px** | $3:2$ | `.png` / `.webp` | Visor a pantalla completa al pulsar `[MIRAR]`. |
 
 * **Concept Mockup Visual:**
   * Archivo de referencia: `![Mockup SCUMM](/home/twinber/.gemini/antigravity-cli/brain/e6405918-3600-4f05-97bf-cd0127944c72/scumm_adventure_mockup_1791664109790.jpg)`
+
 
 
