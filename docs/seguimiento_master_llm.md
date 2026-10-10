@@ -78,8 +78,12 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
         * Objetivo Secundario (Coleccionable Multimodal): Álbum de Fotos de Tenerife (28 fotos desbloqueables interrogando al RAG).
         * Gating determinista en Python: Todo el Norte sellado para abrir el Sur; todo el Sur sellado para subir al Teide.
         * RAG Geocercado con humor de contención ante preguntas fuera de la ubicación actual.
-        * Sistema de viaje cinematográfico Indiana Jones: Mapa pergamino de Tenerife con trazo animado de línea roja discontinua (SVG/CSS).
-    [ ] 2.4 Diseño formal de herramientas (get_weather y auxiliares) y esquemas Pydantic
+    [x] 2.4 Diseño formal de herramientas y esquemas Pydantic (Aprobado)
+        * `WeatherResponse`: clima actual con fallback resiliente.
+        * `StarlightResponse`: nubosidad en Teide y fase lunar continua.
+        * `CalimaResponse`: concentración PM10 y polvo mineral según AEMET.
+        * `RespuestaCodiceRAG`: citas estructuradas obligatorias de páginas de `TENERIFE.pdf`.
+        * `AuditEvent`: registro de telemetría para `game_audit.log` y consola `~`.
     [ ] 2.5 Arquitectura de memoria y control de ventana de tokens
 
 [ ] FASE 3: Implementación Guiada en el Notebook Principal

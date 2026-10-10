@@ -120,16 +120,64 @@
   * Cada chunk almacena la ruta de su imagen correspondiente.
   * Al recuperar el contexto en el juego, la interfaz proyecta la postal visual del lugar junto a la narración y la cita de la fuente.
 
-### 1.8. Contrato Pydantic para Citas Obligatorias (Grounded Attribution)
-* Para cumplir con rigor la exigencia de la rúbrica (*"Devuelve respuestas citando la fuente"*) y evitar alucinaciones, la respuesta del RAG no se deja a la libre voluntad del modelo, sino que se blinda mediante un esquema Pydantic:
+### 1.8. Contratos Pydantic Formales del Dominio (`src/domain/`)
+
+* **1. Herramienta Meteorológica (`WeatherResponse`):**
+  ```python
+  class WeatherResponse(BaseModel):
+      ubicacion: str = Field(description="Nombre del enclave consultado (ej. Santa Cruz, El Teide)")
+      temperatura_c: float = Field(description="Temperatura actual en grados Celsius")
+      humedad_pct: int = Field(description="Humedad relativa del aire (%)")
+      sensacion_termica_c: float = Field(description="Sensación térmica calculada (°C)")
+      descripcion_clima: str = Field(description="Condición meteorológica humana (Despejado, Nublado, Lluvia...)")
+      viento_kmh: float = Field(description="Velocidad del viento en km/h")
+      simulated: bool = Field(default=False, description="True si se activó el fallback offline")
+  ```
+
+* **2. Herramienta Astronómica / Starlight (`StarlightResponse`):**
+  ```python
+  class StarlightResponse(BaseModel):
+      ubicacion: str = Field(default="Parque Nacional del Teide (2.390 m)")
+      cobertura_nubes_pct: int = Field(description="Porcentaje de nubes en cumbre (0% = cielo raso)")
+      fase_lunar: float = Field(description="Valor de 0.0 (Luna Nueva / Óptimo) a 0.5 (Luna Llena)")
+      nombre_fase_lunar: str = Field(description="Nombre descriptivo (Luna Nueva, Creciente, Llena, Menguante)")
+      calidad_observacion: Literal["Excelente", "Buena", "Aceptable", "Baja visibilidad"]
+      aviso_narrativo: str = Field(description="Contexto para el Narrador (modificador no bloqueante)")
+      simulated: bool = Field(default=False)
+  ```
+
+* **3. Herramienta de Alerta de Calima (`CalimaResponse`):**
+  ```python
+  class CalimaResponse(BaseModel):
+      zona: str = Field(description="Zona consultada (Norte, Sur o Cumbres)")
+      pm10_ug_m3: float = Field(description="Concentración de partículas PM10 en microgramos por m³")
+      polvo_mineral_ug_m3: float = Field(description="Concentración específica de polvo sahariano")
+      nivel_alerta: Literal["Aire Limpio", "Calima Ligera", "Alerta Calima Densa"]
+      efecto_visual: str = Field(description="Modificador visual/atmosférico para la narración")
+      simulated: bool = Field(default=False)
+  ```
+
+* **4. Esquema RAG con Citas Obligatorias (`RespuestaCodiceRAG`):**
   ```python
   class RespuestaCodiceRAG(BaseModel):
-      narracion: str = Field(description="Explicación o pista turística integrada en la aventura de Twinber")
-      paginas_citadas: List[int] = Field(description="Números exactos de página del PDF de donde procede la información")
-      fragmento_evidencia: str = Field(description="Cita textual exacta que respalda el dato aportado")
-      lugar_referenciado: str = Field(description="Nombre del lugar o enclave consultado en la guía")
+      narracion_turistica: str = Field(description="Explicación o pista turística integrada en la aventura de Twinber")
+      paginas_citadas: list[int] = Field(description="Páginas exactas de TENERIFE.pdf que respaldan el dato")
+      lugar_referenciado: str = Field(description="Enclave de la isla sobre el que versa la respuesta")
+      cita_textual_evidencia: str = Field(description="Cita textual exacta que respalda el dato aportado")
+      foto_desbloqueada_id: Optional[str] = Field(default=None, description="ID de la foto si este chunk la contiene")
   ```
-* Esto obliga al LLM a contrastar y devolver de forma estructurada los números de página que coinciden con los metadatos de los chunks recuperados de Chroma DB.
+
+* **5. Registro de Auditoría (`AuditEvent` para Consola `~` y `game_audit.log`):**
+  ```python
+  class AuditEvent(BaseModel):
+      timestamp: str
+      tipo_evento: Literal["TOOL_CALL", "RAG_RETRIEVAL", "GUARDRAIL_CHECK", "STATE_MUTATION"]
+      nombre_operacion: str
+      argumentos: dict
+      resultado_resumen: str
+      latencia_ms: float
+      estado: Literal["SUCCESS", "FALLBACK", "ERROR", "BLOCKED"]
+  ```
 
 ### 1.9. Arquitectura Agéntica: Patrón Supervisor + Subagentes como Herramientas
 * **Decisión de Diseño y Justificación Técnica (para el Informe):**
