@@ -1,4 +1,4 @@
-# Diseño de Juego & Especificación Técnica: *Twinber en Busca del Secreto Guanche*
+# Diseño de Juego & Especificación Técnica: *Twinber en Tenerife*
 
 **Género:** Aventura Gráfica Conversacional Retro (Inspirada en *The Secret of Monkey Island* e *Indiana Jones and the Fate of Atlantis*).  
 **Protagonista:** **Twinber**, aventurero y explorador.  
@@ -22,7 +22,7 @@
      * Modelos de datos inmutables y esquemas Pydantic (`GameState`, `Inventory`, `LocationNode`, `WeatherInfo`, `CalimaAlert`, `StarlightInfo`).
      * Sin dependencias externas ni acoplamientos a frameworks.
   2. **Capa 2: Infraestructura y Adaptadores (Ports & Adapters):**
-     * Adaptadores externos: `OpenMeteoClient` (HTTP con fallback offline resiliente), `ChromaVectorStoreAdapter` (embeddings y base vectorial), `LLMClientAdapter` (OpenAI / Gemini SDK), `PDFExtractor` (parser de texto e imágenes), `AuditLogger` (`game_audit.log`).
+     * Adaptadores externos: `OpenMeteoClient` (HTTP con fallback offline resiliente), `ChromaVectorStoreAdapter` (embeddings y base vectorial), `LLMClientAdapter` (OpenAI SDK), `PDFExtractor` (parser de texto e imágenes), `AuditLogger` (`game_audit.log`).
   3. **Capa 3: Aplicación y Casos de Uso (Services & Orchestration):**
      * `AssistantEngine` (orquestador del bucle conversacional del turno).
      * `RAGService` (búsqueda semántica, filtrado por metadatos y citación formal obligatoria).
@@ -59,7 +59,7 @@
 
 ### 1.1. El Objetivo del Juego: El Pasaporte de Explorador
 * **La Misión de Twinber:** Twinber desembarca en Tenerife con un **Pasaporte de Explorador** que debe ir sellando visitando cada rincón de la isla.
-* **El Gran Final (Clímax):** El ascenso a las cumbres del Teide y la contemplación de un cielo estrellado inolvidable desde el Parque Nacional, resolviendo el enigma astronómico del Códice con las tools `get_weather` y `get_starlight_conditions`.
+* **El Gran Final (Clímax):** El ascenso a las cumbres del Teide y la contemplación de un cielo estrellado inolvidable desde el Parque Nacional, con las tools `get_weather` y `get_starlight_conditions`.
 * **Las 10+1 Pantallas Visibles con Fondos Pixel-Art Representativos:**
   * **Zona Norte (5 sellos obligatorios):**
     1. *Santa Cruz de Tenerife* (Avenida Marítima, Plaza de España, Auditorio).
@@ -100,10 +100,20 @@
 * **Línea Roja Discontinua Animada:** Mediante un componente SVG animado con CSS puro (`stroke-dashoffset`), se dibuja en 1.5 a 2 segundos una **línea de puntos rojos** sobre la carretera real (TF-5, TF-1, TF-24) uniendo origen y destino.
 * **Sensación de Viaje:** Un rótulo dinámico anuncia el trayecto (*"Twinber toma la guagua de TITSA por la TF-5 hacia San Cristóbal de La Laguna..."*) antes de dar paso a la nueva postal pixel-art y sus personajes interactivos.
 
-### 1.6. Separación Clave de Arquitectura: Estado vs. Conversación
+### 1.6. Microeconomía de la Aventura: Las 15 Monedas y Objetos Clave
+* **Objetivo de las Monedas:** Evitar que el juego sea un simple paseo pasivo y dotarlo de puzles clásicos de inventario e interacción comercial.
+* **Presupuesto Inicial:** Twinber comienza la aventura con **15 monedas locales** en su zurrón.
+* **Transacciones Clave de la Aventura:**
+  1. *Comprar Gofio en el Molino de Chano (La Orotava):* Coste 3 monedas. Provisión calórica imprescindible para resistir el ascenso a las cumbres.
+  2. *Comanda en el Guachinche El Cubano (Santa Úrsula):* Coste 4 monedas. Pagar la carne fiesta y el vino para ganarse la confianza del tabernero y obtener la ruta segura por La Esperanza (TF-24).
+  3. *Billete del Teleférico del Teide (Las Cañadas):* Coste 5 monedas. Para ascender a los 3.718 m en el clímax final.
+  4. *Reserva para imprevistos / Pasajes:* 3 monedas de margen para billetes de guagua o compras secundarias.
+* **Mecánica Human-in-the-Loop:** Al gastar monedas (mutación irreversible de inventario), el sistema solicita confirmación explícita previa al jugador.
+
+### 1.7. Separación Clave de Arquitectura: Estado vs. Conversación
 * **El Texto es No Determinista (LLM):** La narración, descripciones y diálogos con lugareños o personajes no jugadores (NPCs) los genera el LLM con estilo inmersivo y humor fino.
 * **El Estado es Determinista (Python State Engine):**
-  * El **Pasaporte** e **Inventario** se mantienen en una estructura de datos estricta en memoria (`Pydantic`).
+  * El **Pasaporte**, **Álbum** e **Inventario de monedas** se mantienen en estructuras estrictas en memoria (`Pydantic`).
   * Los **Permisos y Sellos** se gestionan mediante **Function Calling (Tools)**.
   * La IA consulta el estado del jugador usando herramientas antes de permitir o denegar el avance a una zona.
 
@@ -278,13 +288,24 @@
 
 ---
 
-## 2. Estrategia de Memoria & Ventana de Contexto
+## 2. Estrategia de Memoria & Control de Ventana de Tokens
 
 * **Modelo Híbrido: Summary Buffer + Ventana Deslizante:**
   * Conserva intacto el `System Prompt` (identidad del juego, reglas, tono de aventura gráfica).
-  * Mantiene una memoria resumida (*Narrative Summary*) de los hitos superados por Twinber: *"Twinber llegó al puerto, habló con el pescador y compró provisiones en el mercado de Nuestra Señora de África"*.
-  * Mantiene en crudo los últimos **$K$ turnos** recientes para una conversación fluida y con agilidad de réplica.
-  * El inventario y mapa de zonas desbloqueadas viaja fuera del historial como estado estructurado, reduciendo drásticamente el consumo de tokens.
+  * **Estado Invariante Fuera del Historial:** El pasaporte (sellos), el álbum (fotos conseguidas) y el inventario (monedas/objetos) viajan como un bloque compacto de estado estructurado dentro del `System Prompt`, consumiendo apenas ~100 tokens y eliminando alucinaciones.
+  * **Ventana Reciente (Últimos 4 turnos):** Conserva íntegros los últimos 4 intercambios con el interlocutor activo para garantizar fluidez y coherencia conversacional inmediata.
+  * **Resumen Narrativo Acumulado (*Narrative Summary*):** Comprime los turnos antiguos en una sinopsis compacta de 3 o 4 líneas sobre los hitos superados por Twinber en la isla.
+
+* **Presupuesto Fijo de Tokens por Turno (*Token Budgeting*):**
+
+| Componente del Prompt | Presupuesto Máximo de Tokens |
+| :--- | :--- |
+| **System Prompt + Personalidad + Estado Compacto** | $\sim 700\text{ tokens}$ |
+| **Contexto RAG recuperado (Top-2 chunks de `TENERIFE.pdf`)** | $\sim 600\text{ tokens}$ |
+| **Resumen narrativo + Últimos 4 turnos de diálogo** | $\sim 600\text{ tokens}$ |
+| **Mensaje actual del jugador** | $\sim 100\text{ tokens}$ |
+| **Margen de generación (`max_tokens`)** | $500\text{ tokens}$ |
+| **Total Estimado por Turno** | **$\sim 2.500\text{ tokens}$** *(Coste $< 0.001\$$ con `gpt-4o-mini`)* |
 
 ---
 
@@ -300,9 +321,10 @@
   2. **Subtítulos y Diálogos:** Texto de narrador y personajes en color amarillo Monkey Island y cyan.
   3. **Línea de Frase e Input Libre:** Caja de texto para hablar con el NPC activo o dar órdenes libres.
   4. **Matriz de Acciones / Verbos (Abajo-Izquierda):** Botones directos `[HABLAR]`, `[MIRAR]`, `[USAR]`, `[VIAJAR]`, `[CLIMA]`, `[CALIMA]`.
-  5. **Inventario de Twinber (Abajo-Derecha):** Cuadrícula visual con los objetos coleccionados (*Códice Guanche, monedas, ticket guagua, plátano*).
+  5. **Inventario de Twinber (Abajo-Derecha):** Cuadrícula visual con los objetos coleccionados (*Pasaporte, Álbum de fotos, monedas, bolsa de gofio*).
   6. **Consola CRT de Auditoría (`~`):** Terminal desplegable con logs estructurados en tiempo real (llamadas a tools de Open-Meteo, latencia, tokens y citas RAG).
 
 * **Concept Mockup Visual:**
   * Archivo de referencia: `![Mockup SCUMM](/home/twinber/.gemini/antigravity-cli/brain/e6405918-3600-4f05-97bf-cd0127944c72/scumm_adventure_mockup_1791664109790.jpg)`
+
 

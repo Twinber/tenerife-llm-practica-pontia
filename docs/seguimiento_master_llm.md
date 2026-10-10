@@ -83,10 +83,14 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
         * `StarlightResponse`: nubosidad en Teide y fase lunar continua.
         * `CalimaResponse`: concentración PM10 y polvo mineral según AEMET.
         * `RespuestaCodiceRAG`: citas estructuradas obligatorias de páginas de `TENERIFE.pdf`.
-        * `AuditEvent`: registro de telemetría para `game_audit.log` y consola `~`.
-    [ ] 2.5 Arquitectura de memoria y control de ventana de tokens
+    [x] 2.5 Arquitectura de memoria y control de ventana de tokens (Aprobado)
+        * Summary Buffer híbrido (ventana reciente de 4 turnos + sinopsis narrativa acumulada).
+        * Estado estructurado invariante fuera del historial (Pasaporte, Álbum, Monedas).
+        * Presupuesto fijo de tokens: ~2.500 tokens por turno ($< 0.001\$$ / turno en `gpt-4o-mini`).
 
-[ ] FASE 3: Implementación Guiada en el Notebook Principal
+[x] FASE 2: Diseño y Arquitectura de la Solución - 100% COMPLETADA
+
+[>] FASE 3: Implementación Guiada en el Notebook Principal
     [ ] 3.1 Configuración de entorno y conexión segura al LLM
     [ ] 3.2 Pipeline RAG (Indexación, Retriever con metadatos y sistema de citación)
     [ ] 3.3 Gestor de memoria conversacional multiturno con presupuesto de tokens
