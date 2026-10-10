@@ -1,0 +1,344 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+  --bg-dark: #101018;
+  --scumm-bg: #0000aa;
+  --scumm-border: #5555ff;
+  --scumm-text: #ffffff;
+  --scumm-verb: #00aaaa;
+  --scumm-verb-active: #ffff55;
+  --sentence-color: #ffaa00;
+  --dialogue-twinber: #ffff55;
+  --dialogue-paco: #55ffff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--scumm-text);
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 10px;
+  overflow-x: hidden;
+}
+
+/* Header de la demo */
+.demo-header {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #181824;
+  border: 2px solid #333355;
+  border-bottom: none;
+  font-size: 11px;
+}
+
+.demo-title {
+  color: #ffaa00;
+  letter-spacing: 1px;
+}
+
+.demo-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.demo-btn {
+  background: #2a2a40;
+  color: #aaaaee;
+  border: 1px solid #555588;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+.demo-btn:hover {
+  background: #444470;
+  color: #ffffff;
+}
+
+/* Contenedor Principal del Juego (Aspecto 640x360 escalado con pixel art) */
+.game-screen {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border: 4px solid #222233;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  image-rendering: pixelated;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+
+/* 1. Viewport / Escenario Gráfico (66.6% del alto) */
+.scene-viewport {
+  position: relative;
+  width: 100%;
+  height: 66.6%;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.scene-background {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: bottom;
+  display: block;
+}
+
+/* Hotspots invisibles con hover */
+.hotspot {
+  position: absolute;
+  cursor: pointer;
+  z-index: 5;
+  /* background: rgba(255, 0, 0, 0.15); para depurar */
+}
+
+/* Sprites de Personajes en el Escenario */
+.sprite-actor {
+  position: absolute;
+  bottom: 12%;
+  height: 38%;
+  z-index: 10;
+  pointer-events: none;
+  transform-origin: bottom center;
+  transition: transform 0.1s ease;
+}
+
+#twinber-actor {
+  left: 20%;
+  z-index: 12;
+}
+
+#paco-actor {
+  left: 76%;
+  height: 39%;
+  bottom: 11%;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* Subtítulos de Diálogo Flotantes */
+.dialogue-overlay {
+  position: absolute;
+  top: 15%;
+  left: 5%;
+  right: 5%;
+  text-align: center;
+  z-index: 20;
+  pointer-events: none;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialogue-text {
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px solid #222;
+  padding: 10px 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 85%;
+  display: inline-block;
+  text-shadow: 2px 2px #000;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.7);
+  animation: fadeIn 0.15s ease-out;
+}
+
+.dialogue-text.twinber {
+  color: var(--dialogue-twinber);
+  border-color: #aa9900;
+}
+
+.dialogue-text.paco {
+  color: var(--dialogue-paco);
+  border-color: #0088aa;
+}
+
+.dialogue-text.narration {
+  color: #ffaa55;
+  border-color: #aa5500;
+}
+
+/* 2. Línea de Frase Dinámica (6.6% del alto) */
+.sentence-bar {
+  width: 100%;
+  height: 6.6%;
+  background: #000055;
+  border-top: 2px solid #5555bb;
+  border-bottom: 2px solid #5555bb;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 11px;
+  color: var(--sentence-color);
+  text-shadow: 1px 1px #000;
+  z-index: 15;
+}
+
+.sentence-action {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 3. Barra Inferior SCUMM: Verbos + Inventario (26.8% del alto) */
+.scumm-panel {
+  width: 100%;
+  height: 26.8%;
+  background: #000088;
+  display: flex;
+  z-index: 15;
+}
+
+/* 3A. Matriz de Verbos */
+.verb-matrix {
+  width: 50%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 4px;
+  padding: 6px;
+  border-right: 2px solid #5555bb;
+}
+
+.verb-btn {
+  background: transparent;
+  color: var(--scumm-verb);
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.05s ease;
+}
+
+.verb-btn:hover {
+  color: var(--scumm-verb-active);
+  background: #0000aa;
+}
+
+.verb-btn.active {
+  color: #ffffff;
+  background: #0055aa;
+  border-color: #ffff55;
+}
+
+/* 3B. Inventario de Twinber */
+.inventory-grid {
+  width: 50%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 6px;
+  padding: 6px;
+  background: #000066;
+}
+
+.inventory-slot {
+  background: #000044;
+  border: 1px solid #4444aa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.inventory-slot:hover {
+  border-color: #ffff55;
+  background: #000077;
+  transform: scale(1.05);
+}
+
+.inventory-slot img {
+  max-width: 80%;
+  max-height: 80%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.slot-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 8px;
+  color: #ffff55;
+  text-shadow: 1px 1px #000;
+}
+
+/* Filtro Retro CRT (Scanlines + Curvatura) */
+.crt-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 30;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.03)
+  );
+  background-size: 100% 3px, 6px 100%;
+  opacity: 0.8;
+  transition: opacity 0.3s;
+}
+
+.crt-overlay.disabled {
+  opacity: 0;
+}
+
+/* Consola Retro Desplegable (Tecla ~) */
+.crt-console {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  background: rgba(5, 10, 5, 0.95);
+  border-bottom: 3px solid #00ff66;
+  color: #00ff66;
+  font-size: 9px;
+  padding: 12px;
+  overflow-y: auto;
+  z-index: 40;
+  font-family: monospace;
+}
+.crt-console.visible {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
