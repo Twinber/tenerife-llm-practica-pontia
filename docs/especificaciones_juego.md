@@ -311,9 +311,58 @@ Para evitar la frustración clásica de las aventuras gráficas:
 * **Resiliencia y Fallback:**
   * Si la llamada HTTP falla (timeout / sin conexión a internet), la tool atrapa el error y retorna un diccionario sintético verosímil con `"simulated": True`, garantizando que la partida y la corrección del profesor nunca se detengan.
 
+### 1.17. Motor Visual de Animaciones y Micro-Movimiento por Hotspots (Point & Click)
 
+* **Arquitectura de Composición Visual por Capas (Layered Canvas):**
+  Para ofrecer una estética viva sin sobrecargar el Notebook ni requerir un motor 3D, el visor se implementa como un contenedor HTML5/CSS multicapa dentro del componente Gradio:
+  ```text
+  ┌────────────────────────────────────────────────────────┐
+  │ Capa 4: Filtro Retro CRT (Scanlines + curvatura CSS)   │
+  ├────────────────────────────────────────────────────────┤
+  │ Capa 3: Bocadillo / Subtítulos (Streaming teletipo)     │
+  ├────────────────────────────────────────────────────────┤
+  │ Capa 2: Sprites de Personajes (Twinber + NPC activo)   │
+  │         - Estados: IDLE, WALK, TALK                   │
+  ├────────────────────────────────────────────────────────┤
+  │ Capa 1: Bucles Ambientales (Olas, nubes, aspas molino) │
+  ├────────────────────────────────────────────────────────┤
+  │ Capa 0: Postal del Enclave (Imagen RAG de TENERIFE.pdf)│
+  └────────────────────────────────────────────────────────┘
+  ```
 
+* **Esquema Formal del Hotspot (`SceneHotspot`):**
+  Cada uno de los 10+1 enclaves define un conjunto de puntos de interés interactuables mediante coordenadas relativas (%) para garantizar compatibilidad responsive:
+  ```python
+  from typing import Literal, Optional
+  from pydantic import BaseModel, Field
 
+  class SceneHotspot(BaseModel):
+      id: str = Field(..., description="Identificador único del hotspot (ej: 'npc_chano', 'molino_aspas')")
+      nombre: str = Field(..., description="Texto visible en cursor/hover (ej: 'Hablar con Chano')")
+      x_pct: float = Field(..., ge=0.0, le=100.0, description="Posición horizontal en % del ancho")
+      y_pct: float = Field(..., ge=0.0, le=100.0, description="Posición vertical en % de la altura")
+      target_x_pct: float = Field(..., ge=0.0, le=100.0, description="Coordenada X a la que camina Twinber")
+      cursor_icon: Literal["speech", "look", "use", "exit"] = "speech"
+      accion_tipo: Literal["HABLAR", "MIRAR", "USAR", "VIAJAR"]
+      target_id: Optional[str] = Field(None, description="ID del NPC, objeto o enlace a invocar")
+  ```
+
+* **Mecánica de Locomoción de Twinber (Micro-Movimiento):**
+  1. **Clic en Hotspot:** El usuario hace clic sobre un elemento o personaje en la pantalla.
+  2. **Cálculo de Desplazamiento:** Se calcula la distancia horizontal entre la posición actual de Twinber y `target_x_pct`.
+  3. **Orientación Horizontal:** Si `target_x_pct < x_actual`, se aplica `transform: scaleX(-1)` (mirar a la izquierda); en caso contrario, `scaleX(1)` (mirar a la derecha).
+  4. **Ciclo de Caminata (`WALK`):** El sprite conmuta a la animación de pasos (`steps(4)` a 8 fps) mientras CSS desplaza la posición `left` con `transition: left 1.2s ease-in-out`.
+  5. **Llegada y Activación:** Al alcanzar `target_x_pct`, el sprite pasa a estado `IDLE` (o `TALK` si es una conversación) y se dispara la llamada al `engine.step()`.
+
+* **Sincronización de Animaciones con Streaming de Tokens:**
+  * **Estado `IDLE` (En reposo):** Animación en bucle sutil (respiración y pestañeo ocasional) a 4 fps.
+  * **Estado `TALK` (Hablando en vivo):** Mientras el LLM emite tokens por streaming (`delta.content`), el contenedor del personaje que habla adquiere la clase CSS `.is-talking` (animación de mandíbula y gestos retro).
+  * **Retorno a Reposo:** Al detectarse `finish_reason == "stop"`, se retira la clase `.is-talking` y el personaje regresa a `IDLE`.
+
+* **Bucles Ambientales de Enclave (Capa 1):**
+  * *Puerto de la Cruz:* Olas rompiendo en el muelle y gaviotas flotando.
+  * *La Orotava:* Aspas giratorias del Molino de Chano (`animation: rotate 6s linear infinite`).
+  * *El Teide:* Fumarolas ascendentes y capa de "mar de nubes" con desplazamiento horizontal continuo.
 
 ---
 
