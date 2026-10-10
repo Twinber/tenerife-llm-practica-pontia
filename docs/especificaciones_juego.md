@@ -51,7 +51,7 @@
 
 * **Contrato Público de Comunicación:**
   * La UI interactúa con el backend a través de una única interfaz: `engine.step(user_message: str) -> TurnResult`.
-  * `TurnResult` devuelve: `narrative: str`, `state: GameState`, `visual_asset: Optional[str]`, `citations: list[RespuestaCodice]`, `audit_events: list[AuditEvent]`.
+  * `TurnResult` devuelve: `narrative: str`, `state: GameState`, `visual_asset: Optional[str]`, `citations: list[RespuestaCodice]`, `audit_events: list[AuditEvent]`, `sfx_to_play: list[str]`.
 
 ---
 
@@ -424,6 +424,58 @@ Para evitar la frustración clásica de las aventuras gráficas:
       frase_compuesta: str = ""
       texto_libre: str = ""
   ```
+
+### 1.19. El Clímax del Teide, La Prueba de las Estrellas y Scorecard de Victoria
+
+* **Precondiciones Deterministas para el Ascenso a la Cumbre (3.718 m):**
+  1. **Pasaporte Completo:** 10 sellos estampados (5 Norte + 5 Sur).
+  2. **Billete del Teleférico:** Adquirido al Operario por 5 monedas de oro.
+  3. **Provisiones Térmicas:** Bolsa de Gofio de La Orotava (3 monedas) para resistir el frío y mal de altura.
+  4. **Condición Meteorológica Cumbre (`get_weather`):** Viento < 50 km/h y cielo sin tormenta severa.
+
+* **El Encuentro Final: El Guardián de las Estrellas:**
+  * Al alcanzar la cumbre al atardecer, la escena conmuta al cielo nocturno estrellado (Reserva Starlight del Teide).
+  * Aparece **El Guardián de la Cumbre** (sabio astrónomo y protector de las tradiciones guanches).
+  * **Revelación del Secreto Guanche:** Tras la leyenda del encierro de *Guayota* en *Echeyde* por el dios *Achamán*, el Guardián desvela que el verdadero tesoro es el legado vivo de Tenerife (el mar de nubes, los cielos limpios, la biodiversidad de la laurisilva y la memoria de su gente).
+  * **La Prueba Final (3 Preguntas del Viaje):** El Guardián formula 3 preguntas aleatorias sobre enclaves visitados. El LLM valida las respuestas con el RAG de `TENERIFE.pdf`.
+
+* **Pantalla de Victoria y Scorecard del Explorador:**
+  Al superar la prueba final, se activa el cartel retro **"THE END - ¡EXPEDICIÓN COMPLETADA!"** con el informe de evaluación para el tribunal:
+  ```text
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║             ¡EXPEDICIÓN A TENERIFE COMPLETADA CON ÉXITO!        ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║ 📘 Pasaporte de Explorador:  11 / 11 Sellos (Ruta 100% Superada) ║
+  ║ 📸 Álbum de Fotos de la Isla: X / 28 Postales Desbloqueadas      ║
+  ║    → Rango: "Gran Explorador" (o "Maestro Guanche" si 28/28)    ║
+  ║ 🪙 Monedas Restantes:        Y / 15 Monedas de Oro               ║
+  ║                                                                  ║
+  ║ --- MÉTRICAS DE TELEMETRÍA Y EVALUACIÓN (TRIBUNAL DEL MÁSTER) -- ║
+  ║ ⏱️ Turnos Totales Jugados:   N turnos                            ║
+  ║ 🧠 Tokens Totales:           T tokens (Coste aproximado en $)    ║
+  ║ 🛠️ Llamadas a Herramientas:  M invocaciones verificadas          ║
+  ║ 🛡️ Incidentes de Seguridad:  0 (Guardrails 100% limpios)        ║
+  ╚══════════════════════════════════════════════════════════════════╝
+  ```
+
+### 1.20. Diseño Sonoro Retro (SFX Chiptune y Web Audio API)
+
+* **Catálogo Oficial de Efectos de Sonido (SFX):**
+  | ID de Sonido | Momento de Activación | Efecto Acústico Retro (8/16 bits) |
+  | :--- | :--- | :--- |
+  | `sfx_stamp` | Nuevo sello estampado en pasaporte | Golpe sordo y seco de sello de goma (*"¡Khlump!"*) |
+  | `sfx_photo` | Foto del PDF desbloqueada vía RAG | Clic mecánico de obturador y flash (*"Chik-chiiik!"*) |
+  | `sfx_coin` | Pago a un NPC con monedas | Tintineo metálico de monedas de oro (*"¡Plink-chink!"*) |
+  | `sfx_travel` | Transición del mapa Indiana Jones | Motor de guagua/avión y chasquido de brújula |
+  | `sfx_talk_blip`| Streaming de tokens | Micro-bips suaves de teletipo (discretos) |
+  | `sfx_hint` | Clic en botón `[💡 PENSAR]` | Campanilla mágica ascendente (*"¡Dlinnn!"*) |
+  | `sfx_victory`| Final del juego superado | Fanfarria arpegiada chiptune triunfal (5 seg) |
+
+* **Arquitectura de Audio No Bloqueante en Gradio:**
+  * Archivos minúsculos (5-15 KB cada uno) en `assets/audio/` (`.wav`/`.mp3` mono a 8 kHz).
+  * El contrato `TurnResult` devuelve la lista de sonidos a disparar: `sfx_to_play: list[str]`.
+  * La capa de UI ejecuta la reproducción de forma asíncrona mediante HTML5 Web Audio (`new Audio(...).play()`), sin bloquear nunca el backend ni la renderización del notebook.
+  * Botón de accesibilidad `[ 🔊 / 🔇 ]` para silenciar el juego con un solo clic.
 
 ---
 
