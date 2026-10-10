@@ -100,24 +100,53 @@
 * **Línea Roja Discontinua Animada:** Mediante un componente SVG animado con CSS puro (`stroke-dashoffset`), se dibuja en 1.5 a 2 segundos una **línea de puntos rojos** sobre la carretera real (TF-5, TF-1, TF-24) uniendo origen y destino.
 * **Sensación de Viaje:** Un rótulo dinámico anuncia el trayecto (*"Twinber toma la guagua de TITSA por la TF-5 hacia San Cristóbal de La Laguna..."*) antes de dar paso a la nueva postal pixel-art y sus personajes interactivos.
 
-### 1.6. Microeconomía de la Aventura: Las 15 Monedas y Objetos Clave
-* **Objetivo de las Monedas:** Evitar que el juego sea un simple paseo pasivo y dotarlo de puzles clásicos de inventario e interacción comercial.
+### 1.6. Microeconomía de la Aventura y Bloqueos de Progresión (Gating Económico)
+* **Objetivo de las Monedas:** Resolver puzles tangibles de inventario e interacción comercial, evitando que la aventura sea un simple recorrido pasivo.
 * **Presupuesto Inicial:** Twinber comienza la aventura con **15 monedas locales** en su zurrón.
-* **Transacciones Clave de la Aventura:**
-  1. *Comprar Gofio en el Molino de Chano (La Orotava):* Coste 3 monedas. Provisión calórica imprescindible para resistir el ascenso a las cumbres.
-  2. *Comanda en el Guachinche El Cubano (Santa Úrsula):* Coste 4 monedas. Pagar la carne fiesta y el vino para ganarse la confianza del tabernero y obtener la ruta segura por La Esperanza (TF-24).
-  3. *Billete del Teleférico del Teide (Las Cañadas):* Coste 5 monedas. Para ascender a los 3.718 m en el clímax final.
-  4. *Reserva para imprevistos / Pasajes:* 3 monedas de margen para billetes de guagua o compras secundarias.
-* **Mecánica Human-in-the-Loop:** Al gastar monedas (mutación irreversible de inventario), el sistema solicita confirmación explícita previa al jugador.
+* **Los 3 Momentos Clave de Gasto y Bloqueo:**
+  1. *Momento 1: La Orotava — Molino de Chano (3 monedas):*
+     * **El Bloqueo:** El sendero hacia las cumbres exige sustento calórico para resistir el frío y el esfuerzo.
+     * **La Acción:** Comprar la *Bolsa de Gofio recién molido* a Chano el Molinero (3 monedas).
+     * **Efecto:** Desbloquea el paso hacia las cotas altas del norte.
+  2. *Momento 2: Santa Úrsula — Guachinche El Cubano (4 monedas):*
+     * **El Bloqueo:** La carretera TF-24 (La Esperanza) está envuelta en un mar de nubes. Sin las indicaciones locales, es peligroso cruzar.
+     * **La Acción:** Pagar la comanda (carne fiesta y vino) en el guachinche a Manolo el Tabernero (4 monedas).
+     * **Efecto:** Manolo dibuja en una servilleta la *Nota de la Ruta*, revelando la parada en el Mirador de La Tarta por encima de las nubes.
+  3. *Momento 3: Las Cañadas del Teide — Taquilla del Teleférico (5 monedas):*
+     * **El Bloqueo:** Acceso al tramo final del pico (3.718 m).
+     * **La Acción:** Comprar el billete oficial en taquilla (5 monedas).
+     * **Efecto:** Permite subir a la cima para el clímax final Starlight.
+  4. *Colchón de Reserva (3 monedas):* Margen para imprevistos, billetes sueltos de guagua o propinas.
+* **Mecánica Human-in-the-Loop:** Al gastar monedas (mutación irreversible), el Narrador desglosa la compra y solicita confirmación explícita previa al jugador.
 
-### 1.7. Separación Clave de Arquitectura: Estado vs. Conversación
+### 1.7. Sistema Adaptativo de Pistas (*Adaptive Hinting* ante Atascos)
+Para evitar la frustración clásica de las aventuras gráficas:
+1. **Pistas Orgánicas Progresivas:**  
+   Si el jugador intenta realizar una acción bloqueada, el Narrador no responde con un frío error, sino con pistas de dificultad adaptativa:
+   * *Nivel 1 (Sutil):* *"El frío de la cumbre te hiela los huesos... Si tan solo tuvieras algo de alimento tradicional canario que diera calor al cuerpo..."*
+   * *Nivel 2 (Directa, tras insistir):* *"Recuerdas que en La Orotava viste el cartel del Molino de Chano en la Calle de la Carrera. Quizás deberías pasar por allí."*
+2. **Acción `[ 💡 PENSAR / REFLEXIONAR ]`:**  
+   Un botón en la interfaz donde Twinber "piensa en voz alta". El LLM analiza el estado actual (`sellos pendientes`, `monedas`, `inventario`) y emite un monólogo interior sugiriendo el siguiente paso lógico.
+
+### 1.8. Catálogo de NPCs y Arquitectura Híbrida (Python Determinista + LLM Libre)
+* **¿Son NPCs Deterministas? (Arquitectura Híbrida):**
+  * **La Lógica es 100% Determinista (Python):** Las precondiciones, el saldo de monedas y el inventario están blindados en código Python (`src/domain/state.py`). El LLM no puede "alucinar" compras sin llamar a la tool correspondiente.
+  * **El Diálogo es 100% Libre (LLM):** La conversación, el humor, las anécdotas y las bromas en dialecto canario se generan en tiempo real sin árboles de diálogo rígidos ni frases enlatadas.
+* **Catálogo Oficial de NPCs:**
+  1. **Chano el Molinero (La Orotava):** Anciano sabio y orgulloso de la tradición del gofio y las alfombras del Teide. Vende la bolsa de gofio (3 monedas).
+  2. **Manolo el Tabernero (Santa Úrsula):** Hospitalario, socarrón y dicharachero (*"chacho, fleje, mi niño"*). Vende la comanda del guachinche (4 monedas) y entrega la nota de ruta.
+  3. **Operario del Teleférico (El Teide):** Técnico, precavido, obsesionado con la velocidad del viento y la seguridad de la cumbre. Vende el billete (5 monedas).
+  4. **Paco el Pescador (Puerto de la Cruz):** Marinero curtido y nostálgico. Da pistas sobre el mar y las playas salvajes.
+  5. **Yeray el Conductor de Guagua (TITSA):** Pragmático y simpático. Revisa los sellos del pasaporte antes de abrir las rutas entre zonas.
+
+### 1.9. Separación Clave de Arquitectura: Estado vs. Conversación
 * **El Texto es No Determinista (LLM):** La narración, descripciones y diálogos con lugareños o personajes no jugadores (NPCs) los genera el LLM con estilo inmersivo y humor fino.
 * **El Estado es Determinista (Python State Engine):**
   * El **Pasaporte**, **Álbum** e **Inventario de monedas** se mantienen en estructuras estrictas en memoria (`Pydantic`).
   * Los **Permisos y Sellos** se gestionan mediante **Function Calling (Tools)**.
   * La IA consulta el estado del jugador usando herramientas antes de permitir o denegar el avance a una zona.
 
-### 1.7. Justificación Técnica del Chunking Semántico y Soporte Multimodal
+### 1.10. Justificación Técnica del Chunking Semántico y Soporte Multimodal
 * **Justificación de Diseño (para el Informe Final):**
   * Si tuviéramos un corpus inmenso de documentos heterogéneos y desconocidos, la opción adecuada sería un chunking heurístico de caracteres/tokens (`RecursiveCharacterTextSplitter`).
   * Sin embargo, dado que conocemos la estructura exacta de `TENERIFE.pdf` (25 páginas organizadas por enclaves geográficos y temáticos) y el objetivo es una aventura gráfica sin contaminación cruzada ni ruido, se adopta un **Chunking Semántico Estructurado por Lugares y Enclaves**.
@@ -130,7 +159,7 @@
   * Cada chunk almacena la ruta de su imagen correspondiente.
   * Al recuperar el contexto en el juego, la interfaz proyecta la postal visual del lugar junto a la narración y la cita de la fuente.
 
-### 1.8. Contratos Pydantic Formales del Dominio (`src/domain/`)
+### 1.11. Contratos Pydantic Formales del Dominio (`src/domain/`)
 
 * **1. Herramienta Meteorológica (`WeatherResponse`):**
   ```python
@@ -189,7 +218,7 @@
       estado: Literal["SUCCESS", "FALLBACK", "ERROR", "BLOCKED"]
   ```
 
-### 1.9. Arquitectura Agéntica: Patrón Supervisor + Subagentes como Herramientas
+### 1.12. Arquitectura Agéntica: Patrón Supervisor + Subagentes como Herramientas
 * **Decisión de Diseño y Justificación Técnica (para el Informe):**
   * Se descarta el patrón de *Handoffs* completos porque transferir la conversación activa a especialistas obligaría a pasarles todo el inventario e historial acumulado, disparando los costes de tokens y el riesgo de spoilers o descontrol del estado.
   * Se adopta el patrón de **Supervisor (Narrador Central como Dungeon Master)** con **Subagentes Especialistas como Herramientas**:
@@ -202,7 +231,7 @@
       * Devuelven sus respuestas caracterizadas para que el Narrador las proyecte directamente en el diálogo con Twinber.
     * **Beneficio:** Máxima contención de contexto, aislamiento de responsabilidades, riqueza narrativa y cero spoilers.
 
-### 1.10. Sistema de Guardrails de Entrada y Salida (Contención y Seguridad)
+### 1.13. Sistema de Guardrails de Entrada y Salida (Contención y Seguridad)
 * **Guardrail de Entrada (El Portero / Bouncer):**
   * Modelo ligero (`gpt-4o-mini`) con esquema Pydantic para clasificación en milisegundos.
   * Intercepta ataques de *Prompt Injection*, intentos de *Jailbreak* y cambios de rol antes de que consuman el contexto del Narrador.
@@ -212,7 +241,7 @@
   * *Filtro Rápido Determinista (Regex):* Detección y bloqueo inmediato de patrones de API Keys (`sk-...`, `AIzaSy...`) o fragmentos del System Prompt confidencial.
   * *Validador Crítico Semántico:* Verificación de que el Narrador no alucine objetos o vehículos imposibles que rompan las reglas lógicas del inventario y la geografía de Tenerife.
 
-### 1.11. Observabilidad en Tiempo Real: "Consola de Desarrollador Retro" (Tecla `~`)
+### 1.14. Observabilidad en Tiempo Real: "Consola de Desarrollador Retro" (Tecla `~`)
 * **Mecánica Retro & Telemetría:**
   * Inspirado en la consola clásica de los juegos de los 90 (estilo *Quake* o *Doom* accesible con la tecla `~`), la aplicación cuenta con una **Consola de Depuración en Tiempo Real** con estética terminal CRT (fondo negro, texto verde fósforo).
 * **Registro Dual (Memoria + Disco):**
@@ -224,7 +253,7 @@
     4. *Tokens y Costes:* Conteo exacto de tokens de entrada/salida y latencia total por turno.
 * **Impacto en Evaluación:** Cumple el requisito de logging obligatorio del 25% y desbloquea el Bonus Técnico de Observabilidad.
 
-### 1.12. Política de Ejecución: Vía Rápida (Fast Path) vs. Vía Planificada (Planner/Executor)
+### 1.15. Política de Ejecución: Vía Rápida (Fast Path) vs. Vía Planificada (Planner/Executor)
 * **Justificación de UX y Eficiencia de Tokens:**
   * No se aplica el patrón *Planner/Executor* de forma indiscriminada para evitar burocracia, latencia innecesaria e inflación de costes en comandos triviales.
 * **Vía Rápida (Fast Path - Solo Lectura):**
@@ -234,7 +263,7 @@
   * Se activa exclusivamente ante acciones de alto impacto: expediciones peligrosas (subir al Teide, bajar Masca), gasto de recursos (comprar billete de ferry) o mutaciones irreversibles del inventario.
   * *Mecánica Human-in-the-Loop:* El Narrador desglosa la hoja de ruta de la expedición (comprobar clima, provisiones, permisos) y solicita confirmación explícita al jugador antes de disparar las herramientas de mutación.
 
-### 1.13. Servidor MCP de Tenerife: Especificación Técnica de Tools y Resources Validados
+### 1.16. Servidor MCP de Tenerife: Especificación Técnica de Tools y Resources Validados
 
 * **Decisión de Recursos MCP (Aprobados vs Descartados):**
   * ✅ `tenerife://mapa/conexiones`: Aprobado. Grafo de adyacencia (nodos y aristas con identificadores, nombres de carreteras reales como TF-1, TF-5, TF-24, TF-436 y tiempos estimados) para que el agente planifique desplazamientos lógicos sin inventar atajos imposibles.
