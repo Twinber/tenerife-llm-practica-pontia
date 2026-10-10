@@ -364,6 +364,67 @@ Para evitar la frustración clásica de las aventuras gráficas:
   * *La Orotava:* Aspas giratorias del Molino de Chano (`animation: rotate 6s linear infinite`).
   * *El Teide:* Fumarolas ascendentes y capa de "mar de nubes" con desplazamiento horizontal continuo.
 
+### 1.18. Barra de Acciones SCUMM, Línea de Frase Dinámica e Inventario Gráfico con Visor Modal
+
+* **Distribución del Tercio Inferior (Layout de 3 Bloques Retro):**
+  Inspirado en la ergonomía clásica de los juegos de LucasArts de 1990:
+  ```text
+  ┌─────────────────────────┬───────────────────────────────┬─────────────────────────┐
+  │  1. MATRIZ DE VERBOS    │   2. LÍNEA DE FRASE & INPUT   │   3. INVENTARIO GRÁFICO │
+  │  (Botones de Acción)    │   (Orquestador Conversacional)│   (Mochila de Twinber)  │
+  ├─────────────────────────┼───────────────────────────────┼─────────────────────────┤
+  │  [ HABLAR ]  [ MIRAR ]  │   Línea de Orden (Ámbar/Cian):│   [📘 Pasaporte (X/10)] │
+  │  [ USAR   ]  [ DAR   ]  │   "Usar Monedas con Chano..." │   [📸 Álbum     (Y/28)] │
+  │  [ IR A   ]  [ VIAJAR]  │  ┌──────────────────────────┐ │   [🪙 Bolsa     (12 💰)]│
+  │  [ CLIMA  ]  [ CALIMA]  │  │ Escribe o edita aquí...  │ │   [🌾 Bolsa de Gofio  ] │
+  │  [ 💡 PENSAR         ]  │  └──────────────────────────┘ │   [📜 Nota de Ruta    ] │
+  └─────────────────────────┴───────────────────────────────┴─────────────────────────┘
+  ```
+
+* **Línea de Frase Dinámica (Modelo Híbrido Point & Click + LLM Libre):**
+  1. **Construcción Asistida por Clics:**
+     * Clic en verbo `[DAR]` $\rightarrow$ Línea muestra: `"Dar..."`.
+     * Clic en ítem de inventario `[🪙 Bolsa]` $\rightarrow$ Línea muestra: `"Dar Monedas a..."`.
+     * Clic en hotspot de NPC `[Chano]` $\rightarrow$ Línea completa: `"Dar 3 Monedas a Chano el Molinero"` y dispara la ejecución.
+  2. **Entrada de Texto Libre:**
+     * Caja de entrada debajo de la línea de frase.
+     * Permite conversar naturalmente con el NPC activo para indagar sobre secretos, historia o pistas sin limitarse a órdenes rígidas.
+
+* **Inventario Gráfico y Visores Modales de Coleccionables:**
+  * **Objetos Permanentes:**
+    * 📘 `Pasaporte de Explorador`: Registra los 10 sellos comarcales + Teide.
+    * 📸 `Álbum de Fotos`: Registra las 28 fotografías extraídas de `TENERIFE.pdf`.
+    * 🪙 `Bolsa de Monedas`: Contador visual (15 monedas iniciales).
+  * **Mecánica de Inspección Modal (`[MIRAR]` en Coleccionables):**
+    * Al pulsar `[MIRAR]` en el Pasaporte, se superpone un modal retro tipo libreta mostrando los sellos físicos estampados (tinta roja y azul) en el mapa de las 2 zonas.
+    * Al pulsar `[MIRAR]` en el Álbum de Fotos, se abre una galería retro en cuadrícula/carrusel con las postales a alta resolución desbloqueadas, su página citada en el PDF y el pie de foto.
+  * **Objetos de Aventura Adquiridos:**
+    * 🌾 `Bolsa de Gofio` (3 monedas, Chano).
+    * 📜 `Comanda del Guachinche y Nota TF-24` (4 monedas, Manolo).
+    * 🎫 `Billete del Teleférico del Teide` (5 monedas, Operario).
+    * 🍌 `Plátano de Canarias` (encontrado en plantación).
+
+* **Contrato Pydantic para el Estado de la UI (`UIActionState` & `InventoryItem`):**
+  ```python
+  from typing import Literal, Optional
+  from pydantic import BaseModel, Field
+
+  class InventoryItem(BaseModel):
+      id: str = Field(..., description="ID único del ítem")
+      nombre: str = Field(..., description="Nombre visible")
+      icono: str = Field(..., description="Icono o emoji representativo")
+      tipo: Literal["PERMANENTE", "CONSUMIBLE", "CLAVE"]
+      cantidad: int = 1
+      inspeccionable: bool = False  # Abre modal al hacer MIRAR
+
+  class UIActionState(BaseModel):
+      verbo_activo: Optional[str] = None
+      item_origen_id: Optional[str] = None
+      target_hotspot_id: Optional[str] = None
+      frase_compuesta: str = ""
+      texto_libre: str = ""
+  ```
+
 ---
 
 ## 2. Estrategia de Memoria & Control de Ventana de Tokens
