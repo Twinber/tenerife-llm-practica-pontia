@@ -14,6 +14,8 @@ export interface ActorConfig {
   talkFrameCount: number;
   minIdlePauseSecs: number;
   maxIdlePauseSecs: number;
+  minX?: number; // Límite izquierdo de caminata en %
+  maxX?: number; // Límite derecho de caminata en %
 }
 
 export class Actor {
@@ -24,6 +26,8 @@ export class Actor {
   public facing: number;
   public state: ActorState = 'IDLE';
   public frameIdx: number = 0;
+  public minX?: number;
+  public maxX?: number;
 
   private speed: number;
   private animTimer: number = 0;
@@ -47,6 +51,8 @@ export class Actor {
     this.walkFrameCount = config.walkFrameCount;
     this.idleFrameCount = config.idleFrameCount;
     this.talkFrameCount = config.talkFrameCount;
+    this.minX = config.minX;
+    this.maxX = config.maxX;
     this.minIdleTicks = config.minIdlePauseSecs * 60;
     this.maxIdleTicks = config.maxIdlePauseSecs * 60;
     this.idlePauseTimer = this.randomRange(this.minIdleTicks, this.maxIdleTicks);
@@ -57,6 +63,10 @@ export class Actor {
   }
 
   public moveTo(targetX: number, onArrival: (() => void) | null = null): void {
+    // Restringir el avance estrictamente a los límites del suelo/escenario
+    if (this.minX !== undefined) targetX = Math.max(this.minX, targetX);
+    if (this.maxX !== undefined) targetX = Math.min(this.maxX, targetX);
+
     this.targetXPct = targetX;
     this.onArrivalCallback = onArrival;
     if (Math.abs(this.xPct - targetX) > 0.6) {

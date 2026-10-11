@@ -46,7 +46,9 @@ export class ViewportView {
 
       const rect = this.viewportElem.getBoundingClientRect();
       const clickXPct = ((e.clientX - rect.left) / rect.width) * 100;
-      const targetX = Math.max(6, Math.min(88, clickXPct));
+      const minX = this.twinber.minX ?? 18;
+      const maxX = this.twinber.maxX ?? 72;
+      const targetX = Math.max(minX, Math.min(maxX, clickXPct));
       this.actionDispatcher.clickGround(targetX);
     });
 

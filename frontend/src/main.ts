@@ -23,14 +23,16 @@ window.addEventListener('DOMContentLoaded', () => {
   const twinber = new Actor({
     id: 'twinber',
     name: 'Twinber',
-    initialX: 22.0,
+    initialX: 24.0,
     initialFacing: 1,
     speed: 0.16,
     walkFrameCount: 6,
     idleFrameCount: 4,
     talkFrameCount: 4,
     minIdlePauseSecs: 3.0,
-    maxIdlePauseSecs: 6.5
+    maxIdlePauseSecs: 6.5,
+    minX: 18.0, // Límite del muelle: no avanzar más allá de la hilera de adoquines/mar
+    maxX: 72.0  // Límite frente a Paco y los barriles
   });
   twinber.onStepSound = () => audioService.playStep();
 

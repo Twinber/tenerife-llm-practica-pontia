@@ -115,7 +115,7 @@ html, body {
 /* Sprites de Personajes en el Escenario */
 .sprite-actor {
   position: absolute;
-  bottom: 8%; /* Situados perfectamente sobre los adoquines del muelle */
+  bottom: 8%;
   height: 34%;
   z-index: 10;
   pointer-events: none;
@@ -123,14 +123,15 @@ html, body {
 }
 
 #twinber-actor {
-  left: 20%;
+  left: 24%;
+  bottom: 11%; /* Asentado firmemente sobre la superficie de los adoquines */
   z-index: 12;
 }
 
 #paco-actor {
   left: 82%;
   height: 35%;
-  bottom: 7%;
+  bottom: 8%; /* En línea con la red y los barriles */
   pointer-events: auto;
   cursor: pointer;
   transform: scaleX(-1); /* Mirando hacia Twinber */

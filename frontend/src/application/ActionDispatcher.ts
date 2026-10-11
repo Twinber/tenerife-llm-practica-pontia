@@ -59,7 +59,8 @@ export class ActionDispatcher {
   }
 
   public talkToPaco(): void {
-    this.twinber.moveTo(74, () => {
+    const nearPacoX = Math.min(72, this.twinber.maxX ?? 72);
+    this.twinber.moveTo(nearPacoX, () => {
       this.twinber.facing = 1;
       this.paco.facing = -1;
       this.dialogueManager.enqueue([
@@ -107,7 +108,9 @@ export class ActionDispatcher {
   }
 
   public inspectLighthouse(): void {
-    this.twinber.moveTo(12, () => {
+    const leftEdge = this.twinber.minX ?? 18;
+    this.twinber.moveTo(leftEdge, () => {
+      this.twinber.facing = -1; // mirar hacia el horizonte y el faro
       this.dialogueManager.enqueue([
         { speaker: 'twinber', text: "Twinber: 'El viejo faro guiando a los barcos que llegan desde el Atlántico.'" }
       ]);
