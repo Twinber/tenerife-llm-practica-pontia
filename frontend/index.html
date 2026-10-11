@@ -121,6 +121,37 @@
           <span id="album-page-indicator" class="album-page-indicator">PÁGINA 1 / 7</span>
           <button id="btn-album-next" class="album-nav-btn">SIGUIENTE ▶</button>
         </footer>
+    </div>
+
+    <!-- Modal Retro del Pasaporte de Explorador (Apertura a Doble Página - 5 Pliegos) -->
+    <div id="passport-modal" class="retro-modal-overlay hidden">
+      <div class="retro-passport-window">
+        <header class="passport-header">
+          <div class="passport-title">📘 PASAPORTE DE EXPLORADOR DE TENERIFE (<span id="passport-counter">0/10</span> SELLOS)</div>
+          <button id="btn-close-passport" class="modal-close-btn">✕ CERRAR [ESC]</button>
+        </header>
+
+        <!-- Cuaderno de Pasaporte a Doble Página Abierta -->
+        <main class="passport-book-spread" id="passport-book-spread">
+          <!-- Página Izquierda -->
+          <section class="passport-page page-left" id="passport-page-left">
+            <!-- Renderizado dinámicamente -->
+          </section>
+
+          <!-- Lomo central / Cosido de seguridad -->
+          <div class="passport-spine"></div>
+
+          <!-- Página Derecha -->
+          <section class="passport-page page-right" id="passport-page-right">
+            <!-- Renderizado dinámicamente -->
+          </section>
+        </main>
+
+        <footer class="passport-footer">
+          <button id="btn-passport-prev" class="passport-nav-btn">◀ PLIEGO ANTERIOR</button>
+          <span id="passport-page-indicator" class="passport-page-indicator">PLIEGO 1 DE 5 (PÁGINAS 1 - 2)</span>
+          <button id="btn-passport-next" class="passport-nav-btn">PLIEGO SIGUIENTE ▶</button>
+        </footer>
       </div>
     </div>
 

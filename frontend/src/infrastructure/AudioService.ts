@@ -57,6 +57,11 @@ export class AudioService {
     this.beep(330, 'square', 0.04, 0.05);
   }
 
+  public playPageTurn(): void {
+    this.beep(220, 'triangle', 0.04, 0.05);
+    setTimeout(() => this.beep(330, 'triangle', 0.05, 0.04), 30);
+  }
+
   public toggleMute(): boolean {
     this.isMuted = !this.isMuted;
     return this.isMuted;

@@ -81,10 +81,12 @@ export class ScummDockView {
         const item = slot.dataset.item;
         if (!item) return;
 
-        // Si el verbo activo es MIRAR y clican en Álbum de Fotos, abrir modal
-        if (this.actionDispatcher.activeVerb === 'MIRAR' && item === 'Álbum de Fotos') {
-          this.actionDispatcher.selectItem(item);
-          return;
+        // Si el verbo activo es MIRAR y clican en Álbum de Fotos o Pasaporte, abrir modal
+        if (this.actionDispatcher.activeVerb === 'MIRAR') {
+          if (item === 'Álbum de Fotos' || item === 'Pasaporte de Explorador') {
+            this.actionDispatcher.selectItem(item);
+            return;
+          }
         }
 
         // Limpiar selección previa o alternar
@@ -109,10 +111,13 @@ export class ScummDockView {
         }
       });
 
-      // Doble clic en cualquier momento en el álbum para abrirlo
+      // Doble clic en cualquier momento en el álbum o pasaporte para abrirlo
       slot.addEventListener('dblclick', () => {
         if (slot.dataset.item === 'Álbum de Fotos' && this.actionDispatcher.photoAlbumModal) {
           this.actionDispatcher.photoAlbumModal.open();
+        }
+        if (slot.dataset.item === 'Pasaporte de Explorador' && this.actionDispatcher.passportModal) {
+          this.actionDispatcher.passportModal.open();
         }
       });
 

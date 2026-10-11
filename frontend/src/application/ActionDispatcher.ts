@@ -6,6 +6,7 @@ import { Actor } from '../domain/Actor';
 import { DialogueManager } from './DialogueManager';
 import { AudioService } from '../infrastructure/AudioService';
 import type { PhotoAlbumModal } from '../presentation/PhotoAlbumModal';
+import type { PassportModal } from '../presentation/PassportModal';
 
 export class ActionDispatcher {
   public activeVerb: VerbType = 'HABLAR';
@@ -17,6 +18,7 @@ export class ActionDispatcher {
   private dialogueManager: DialogueManager;
   private audioService: AudioService;
   public photoAlbumModal?: PhotoAlbumModal;
+  public passportModal?: PassportModal;
   public onSentenceChange?: (text: string) => void;
   public onLogMessage?: (msg: string) => void;
   public onStateUpdate?: (updates: { photos?: string; passport?: string; coins?: string }) => void;
@@ -68,6 +70,10 @@ export class ActionDispatcher {
         return;
       }
       if (itemName === 'Pasaporte de Explorador') {
+        if (this.passportModal) {
+          this.passportModal.open();
+          return;
+        }
         const count = this.stampedZones.size;
         const list = count > 0 ? Array.from(this.stampedZones).join(', ') : 'Ninguno todavía';
         this.dialogueManager.enqueue([
@@ -378,6 +384,9 @@ export class ActionDispatcher {
     const hasStamp = this.stampedZones.has('Puerto de la Cruz');
     if (!hasStamp) {
       this.stampedZones.add('Puerto de la Cruz');
+      if (this.passportModal) {
+        this.passportModal.unlockStamp('puerto_cruz');
+      }
       this.audioService.playCoin();
       if (this.onStateUpdate) {
         this.onStateUpdate({ passport: `${this.stampedZones.size}/10` });
