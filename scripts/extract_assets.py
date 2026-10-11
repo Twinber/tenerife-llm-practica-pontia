@@ -106,7 +106,6 @@ def extract_twinber():
         sheet_path='frontend/public/assets/img/sprite_twinber_sheet.jpg',
         num_rows=3,
         rows_config=[
-            (0, 'walk', [(29, 145), (309, 415), (563, 682), (773, 889), (1038, 1140), (1227, 1345)]),
             (1, 'idle', [(146, 236), (475, 567), (799, 927), (1123, 1241)]),
             (2, 'talk', [(147, 269), (476, 614), (805, 935), (1128, 1221)])
         ],
@@ -127,9 +126,9 @@ def extract_paco():
             (1, 'talk', [(66, 269), (363, 582), (659, 867), (957, 1117)])
         ],
         canvas_w=280,
-        canvas_h=400,
+        canvas_h=460,
         anchor_x=140,
-        anchor_y=390,
+        anchor_y=450,
         actor_name='paco',
         out_dir='frontend/public/assets/img/sprites'
     )
@@ -143,9 +142,9 @@ def extract_nieves():
             (1, 'talk', [(86, 259), (430, 625), (774, 947), (1118, 1290)])
         ],
         canvas_w=280,
-        canvas_h=400,
+        canvas_h=460,
         anchor_x=140,
-        anchor_y=390,
+        anchor_y=450,
         actor_name='nieves',
         out_dir='frontend/public/assets/img/sprites'
     )
@@ -159,9 +158,9 @@ def extract_chano():
             (1, 'talk', [(248, 400), (475, 674), (713, 875), (947, 1096)])
         ],
         canvas_w=280,
-        canvas_h=400,
+        canvas_h=460,
         anchor_x=140,
-        anchor_y=390,
+        anchor_y=450,
         actor_name='chano',
         out_dir='frontend/public/assets/img/sprites'
     )
@@ -175,9 +174,9 @@ def extract_candido():
             (1, 'talk', [(62, 254), (362, 564), (661, 855), (960, 1152)])
         ],
         canvas_w=280,
-        canvas_h=400,
+        canvas_h=460,
         anchor_x=140,
-        anchor_y=390,
+        anchor_y=450,
         actor_name='candido',
         out_dir='frontend/public/assets/img/sprites'
     )
@@ -191,9 +190,9 @@ def extract_manolo():
             (1, 'talk', [(51, 256), (345, 624), (644, 848), (941, 1185)])
         ],
         canvas_w=280,
-        canvas_h=400,
+        canvas_h=460,
         anchor_x=140,
-        anchor_y=390,
+        anchor_y=450,
         actor_name='manolo',
         out_dir='frontend/public/assets/img/sprites'
     )
@@ -207,9 +206,9 @@ def extract_herminia():
             (1, 'talk', [(65, 216), (362, 551), (661, 811), (959, 1109)])
         ],
         canvas_w=280,
-        canvas_h=400,
+        canvas_h=460,
         anchor_x=140,
-        anchor_y=390,
+        anchor_y=450,
         actor_name='herminia',
         out_dir='frontend/public/assets/img/sprites'
     )
@@ -223,9 +222,9 @@ def extract_morales():
             (1, 'talk', [(126, 252), (446, 666), (776, 905), (1112, 1238)])
         ],
         canvas_w=280,
-        canvas_h=400,
+        canvas_h=460,
         anchor_x=140,
-        anchor_y=390,
+        anchor_y=450,
         actor_name='morales',
         out_dir='frontend/public/assets/img/sprites'
     )
@@ -239,9 +238,9 @@ def extract_yeray():
             (1, 'talk', [(73, 275), (378, 593), (660, 887), (966, 1169)])
         ],
         canvas_w=280,
-        canvas_h=400,
+        canvas_h=460,
         anchor_x=140,
-        anchor_y=390,
+        anchor_y=450,
         actor_name='yeray',
         out_dir='frontend/public/assets/img/sprites'
     )
@@ -255,9 +254,9 @@ def extract_socorrista():
             (1, 'talk', [(31, 227), (331, 524), (632, 879), (929, 1126)])
         ],
         canvas_w=280,
-        canvas_h=400,
+        canvas_h=460,
         anchor_x=140,
-        anchor_y=390,
+        anchor_y=450,
         actor_name='socorrista',
         out_dir='frontend/public/assets/img/sprites'
     )
@@ -271,12 +270,120 @@ def extract_frutero():
             (1, 'talk', [(82, 279), (421, 637), (764, 967), (1109, 1309)])
         ],
         canvas_w=280,
-        canvas_h=400,
+        canvas_h=460,
         anchor_x=140,
-        anchor_y=390,
+        anchor_y=450,
         actor_name='frutero',
         out_dir='frontend/public/assets/img/sprites'
     )
+
+def refine_tanausu():
+    for anim in ['idle', 'talk']:
+        for i in range(4):
+            im = Image.open(f'frontend/public/assets/img/sprites/yeray_{anim}_{i}.png').convert('RGBA')
+            w, h = im.size
+            pix = im.load()
+            for y in range(h):
+                for x in range(w):
+                    r, g, b, a = pix[x, y]
+                    if a < 20: continue
+                    if 40 <= y <= 170 and 110 <= x <= 165:
+                        if 40 < r < 140 and 25 < g < 100 and b < 80 and r >= g:
+                            f = 0.52
+                            pix[x, y] = (int(r * f), int(g * f), int(b * f), a)
+                        elif 136 <= y <= 160 and 126 <= x <= 152:
+                            if (y >= 144 or abs(x - 139) > 7) and r > 105 and g > 55:
+                                pix[x, y] = (int(r * 0.40), int(g * 0.35), int(b * 0.30), a)
+                    if 165 <= y <= 295:
+                        if g > 55 and g > b + 12 and (g >= r - 15) and not (r > 150 and g > 100 and b > 70):
+                            lum = (r * 0.3 + g * 0.59 + b * 0.11) / 255.0
+                            new_r = min(255, int(220 * lum + 35))
+                            new_g = min(255, int(95 * lum + 10))
+                            new_b = min(255, int(45 * lum + 5))
+                            pix[x, y] = (new_r, new_g, new_b, a)
+                    if 285 <= y <= 415 and 90 <= x <= 190:
+                        if r > 60 and g > 55 and b > 40 and abs(r - g) < 35 and r > b:
+                            lum = (r + g + b) / 3 / 255.0
+                            new_r = min(255, int(60 * lum + 15))
+                            new_g = min(255, int(75 * lum + 18))
+                            new_b = min(255, int(105 * lum + 25))
+                            pix[x, y] = (new_r, new_g, new_b, a)
+                    if y >= 140 and 165 <= x <= 200:
+                        if r > 50 and g > 35 and r > g + 10 and r > b + 25:
+                            lum = (r + g + b) / 3 / 255.0
+                            val = min(255, int(210 * lum + 25))
+                            pix[x, y] = (val, min(255, val + 5), min(255, val + 15), a)
+            im.save(f'frontend/public/assets/img/sprites/tanausu_{anim}_{i}.png')
+
+def refine_operario():
+    for anim in ['idle', 'talk']:
+        for i in range(4):
+            im = Image.open(f'frontend/public/assets/img/sprites/morales_{anim}_{i}.png').convert('RGBA')
+            w, h = im.size
+            pix = im.load()
+            for y in range(h):
+                for x in range(w):
+                    r, g, b, a = pix[x, y]
+                    if a < 20: continue
+                    if 110 <= y <= 175 and 100 <= x <= 165:
+                        if r > 100 and g > 100 and b > 100:
+                            lum = (r + g + b) / 3 / 255.0
+                            pix[x, y] = (int(30 * lum + 15), int(45 * lum + 20), int(75 * lum + 35), a)
+                        elif 40 <= r <= 90 and 40 <= g <= 90 and 60 <= b <= 120:
+                            pix[x, y] = (int(r * 0.7), int(g * 0.75), int(b * 0.85), a)
+                    if 228 <= y <= 345:
+                        is_jacket = abs(r - g) < 28 and abs(g - b) < 28 and r > 65
+                        is_skin = (r > 150 and g > 90 and b > 70 and r > g + 30)
+                        if is_jacket and not is_skin:
+                            lum = (r * 0.3 + g * 0.59 + b * 0.11) / 255.0
+                            if y <= 250 and abs(x - 140) > 25:
+                                pix[x, y] = (int(25 * lum + 10), int(35 * lum + 15), int(60 * lum + 25), a)
+                            else:
+                                new_r = min(255, int(215 * lum + 35))
+                                new_g = min(255, int(40 * lum + 10))
+                                new_b = min(255, int(45 * lum + 10))
+                                pix[x, y] = (new_r, new_g, new_b, a)
+                    if 345 <= y <= 430:
+                        if abs(r - g) < 25 and abs(g - b) < 25:
+                            lum = (r + g + b) / 3 / 255.0
+                            pix[x, y] = (int(35 * lum + 10), int(40 * lum + 12), int(50 * lum + 15), a)
+            im.save(f'frontend/public/assets/img/sprites/operario_{anim}_{i}.png')
+
+def refine_guardian():
+    for anim in ['idle', 'talk']:
+        for i in range(4):
+            im = Image.open(f'frontend/public/assets/img/sprites/candido_{anim}_{i}.png').convert('RGBA')
+            w, h = im.size
+            pix = im.load()
+            for y in range(h):
+                for x in range(w):
+                    r, g, b, a = pix[x, y]
+                    if a < 20: continue
+                    if 40 <= y <= 135:
+                        if r > 100 and g > 75 and b > 45 and r > b + 25:
+                            lum = (r + g + b) / 3 / 255.0
+                            pix[x, y] = (int(35 * lum + 15), int(42 * lum + 20), int(65 * lum + 30), a)
+                    if 215 <= y <= 375:
+                        is_shirt = abs(r - g) < 25 and abs(g - b) < 25 and r > 90
+                        is_skin = (r > 150 and g > 90 and b > 70 and r > g + 35)
+                        if is_shirt and not is_skin:
+                            lum = (r * 0.3 + g * 0.59 + b * 0.11) / 255.0
+                            new_r = min(255, int(185 * lum + 25))
+                            new_g = min(255, int(155 * lum + 20))
+                            new_b = min(255, int(120 * lum + 15))
+                            pix[x, y] = (new_r, new_g, new_b, a)
+                    if y >= 210 and 165 <= x <= 200:
+                        if r > 65 and g > 40 and r > g + 15:
+                            lum = (r + g + b) / 3 / 255.0
+                            new_r = min(255, int(225 * lum + 30))
+                            new_g = min(255, int(180 * lum + 20))
+                            new_b = min(255, int(60 * lum + 10))
+                            pix[x, y] = (new_r, new_g, new_b, a)
+                    if 415 <= y <= 455:
+                        if a > 50:
+                            lum = (r + g + b) / 3 / 255.0
+                            pix[x, y] = (int(65 * lum + 15), int(45 * lum + 10), int(35 * lum + 8), a)
+            im.save(f'frontend/public/assets/img/sprites/guardian_{anim}_{i}.png')
 
 if __name__ == '__main__':
     extract_twinber()
@@ -290,4 +397,7 @@ if __name__ == '__main__':
     extract_yeray()
     extract_socorrista()
     extract_frutero()
+    refine_tanausu()
+    refine_operario()
+    refine_guardian()
     print("\n¡Extracción y normalización de todos los actores completada con éxito!")

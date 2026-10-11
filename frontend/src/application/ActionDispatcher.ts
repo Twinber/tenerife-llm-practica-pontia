@@ -223,15 +223,19 @@ export class ActionDispatcher {
       this.paco.name = found.npc.name;
       this.paco.xPct = found.npc.initialX;
       this.paco.targetXPct = found.npc.initialX;
+      this.paco.bottomPct = found.npc.initialBottom !== undefined ? found.npc.initialBottom : 8;
       this.paco.frameIdx = 0;
       this.paco.state = 'IDLE';
       this.paco.facing = -1;
 
       // 2. Posicionar a Twinber a distancia coherente del NPC (a su izquierda, mirándole)
       const npcX = found.npc.initialX;
-      const twinberX = Math.max(16, npcX - 11.5);
+      const twinberX = found.npc.twinberX !== undefined ? found.npc.twinberX : Math.max(16, npcX - 11.5);
       this.twinber.xPct = twinberX;
       this.twinber.targetXPct = twinberX;
+      this.twinber.bottomPct = found.npc.twinberBottom !== undefined 
+        ? found.npc.twinberBottom 
+        : (found.npc.initialBottom !== undefined ? found.npc.initialBottom : 8);
       this.twinber.state = 'IDLE';
       this.twinber.frameIdx = 0;
       this.twinber.facing = 1;

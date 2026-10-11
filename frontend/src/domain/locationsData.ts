@@ -28,6 +28,9 @@ export interface LocationSceneDef {
     name: string;
     role: string;
     initialX: number;
+    initialBottom?: number;
+    twinberX?: number;
+    twinberBottom?: number;
     lookText: string;
     greeting: string;
     photoIdOnLore?: number; // Foto desbloqueable con [HABLAR / LORE]
@@ -227,7 +230,8 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
       id: 'candido',
       name: 'Don Cándido el Bodeguero',
       role: 'Guardián del patrimonio botánico',
-      initialX: 78.0,
+      initialX: 56.0,
+      initialBottom: 7.0,
       lookText: "Don Cándido, elegante anciano de sombrero de paja y bastón de madroño.",
       greeting: "Frente a ti se yergue el ser vivo más anciano de la isla. Respeta su sombra milenaria."
     },

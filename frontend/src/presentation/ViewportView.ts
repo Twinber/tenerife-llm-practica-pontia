@@ -134,6 +134,7 @@ export class ViewportView {
   public render(): void {
     // 1. Renderizar Twinber
     this.twinberElem.style.left = `${this.twinber.xPct}%`;
+    this.twinberElem.style.bottom = `${this.twinber.bottomPct}%`;
     this.twinberElem.style.transform = `translateX(-50%) scaleX(${this.twinber.facing})`;
     const tSrc = this.assetLoader.getActorSpritePath(
       'twinber',
@@ -149,6 +150,7 @@ export class ViewportView {
     if (currentNpc) {
       this.pacoElem.style.display = 'block';
       this.pacoElem.style.left = `${this.paco.xPct}%`;
+      this.pacoElem.style.bottom = `${this.paco.bottomPct}%`;
       this.pacoElem.style.transform = `translateX(-50%) scaleX(${this.paco.facing})`;
       const npcActorId = currentNpc.id || this.paco.id || 'paco';
       const pSrc = this.assetLoader.getActorSpritePath(

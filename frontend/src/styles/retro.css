@@ -143,7 +143,6 @@ html, body {
 
 #twinber-actor {
   left: 24%;
-  bottom: 11%; /* Asentado firmemente sobre la superficie de los adoquines */
   z-index: 12;
   transform: translateX(-50%) scaleX(1);
 }
@@ -151,7 +150,6 @@ html, body {
 #paco-actor {
   left: 82%;
   height: 35%;
-  bottom: 8%; /* En línea con la red y los barriles */
   pointer-events: auto;
   cursor: pointer;
   transform: translateX(-50%) scaleX(-1); /* Mirando hacia Twinber */

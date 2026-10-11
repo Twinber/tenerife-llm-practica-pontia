@@ -16,6 +16,7 @@ export interface ActorConfig {
   maxIdlePauseSecs: number;
   minX?: number; // Límite izquierdo en %
   maxX?: number; // Límite derecho en %
+  initialBottom?: number; // Altura respecto al suelo en %
 }
 
 export class Actor {
@@ -23,6 +24,7 @@ export class Actor {
   public name: string;
   public xPct: number;
   public targetXPct: number;
+  public bottomPct: number = 8;
   public facing: number;
   public state: ActorState = 'IDLE';
   public frameIdx: number = 0;
@@ -49,6 +51,9 @@ export class Actor {
     this.talkFrameCount = config.talkFrameCount;
     this.minX = config.minX;
     this.maxX = config.maxX;
+    if (config.initialBottom !== undefined) {
+      this.bottomPct = config.initialBottom;
+    }
     this.minIdleTicks = config.minIdlePauseSecs * 60;
     this.maxIdleTicks = config.maxIdlePauseSecs * 60;
     this.idlePauseTimer = this.randomRange(this.minIdleTicks, this.maxIdleTicks);

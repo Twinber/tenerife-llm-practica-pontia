@@ -26,6 +26,7 @@ window.addEventListener('DOMContentLoaded', () => {
     id: 'twinber',
     name: 'Twinber',
     initialX: 70.5, // Situado a distancia natural de Paco (82.0%)
+    initialBottom: 8,
     initialFacing: 1,
     speed: 0,
     walkFrameCount: 0,
@@ -39,6 +40,7 @@ window.addEventListener('DOMContentLoaded', () => {
     id: 'paco',
     name: 'Paco el Pescador',
     initialX: 82.0,
+    initialBottom: 8,
     initialFacing: -1,
     speed: 0.1,
     walkFrameCount: 1,
@@ -81,6 +83,10 @@ window.addEventListener('DOMContentLoaded', () => {
   );
   actionDispatcher.viewportView = viewportView;
   actionDispatcher.setupSceneHotspots();
+
+  // Exponer para automatización y pruebas de Playwright
+  (window as any).__actionDispatcher = actionDispatcher;
+  (window as any).__dialogueManager = dialogueManager;
 
   // Vincular logs a la consola de telemetría
   actionDispatcher.onLogMessage = (msg) => telemetryView.log(msg);
