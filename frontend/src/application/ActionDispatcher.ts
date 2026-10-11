@@ -30,10 +30,17 @@ export class ActionDispatcher {
   public stampedZones: Set<string> = new Set();
   public coins: number = 15;
   public bananaCount: number = 0;
+  public acquiredItems: Array<{ name: string; icon: string; count?: number }> = [];
 
   public onDialogueModeChange?: (active: boolean, npcName?: string) => void;
   public onDialogueSpeechState?: (isSpeaking: boolean) => void;
-  public onStateUpdate?: (updates: { photos?: string; passport?: string; coins?: number; bananas?: number }) => void;
+  public onStateUpdate?: (updates: {
+    photos?: string;
+    passport?: string;
+    coins?: number;
+    bananas?: number;
+    items?: Array<{ name: string; icon: string; count?: number }>;
+  }) => void;
 
   constructor(
     twinber: Actor,
@@ -51,6 +58,21 @@ export class ActionDispatcher {
     };
   }
 
+  public acquireItem(name: string, icon: string, count: number = 1): void {
+    const existing = this.acquiredItems.find(it => it.name === name);
+    if (existing) {
+      existing.count = (existing.count || 1) + count;
+    } else {
+      this.acquiredItems.push({ name, icon, count });
+    }
+    if (name === 'Plátano de Canarias') {
+      this.bananaCount = (this.bananaCount || 0) + count;
+    }
+    if (this.onStateUpdate) {
+      this.onStateUpdate({ items: this.acquiredItems, bananas: this.bananaCount, coins: this.coins });
+    }
+  }
+
   public setVerb(verb: VerbType): void {
     this.activeVerb = verb;
     this.audioService.playClick();
@@ -65,6 +87,7 @@ export class ActionDispatcher {
 
   public selectItem(itemName: string): void {
     if (this.activeVerb === 'MIRAR') {
+      this.dialogueManager.clear();
       if (itemName === 'Álbum de Fotos' && this.photoAlbumModal) {
         this.photoAlbumModal.open();
         return;
@@ -90,7 +113,31 @@ export class ActionDispatcher {
       }
       if (itemName === 'Bolsa de Monedas de Oro') {
         this.dialogueManager.enqueue([
-          { speaker: 'twinber', text: `Twinber [MONEDAS]: 'Tengo ${this.coins} monedas de oro en mi riñonera. Suficientes para comprar provisiones, recuerdos y billetes.'` }
+          { speaker: 'twinber', text: `Twinber [MONEDAS]: 'Llevo ${this.coins} monedas de oro en mi riñonera.'` }
+        ]);
+        return;
+      }
+      if (itemName === 'Saco de Gofio') {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: "Twinber: 'Un saquito de gofio tradicional canario de trigo y millo tostado.'" }
+        ]);
+        return;
+      }
+      if (itemName === 'Comanda del Guachinche') {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: "Twinber: 'Una comanda de taberna con notas y apuntes de ruta.'" }
+        ]);
+        return;
+      }
+      if (itemName === 'Billete del Teleférico') {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: "Twinber: 'Un billete para la cabina del teleférico de El Teide.'" }
+        ]);
+        return;
+      }
+      if (itemName === 'Plátano de Canarias') {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: "Twinber: 'Un rico plátano de Canarias con motitas. Siempre viene bien para reponer fuerzas.'" }
         ]);
         return;
       }
@@ -105,28 +152,6 @@ export class ActionDispatcher {
       this.audioService.playCoin();
     }
     this.updateSentence();
-  }
-
-  public inspectLockedItem(itemName: string): void {
-    this.dialogueManager.clear();
-    this.audioService.playHint();
-    if (itemName === 'Saco de Gofio') {
-      this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber [SACO DE GOFIO - 3 💰]: 'Harina tostada de trigo y millo tradicional canario. Podré comprar un saco a Chano en el antiguo molino de La Orotava.'" }
-      ]);
-    } else if (itemName === 'Comanda del Guachinche') {
-      this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber [COMANDA DE GUACHINCHE - 4 💰]: 'Comanda con anotaciones de papas arrugadas, vino del país y rutas. Manolo la despacha en su tasca de Santa Úrsula.'" }
-      ]);
-    } else if (itemName === 'Billete del Teleférico') {
-      this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber [BILLETE DEL TELEFÉRICO - 5 💰]: 'Ticket oficial para ascender a La Rambleta (3.555 m). Se adquiere en la taquilla de Las Cañadas del Teide.'" }
-      ]);
-    } else if (itemName === 'Plátano de Canarias') {
-      this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: `Twinber [🍌 PLÁTANO DE CANARIAS - 1 💰]: '¡El auténtico plátano con motitas! Es un meme puro: no resuelve ningún acertijo, pero qué rico está. Llevo ${this.bananaCount}/3.'` }
-      ]);
-    }
   }
 
   public setHoverTarget(target: string): void {
@@ -353,6 +378,41 @@ export class ActionDispatcher {
       } else {
         this.dialogueManager.enqueue([
           { speaker: 'twinber', text: "Twinber [MAPA]: 'Consulto las carreteras insulares. Usa el verbo [VIAJAR] para desplazarte por la isla.'" }
+        ]);
+      }
+    } else if (this.selectedItemName === 'Plátano de Canarias') {
+      if (hotspotId === 'hotspot-paco' || hotspotId === 'paco-actor') {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: "Twinber: '¿Le apetece un plátano de Canarias, Paco?'" },
+          { speaker: 'paco', text: "Paco: '¡Muchas gracias, muchacho! Guárdalo para el camino, que subir monte da hambre.'" }
+        ]);
+      } else {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: "Twinber: 'No creo que frotar un plátano ahí sirva para nada.'" }
+        ]);
+      }
+    } else if (this.selectedItemName === 'Saco de Gofio') {
+      if (hotspotId === 'hotspot-paco' || hotspotId === 'paco-actor') {
+        this.dialogueManager.enqueue([
+          { speaker: 'paco', text: "Paco: '¡Ese gofio recién molido huele a gloria! Con un buen escaldón entra de maravilla.'" }
+        ]);
+      } else {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: "Twinber: 'Prefiero guardar el gofio y no esparcirlo por los adoquines.'" }
+        ]);
+      }
+    } else if (this.selectedItemName === 'Comanda del Guachinche') {
+      this.dialogueManager.enqueue([
+        { speaker: 'twinber', text: "Twinber: 'Reviso los apuntes manuscritos en la comanda para orientarme.'" }
+      ]);
+    } else if (this.selectedItemName === 'Billete del Teleférico') {
+      if (hotspotId === 'hotspot-teide') {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: "Twinber: 'Este billete me servirá cuando llegue a la estación base del Teleférico en Las Cañadas.'" }
+        ]);
+      } else {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: "Twinber: 'El revisor de la estación de teleférico no está por aquí.'" }
         ]);
       }
     }

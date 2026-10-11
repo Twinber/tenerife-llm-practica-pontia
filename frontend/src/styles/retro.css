@@ -399,25 +399,19 @@ html, body {
   z-index: 2;
 }
 
-/* Ranuras bloqueadas de objetos en venta (con silueta atractiva y legible) */
-.sidebar-inventory .inventory-slot.locked-slot {
-  opacity: 0.85;
-  filter: saturate(0.7) brightness(0.92);
-  border: 1px dashed #5566aa;
-  background: rgba(8, 14, 42, 0.75);
+/* Ranuras vacías en el inventario (se revelan al conseguir objetos en la aventura) */
+.sidebar-inventory .inventory-slot.empty-slot {
+  background: rgba(4, 7, 24, 0.45);
+  border: 1px dashed rgba(60, 75, 140, 0.35);
+  cursor: default;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
 }
 
-.sidebar-inventory .inventory-slot.locked-slot:hover {
-  opacity: 1;
-  filter: saturate(1.1) brightness(1.05);
-  border-color: #ffaa00;
-  border-style: solid;
-}
-
-.sidebar-inventory .inventory-slot.locked-slot .slot-badge {
-  color: #ffaa00;
-  border-color: #886611;
-  background: rgba(22, 16, 2, 0.92);
+.sidebar-inventory .inventory-slot.empty-slot:hover {
+  transform: none;
+  border-color: rgba(60, 75, 140, 0.35);
+  background: rgba(4, 7, 24, 0.45);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
 }
 
 /* Modo Diálogo Ramificado en el Dock (Estilo LucasArts) */

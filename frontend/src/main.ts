@@ -101,7 +101,8 @@ window.addEventListener('DOMContentLoaded', () => {
   };
 
   telemetryView.log('Twinber Frontend Clean Architecture inicializado (Vite + TypeScript).');
-  telemetryView.log('Escenario activo: Puerto de la Cruz (100% fondo panorámico sin recortes).');
+  // Exponer API interna en window para telemetría y pruebas
+  (window as any).__twinber = { actionDispatcher, gameEngine };
 
   gameEngine.start();
 });
