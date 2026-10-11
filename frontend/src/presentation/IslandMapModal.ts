@@ -217,6 +217,15 @@ export class IslandMapModal {
       pinGroup.setAttribute('data-location-id', loc.id);
       pinGroup.setAttribute('transform', `translate(${loc.mapCoords.x}, ${loc.mapCoords.y})`);
 
+      // Área de impacto ampliada y continua para evitar cualquier micro-parpadeo
+      const hitArea = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      hitArea.setAttribute('cx', '0');
+      hitArea.setAttribute('cy', '0');
+      hitArea.setAttribute('r', '20');
+      hitArea.setAttribute('fill', 'transparent');
+      hitArea.setAttribute('class', 'pin-hit-area');
+      pinGroup.appendChild(hitArea);
+
       // Sombra
       const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
       shadow.setAttribute('cx', '0');
@@ -224,6 +233,7 @@ export class IslandMapModal {
       shadow.setAttribute('rx', '10');
       shadow.setAttribute('ry', '6');
       shadow.setAttribute('fill', 'rgba(0,0,0,0.5)');
+      shadow.setAttribute('pointer-events', 'none');
       pinGroup.appendChild(shadow);
 
       // Anillo exterior
@@ -232,6 +242,7 @@ export class IslandMapModal {
       ring.setAttribute('cx', '0');
       ring.setAttribute('cy', '0');
       ring.setAttribute('r', isCurrent ? '13' : '10');
+      ring.setAttribute('pointer-events', 'none');
       pinGroup.appendChild(ring);
 
       // Núcleo del pin
@@ -240,6 +251,7 @@ export class IslandMapModal {
       core.setAttribute('cx', '0');
       core.setAttribute('cy', '0');
       core.setAttribute('r', isCurrent ? '8' : '6');
+      core.setAttribute('pointer-events', 'none');
       pinGroup.appendChild(core);
 
       // Icono insignia en el centro
@@ -249,6 +261,7 @@ export class IslandMapModal {
       badge.setAttribute('y', isCurrent ? '3' : '3');
       badge.setAttribute('text-anchor', 'middle');
       badge.setAttribute('font-size', isCurrent ? '9' : '8');
+      badge.setAttribute('pointer-events', 'none');
       badge.textContent = isCurrent ? '★' : validation.allowed ? '•' : '🔒';
       pinGroup.appendChild(badge);
 
