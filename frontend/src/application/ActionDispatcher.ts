@@ -5,6 +5,7 @@ import { VerbType } from '../domain/types';
 import { Actor } from '../domain/Actor';
 import { DialogueManager } from './DialogueManager';
 import { AudioService } from '../infrastructure/AudioService';
+import type { PhotoAlbumModal } from '../presentation/PhotoAlbumModal';
 
 export class ActionDispatcher {
   public activeVerb: VerbType = 'HABLAR';
@@ -15,6 +16,7 @@ export class ActionDispatcher {
   private paco: Actor;
   private dialogueManager: DialogueManager;
   private audioService: AudioService;
+  public photoAlbumModal?: PhotoAlbumModal;
   public onSentenceChange?: (text: string) => void;
   public onLogMessage?: (msg: string) => void;
   public onStateUpdate?: (updates: { photos?: string; passport?: string; coins?: string }) => void;
@@ -48,6 +50,19 @@ export class ActionDispatcher {
   }
 
   public selectItem(itemName: string): void {
+    if (this.activeVerb === 'MIRAR') {
+      if (itemName === 'Álbum de Fotos' && this.photoAlbumModal) {
+        this.photoAlbumModal.open();
+        return;
+      }
+      if (itemName === 'Pasaporte de Explorador') {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: "Twinber [MIRAR PASAPORTE]: 'Mi pasaporte oficial de explorador de Tenerife. Tiene espacio para los 10 sellos comarcales más el sello de la cumbre del Teide.'" }
+        ]);
+        return;
+      }
+    }
+
     if (this.selectedItemName === itemName) {
       this.selectedItemName = null;
       this.activeVerb = 'MIRAR';
@@ -194,9 +209,24 @@ export class ActionDispatcher {
       if (hotspotId === 'hotspot-teide') {
         this.audioService.playHint();
         this.teidePhotoTaken = true;
-        if (this.onStateUpdate) this.onStateUpdate({ photos: '1/28' });
+        if (this.photoAlbumModal) {
+          this.photoAlbumModal.unlockPhoto(15);
+          const count = this.photoAlbumModal.getUnlockedCount();
+          if (this.onStateUpdate) this.onStateUpdate({ photos: `${count}/28` });
+        }
         this.dialogueManager.enqueue([
-          { speaker: 'twinber', text: "Twinber [📸 CÁMARA 35mm]: '¡CLICK! He sacado una hermosa foto panorámica de El Teide sobre el muelle. ¡Registrada en el Álbum (1/28)!' " }
+          { speaker: 'twinber', text: "Twinber [📸 CÁMARA 35mm]: '¡CLICK! He sacado una hermosa foto panorámica de El Teide sobre el muelle. ¡Registrada en el Álbum (Foto #15)!' " },
+          { speaker: 'twinber', text: "Twinber: 'Usa el verbo [MIRAR] sobre el Álbum de Fotos para contemplar tus recuerdos.'" }
+        ]);
+      } else if (hotspotId === 'hotspot-faro') {
+        this.audioService.playHint();
+        if (this.photoAlbumModal) {
+          this.photoAlbumModal.unlockPhoto(1);
+          const count = this.photoAlbumModal.getUnlockedCount();
+          if (this.onStateUpdate) this.onStateUpdate({ photos: `${count}/28` });
+        }
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: "Twinber [📸 CÁMARA 35mm]: '¡CLICK! Foto del histórico fortín de San Telmo y el puerto guardada en el Álbum (Foto #01).'" }
         ]);
       } else if (hotspotId === 'hotspot-paco' || hotspotId === 'paco-actor') {
         this.audioService.playHint();

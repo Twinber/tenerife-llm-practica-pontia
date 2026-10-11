@@ -50,6 +50,12 @@ export class ScummDockView {
         const item = slot.dataset.item;
         if (!item) return;
 
+        // Si el verbo activo es MIRAR y clican en Álbum de Fotos, abrir modal
+        if (this.actionDispatcher.activeVerb === 'MIRAR' && item === 'Álbum de Fotos') {
+          this.actionDispatcher.selectItem(item);
+          return;
+        }
+
         // Limpiar selección previa o alternar
         const isSelected = slot.classList.contains('selected');
         document.querySelectorAll('.inventory-slot').forEach(s => s.classList.remove('selected'));
@@ -69,6 +75,13 @@ export class ScummDockView {
           document.querySelectorAll<HTMLButtonElement>('.verb-btn').forEach(b => {
             b.classList.toggle('active', b.dataset.verb === this.actionDispatcher.activeVerb);
           });
+        }
+      });
+
+      // Doble clic en cualquier momento en el álbum para abrirlo
+      slot.addEventListener('dblclick', () => {
+        if (slot.dataset.item === 'Álbum de Fotos' && this.actionDispatcher.photoAlbumModal) {
+          this.actionDispatcher.photoAlbumModal.open();
         }
       });
 

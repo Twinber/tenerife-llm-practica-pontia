@@ -303,7 +303,6 @@ html, body {
   text-shadow: 1px 1px #000;
 }
 
-/* Consola Retro (Tecla 'T') */
 .crt-console {
   display: none;
   position: absolute;
@@ -323,3 +322,215 @@ html, body {
 .crt-console.visible {
   display: block;
 }
+
+/* ==============================================================================
+   MODAL RETRO DEL ÁLBUM DE FOTOS (PAGINADO)
+   ============================================================================== */
+.retro-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(5px);
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.retro-modal-overlay.hidden {
+  display: none;
+}
+
+.retro-album-window {
+  width: 92%;
+  max-width: 940px;
+  height: 88%;
+  max-height: 580px;
+  background: #090e24;
+  border: 3px solid #ffaa00;
+  border-radius: 6px;
+  box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.album-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  background: #040612;
+  border-bottom: 2px solid #223377;
+}
+
+.album-title {
+  font-size: 10px;
+  color: #ffaa00;
+  text-shadow: 1px 1px #000;
+}
+
+.modal-close-btn {
+  background: #881122;
+  border: 1px solid #ff4455;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.1s;
+}
+.modal-close-btn:hover {
+  background: #aa1133;
+}
+
+.album-page-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.album-photo-card {
+  background: #0c1230;
+  border: 2px solid #223366;
+  border-radius: 4px;
+  display: flex;
+  gap: 10px;
+  padding: 8px;
+  align-items: center;
+}
+
+.album-photo-card.unlocked {
+  border-color: #4466cc;
+  background: #0d1538;
+}
+
+.album-photo-card.locked {
+  background: #050816;
+  border-color: #1a2340;
+  opacity: 0.8;
+}
+
+.photo-img-wrapper {
+  width: 48%;
+  height: 100%;
+  position: relative;
+  border: 1px solid #334477;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.real-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-id-tag {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #ffff55;
+  font-size: 7px;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.locked-slot {
+  background: #03050d;
+  border: 1px dashed #223355;
+}
+
+.locked-icon {
+  font-size: 16px;
+  color: #334466;
+}
+
+.photo-info {
+  width: 52%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.photo-title {
+  font-size: 9px;
+  color: #ffff55;
+  line-height: 1.3;
+}
+
+.photo-enclave {
+  font-size: 8px;
+  color: #00e5ff;
+}
+
+.photo-quote {
+  font-size: 7px;
+  color: #aab0cc;
+  line-height: 1.4;
+  font-family: monospace;
+}
+
+.locked-info {
+  justify-content: center;
+}
+
+.locked-title {
+  color: #445577;
+}
+
+.photo-locked-badge {
+  font-size: 7px;
+  color: #773333;
+  margin-top: 2px;
+}
+
+.album-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  background: #040612;
+  border-top: 2px solid #223377;
+}
+
+.album-nav-btn {
+  background: #112255;
+  border: 1px solid #3355aa;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.1s;
+}
+.album-nav-btn:hover:not(:disabled) {
+  background: #2244aa;
+  border-color: #6688ff;
+}
+.album-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.album-page-indicator {
+  font-size: 9px;
+  color: #ffaa00;
+  text-shadow: 1px 1px #000;
+}
+

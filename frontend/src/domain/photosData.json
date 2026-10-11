@@ -1,0 +1,198 @@
+[
+  {
+    "id": 1,
+    "filename": "/assets/img/photos/photo_01.jpg",
+    "title": "Puerto de la Cruz y San Telmo",
+    "enclave": "Puerto de la Cruz",
+    "quote": "Pág. 11: Muelle histórico y paseo costero de San Telmo."
+  },
+  {
+    "id": 2,
+    "filename": "/assets/img/photos/photo_02.jpg",
+    "title": "Lago Martiánez y Costa",
+    "enclave": "Puerto de la Cruz",
+    "quote": "Pág. 12: Complejo de piscinas de agua marina obra de César Manrique."
+  },
+  {
+    "id": 3,
+    "filename": "/assets/img/photos/photo_03.jpg",
+    "title": "Liceo de Taoro y Jardines Victoria",
+    "enclave": "La Orotava",
+    "quote": "Pág. 9: Jardines escalonados y señorial palacete del siglo XIX."
+  },
+  {
+    "id": 4,
+    "filename": "/assets/img/photos/photo_04.jpg",
+    "title": "Playa de Los Patos",
+    "enclave": "La Orotava",
+    "quote": "Pág. 10: Espectacular playa salvaje de arena negra bajo los acantilados."
+  },
+  {
+    "id": 5,
+    "filename": "/assets/img/photos/photo_05.jpg",
+    "title": "Playa del Ancón",
+    "enclave": "La Orotava",
+    "quote": "Pág. 10: Rincón virgen de fuerte oleaje con vistas a la costa norte."
+  },
+  {
+    "id": 6,
+    "filename": "/assets/img/photos/photo_06.jpg",
+    "title": "Casco Histórico y Buenavista",
+    "enclave": "Isla Baja",
+    "quote": "Pág. 13: Arquitectura tradicional y pastelerías señoriales."
+  },
+  {
+    "id": 7,
+    "filename": "/assets/img/photos/photo_07.jpg",
+    "title": "Faro de Punta de Teno",
+    "enclave": "Punta de Teno",
+    "quote": "Pág. 14: Extremo más occidental de Tenerife con faro emblemático."
+  },
+  {
+    "id": 8,
+    "filename": "/assets/img/photos/photo_08.jpg",
+    "title": "Auditorio de Tenerife",
+    "enclave": "Santa Cruz",
+    "quote": "Pág. 2: Icono vanguardista del arquitecto Santiago Calatrava."
+  },
+  {
+    "id": 9,
+    "filename": "/assets/img/photos/photo_09.jpg",
+    "title": "Plaza de España y Lago",
+    "enclave": "Santa Cruz",
+    "quote": "Pág. 2: Centro neurálgico de la capital junto al puerto."
+  },
+  {
+    "id": 10,
+    "filename": "/assets/img/photos/photo_10.jpg",
+    "title": "Playa de Las Teresitas",
+    "enclave": "Santa Cruz",
+    "quote": "Pág. 3: Célebre playa de arena dorada traída del Sáhara con palmeras."
+  },
+  {
+    "id": 11,
+    "filename": "/assets/img/photos/photo_11.jpg",
+    "title": "Plaza del Adelantado",
+    "enclave": "La Laguna",
+    "quote": "Pág. 4: Corazón de la ciudad universitaria Patrimonio de la Humanidad."
+  },
+  {
+    "id": 12,
+    "filename": "/assets/img/photos/photo_12.jpg",
+    "title": "Parque Rural de Anaga",
+    "enclave": "Anaga",
+    "quote": "Pág. 5: Selva de laurisilva milenaria con máxima biodiversidad."
+  },
+  {
+    "id": 13,
+    "filename": "/assets/img/photos/photo_13.jpg",
+    "title": "Pico del Inglés (Túnel Verde)",
+    "enclave": "Anaga",
+    "quote": "Pág. 6: Pasillo frondoso esculpido en roca volcánica y vegetación."
+  },
+  {
+    "id": 14,
+    "filename": "/assets/img/photos/photo_14.jpg",
+    "title": "Playa de Benijo al Atardecer",
+    "enclave": "Anaga",
+    "quote": "Pág. 8: Mágicos roques y atardeceres de arena volcánica."
+  },
+  {
+    "id": 15,
+    "filename": "/assets/img/photos/photo_15.jpg",
+    "title": "El Teide desde Las Cañadas",
+    "enclave": "El Teide",
+    "quote": "Pág. 15: Volcán de 3.718 metros alzándose sobre el mar de nubes."
+  },
+  {
+    "id": 16,
+    "filename": "/assets/img/photos/photo_16.jpg",
+    "title": "Roques de García",
+    "enclave": "El Teide",
+    "quote": "Pág. 15: Formaciones basálticas frente al Llano de Ucanca."
+  },
+  {
+    "id": 17,
+    "filename": "/assets/img/photos/photo_17.jpg",
+    "title": "Teleférico del Teide",
+    "enclave": "El Teide",
+    "quote": "Pág. 16: Ascenso hacia la estación superior de La Rambleta."
+  },
+  {
+    "id": 18,
+    "filename": "/assets/img/photos/photo_18.jpg",
+    "title": "Guía Oficial de Tenerife",
+    "enclave": "Tenerife",
+    "quote": "Pág. 1: Portada histórica de los tesoros de la isla."
+  },
+  {
+    "id": 19,
+    "filename": "/assets/img/photos/photo_19.jpg",
+    "title": "Caserío de Masca",
+    "enclave": "Masca",
+    "quote": "Pág. 22: Aldea encaramada entre crestas volcánicas vertiginosas."
+  },
+  {
+    "id": 20,
+    "filename": "/assets/img/photos/photo_20.jpg",
+    "title": "Barranco de Masca",
+    "enclave": "Masca",
+    "quote": "Pág. 22: Cañón que desciende hasta el océano con paredes de 400 m."
+  },
+  {
+    "id": 21,
+    "filename": "/assets/img/photos/photo_21.jpg",
+    "title": "Playa de Troya",
+    "enclave": "Costa Adeje",
+    "quote": "Pág. 17: Aguas tranquilas en el centro turístico del sur."
+  },
+  {
+    "id": 22,
+    "filename": "/assets/img/photos/photo_22.jpg",
+    "title": "Monkey Beach Club",
+    "enclave": "Costa Adeje",
+    "quote": "Pág. 17: Club costero emblemático sobre la arena dorada."
+  },
+  {
+    "id": 23,
+    "filename": "/assets/img/photos/photo_23.jpg",
+    "title": "Papagayo Beach Club",
+    "enclave": "Las Américas",
+    "quote": "Pág. 18: Famoso club de ocio y restaurante junto al mar."
+  },
+  {
+    "id": 24,
+    "filename": "/assets/img/photos/photo_24.jpg",
+    "title": "Playa del Camisón",
+    "enclave": "Los Cristianos",
+    "quote": "Pág. 20: Ensenada protegida ideal para el descanso."
+  },
+  {
+    "id": 25,
+    "filename": "/assets/img/photos/photo_25.jpg",
+    "title": "Siam Park (Templo del Agua)",
+    "enclave": "Adeje",
+    "quote": "Pág. 21: Parque acuático galardonado mundialmente."
+  },
+  {
+    "id": 26,
+    "filename": "/assets/img/photos/photo_26.jpg",
+    "title": "Piscina de Olas de Siam Park",
+    "enclave": "Adeje",
+    "quote": "Pág. 21: La mayor ola artificial del mundo con arena natural."
+  },
+  {
+    "id": 27,
+    "filename": "/assets/img/photos/photo_27.jpg",
+    "title": "El Médano y Deportes de Viento",
+    "enclave": "El Médano",
+    "quote": "Pág. 23: Paraíso internacional del windsurf y kitesurf."
+  },
+  {
+    "id": 28,
+    "filename": "/assets/img/photos/photo_28.jpg",
+    "title": "Montaña Roja y La Tejita",
+    "enclave": "El Médano",
+    "quote": "Pág. 23: Cono volcánico protegido junto a la playa natural."
+  }
+]

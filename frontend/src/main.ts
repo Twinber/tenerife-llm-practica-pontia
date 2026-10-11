@@ -12,6 +12,7 @@ import { GameEngine } from './application/GameEngine';
 import { ViewportView } from './presentation/ViewportView';
 import { ScummDockView } from './presentation/ScummDockView';
 import { TelemetryView } from './presentation/TelemetryView';
+import { PhotoAlbumModal } from './presentation/PhotoAlbumModal';
 
 window.addEventListener('DOMContentLoaded', () => {
   // 1. Capa de Infraestructura
@@ -67,6 +68,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // 4. Capa de Presentación (Vistas y Componentes UI)
   const telemetryView = new TelemetryView();
+  const photoAlbumModal = new PhotoAlbumModal(audioService);
+  actionDispatcher.photoAlbumModal = photoAlbumModal;
+
   new ScummDockView(actionDispatcher, audioService);
   const viewportView = new ViewportView(
     twinber,
