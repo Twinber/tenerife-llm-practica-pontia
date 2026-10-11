@@ -47,11 +47,11 @@ body {
   overflow: hidden;
 }
 
-/* 1. Viewport / Escenario Gráfico - 83% del alto para lucir todo el fondo */
+/* 1. Viewport / Escenario Gráfico - 78% del alto para lucir todo el fondo */
 .scene-viewport {
   position: relative;
   width: 100%;
-  height: 83%;
+  height: 78%;
   overflow: hidden;
   cursor: crosshair;
 }
@@ -181,7 +181,7 @@ body {
 /* 2. Línea de Frase Dinámica (Limpia y Compacta) */
 .sentence-bar {
   width: 100%;
-  height: 4%;
+  height: 4.5%;
   background: #040624;
   border-top: 2px solid var(--scumm-border);
   border-bottom: 1px solid var(--scumm-border);
@@ -200,10 +200,10 @@ body {
   text-overflow: ellipsis;
 }
 
-/* 3. Barra SCUMM Inferior Compacta (13% del alto total) */
+/* 3. Barra SCUMM Inferior Compacta (17.5% del alto total) */
 .scumm-panel {
   width: 100%;
-  height: 13%;
+  height: 17.5%;
   background: var(--scumm-blue);
   display: flex;
   z-index: 15;
