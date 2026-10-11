@@ -190,9 +190,9 @@ def extract_manolo():
             (0, 'idle', [(51, 254), (344, 549), (628, 846), (940, 1145)]),
             (1, 'talk', [(51, 256), (345, 624), (644, 848), (941, 1185)])
         ],
-        canvas_w=280,
+        canvas_w=360,
         canvas_h=460,
-        anchor_x=140,
+        anchor_x=180,
         anchor_y=450,
         actor_name='manolo',
         out_dir='frontend/public/assets/img/sprites'
