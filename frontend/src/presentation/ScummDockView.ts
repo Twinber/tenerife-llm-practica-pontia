@@ -1,5 +1,5 @@
 // ==============================================================================
-// PRESENTATION: ScummDockView (Dock Flotante: Línea de Frase, Verbos e Inventario)
+// PRESENTATION: ScummDockView (Dock Flotante: Línea de Frase, Verbos, Inventario y Diálogos)
 // ==============================================================================
 import { VerbType } from '../domain/types';
 import { ActionDispatcher } from '../application/ActionDispatcher';
@@ -10,10 +10,19 @@ export class ScummDockView {
   private actionDispatcher: ActionDispatcher;
   private audioService: AudioService;
 
+  private dockVerbsInventory: HTMLElement;
+  private dockDialogue: HTMLElement;
+  private dialogueFreeForm: HTMLFormElement;
+  private dialogueFreeInput: HTMLInputElement;
+
   constructor(actionDispatcher: ActionDispatcher, audioService: AudioService) {
     this.actionDispatcher = actionDispatcher;
     this.audioService = audioService;
     this.sentenceActionElem = document.getElementById('sentence-action')!;
+    this.dockVerbsInventory = document.getElementById('dock-verbs-inventory')!;
+    this.dockDialogue = document.getElementById('dock-dialogue')!;
+    this.dialogueFreeForm = document.getElementById('dialogue-free-form') as HTMLFormElement;
+    this.dialogueFreeInput = document.getElementById('dialogue-free-input') as HTMLInputElement;
 
     this.bindEvents();
 
@@ -29,6 +38,28 @@ export class ScummDockView {
       if (updates.passport) {
         const passportSlot = document.querySelector<HTMLElement>('[data-item="Pasaporte de Explorador"] .slot-badge');
         if (passportSlot) passportSlot.innerText = updates.passport;
+      }
+    };
+
+    this.actionDispatcher.onDialogueModeChange = (active: boolean) => {
+      if (active) {
+        this.dockVerbsInventory.classList.add('hidden');
+        this.dockDialogue.classList.remove('hidden', 'dialogue-speaking');
+        if (this.dialogueFreeInput) this.dialogueFreeInput.value = '';
+      } else {
+        this.dockDialogue.classList.add('hidden');
+        this.dockVerbsInventory.classList.remove('hidden');
+      }
+    };
+
+    this.actionDispatcher.onDialogueSpeechState = (isSpeaking: boolean) => {
+      if (isSpeaking) {
+        this.dockDialogue.classList.add('dialogue-speaking');
+      } else {
+        if (this.actionDispatcher.isInNpcDialogue) {
+          this.dockDialogue.classList.remove('dialogue-speaking');
+          if (this.dialogueFreeInput) this.dialogueFreeInput.value = '';
+        }
       }
     };
   }
@@ -92,6 +123,51 @@ export class ScummDockView {
       slot.addEventListener('mouseleave', () => {
         this.actionDispatcher.setHoverTarget('');
       });
+    });
+
+    // Botones de Opciones de Diálogo
+    document.querySelectorAll<HTMLButtonElement>('.dialogue-choice-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const choice = btn.dataset.choice as 'passport' | 'lore' | 'exit';
+        if (choice) {
+          this.audioService.playClick();
+          this.actionDispatcher.selectDialogueChoice(choice);
+        }
+      });
+    });
+
+    // Formulario de Input Abierto de Diálogo
+    if (this.dialogueFreeForm) {
+      this.dialogueFreeForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const text = this.dialogueFreeInput.value.trim();
+        if (text) {
+          this.audioService.playClick();
+          this.actionDispatcher.selectDialogueChoice('custom', text);
+        }
+      });
+    }
+
+    // Teclas de acceso rápido en modo Diálogo (1, 2, 3, 4, Escape)
+    window.addEventListener('keydown', (e) => {
+      if (!this.actionDispatcher.isInNpcDialogue) return;
+      if (this.actionDispatcher.isDialogueSpeaking) return;
+
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      if (e.key === '1') {
+        this.audioService.playClick();
+        this.actionDispatcher.selectDialogueChoice('passport');
+      } else if (e.key === '2') {
+        this.audioService.playClick();
+        this.actionDispatcher.selectDialogueChoice('lore');
+      } else if (e.key === '3') {
+        if (this.dialogueFreeInput) this.dialogueFreeInput.focus();
+      } else if (e.key === '4' || e.key === 'Escape') {
+        this.audioService.playClick();
+        this.actionDispatcher.selectDialogueChoice('exit');
+      }
     });
   }
 }

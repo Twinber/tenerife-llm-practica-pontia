@@ -46,7 +46,7 @@
       </div>
 
       <!-- Contenido del Dock: Verbos + Inventario en una fila -->
-      <div class="dock-content">
+      <div class="dock-content" id="dock-verbs-inventory">
         <!-- Matriz de Verbos Compacta (6 Verbos Oficiales) -->
         <nav class="verb-matrix">
           <button class="verb-btn active" data-verb="HABLAR">HABLAR</button>
@@ -74,6 +74,26 @@
           <div class="inventory-slot" data-item="Brújula de Latón" title="Brújula de Latón">
             <img src="/assets/img/items/item_brujula.png" alt="Brújula">
           </div>
+        </div>
+      </div>
+
+      <!-- Modo Diálogo Ramificado (Oculto inicialmente) -->
+      <div class="dock-dialogue hidden" id="dock-dialogue">
+        <div class="dialogue-choices-list">
+          <button class="dialogue-choice-btn" data-choice="passport">
+            <span class="choice-num">1.</span> "¿Puede sellarme el pasaporte?"
+          </button>
+          <button class="dialogue-choice-btn" data-choice="lore">
+            <span class="choice-num">2.</span> "¿Qué me puede contar de esta zona?"
+          </button>
+          <form class="dialogue-free-form" id="dialogue-free-form">
+            <span class="choice-num">3.</span>
+            <input type="text" id="dialogue-free-input" class="dialogue-free-input" placeholder="Escribe tu propia pregunta a Paco..." maxlength="100" autocomplete="off" />
+            <button type="submit" class="dialogue-free-submit" id="dialogue-free-submit">PREGUNTAR ↵</button>
+          </form>
+          <button class="dialogue-choice-btn choice-exit" data-choice="exit">
+            <span class="choice-num">4.</span> "Tengo que marcharme. ¡Hasta luego!"
+          </button>
         </div>
       </div>
     </footer>

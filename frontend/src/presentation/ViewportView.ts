@@ -41,6 +41,9 @@ export class ViewportView {
   private bindEvents(): void {
     // Avanzar diálogo con tecla Espacio o Enter
     window.addEventListener('keydown', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
       if ((e.key === ' ' || e.key === 'Enter') && this.dialogueManager.currentLine) {
         e.preventDefault();
         this.dialogueManager.advanceOrSkip();

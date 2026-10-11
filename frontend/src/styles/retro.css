@@ -348,6 +348,126 @@ html, body {
   text-shadow: 1px 1px #000;
 }
 
+.dock-content.hidden {
+  display: none !important;
+}
+
+/* Modo Diálogo Ramificado en el Dock (Estilo LucasArts) */
+.dock-dialogue {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 12px;
+  gap: 3px;
+  min-height: 84px;
+  justify-content: center;
+}
+
+.dock-dialogue.hidden {
+  display: none !important;
+}
+
+.dock-dialogue.dialogue-speaking {
+  display: none !important;
+}
+
+.dialogue-choices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+}
+
+.dialogue-choice-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #00e5ff;
+  font-family: inherit;
+  font-size: 8px;
+  text-align: left;
+  padding: 3px 6px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.08s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dialogue-choice-btn:hover {
+  background: rgba(0, 80, 200, 0.45);
+  color: #ffff55;
+  border-color: #4466cc;
+  padding-left: 10px;
+}
+
+.dialogue-choice-btn .choice-num {
+  color: #ffff55;
+  font-weight: bold;
+}
+
+.dialogue-choice-btn.choice-exit {
+  color: #99aacc;
+}
+
+.dialogue-choice-btn.choice-exit:hover {
+  color: #ff5555;
+}
+
+.dialogue-free-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px;
+  background: rgba(10, 20, 60, 0.6);
+  border: 1px solid #334488;
+  border-radius: 3px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.dialogue-free-form:focus-within {
+  border-color: #ffff55;
+  background: rgba(10, 25, 80, 0.9);
+}
+
+.dialogue-free-form .choice-num {
+  color: #ffff55;
+  font-size: 8px;
+  font-weight: bold;
+}
+
+.dialogue-free-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #ffff55;
+  font-family: inherit;
+  font-size: 8px;
+  padding: 3px 2px;
+  outline: none;
+}
+
+.dialogue-free-input::placeholder {
+  color: rgba(180, 200, 240, 0.5);
+  font-style: italic;
+}
+
+.dialogue-free-submit {
+  background: #0044aa;
+  border: 1px solid #ffff55;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 7px;
+  padding: 2px 7px;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.1s ease;
+}
+
+.dialogue-free-submit:hover {
+  background: #0066ee;
+  color: #ffff55;
+}
+
 .crt-console {
   display: none;
   position: absolute;
