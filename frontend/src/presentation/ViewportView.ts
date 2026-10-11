@@ -39,8 +39,26 @@ export class ViewportView {
   }
 
   private bindEvents(): void {
+    // Avanzar diálogo con tecla Espacio o Enter
+    window.addEventListener('keydown', (e) => {
+      if ((e.key === ' ' || e.key === 'Enter') && this.dialogueManager.currentLine) {
+        e.preventDefault();
+        this.dialogueManager.advanceOrSkip();
+      }
+    });
+
+    // Clic en el propio contenedor del diálogo para avanzar
+    this.dialogueContainer.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.dialogueManager.advanceOrSkip();
+    });
+
     // Clic en el suelo
     this.viewportElem.addEventListener('click', (e) => {
+      if (this.dialogueManager.currentLine) {
+        this.dialogueManager.advanceOrSkip();
+        return;
+      }
       const target = e.target as HTMLElement;
       if (target.classList.contains('hotspot') || target.id === 'paco-actor') return;
 
@@ -108,13 +126,26 @@ export class ViewportView {
       this.pacoElem.src = pSrc;
     }
 
-    // 3. Renderizar Subtítulo
+    // 3. Renderizar Subtítulo con botón interactivo de continuación
     if (this.dialogueManager.currentLine) {
+      const isTyped = this.dialogueManager.isFullyTyped;
+      const speaker = this.dialogueManager.currentLine.speaker;
       this.dialogueContainer.innerHTML = `
-        <div class="dialogue-text ${this.dialogueManager.currentLine.speaker}">
-          ${this.dialogueManager.displayedText}
+        <div class="dialogue-bubble ${speaker}">
+          <div class="dialogue-body">${this.dialogueManager.displayedText}</div>
+          <button id="btn-dialogue-continue" class="dialogue-continue-btn ${isTyped ? 'ready' : 'typing'}">
+            ${isTyped ? '▶ CONTINUAR [ESPACIO]' : '...'}
+          </button>
         </div>
       `;
+
+      const btn = document.getElementById('btn-dialogue-continue');
+      if (btn) {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          this.dialogueManager.advanceOrSkip();
+        };
+      }
     } else {
       this.dialogueContainer.innerHTML = '';
     }

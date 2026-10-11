@@ -140,38 +140,83 @@ html, body {
 /* Subtítulos de Diálogo */
 .dialogue-overlay {
   position: absolute;
-  top: 16%;
+  top: 14%;
   left: 8%;
   right: 8%;
   text-align: center;
-  z-index: 25;
+  z-index: 35;
   pointer-events: none;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.dialogue-text {
-  background: rgba(0, 0, 0, 0.88);
-  border: 2px solid #333;
-  padding: 10px 18px;
-  font-size: 12px;
-  line-height: 1.6;
-  max-width: 80%;
-  display: inline-block;
-  text-shadow: 2px 2px #000;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.8);
-  border-radius: 4px;
+.dialogue-bubble {
+  background: rgba(4, 8, 26, 0.94);
+  border: 2px solid #ffaa00;
+  padding: 12px 18px;
+  max-width: 82%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.95);
+  border-radius: 6px;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.dialogue-bubble:hover {
+  transform: scale(1.01);
 }
 
-.dialogue-text.twinber {
+.dialogue-bubble.twinber {
+  border-color: #ffcc00;
   color: var(--dialogue-twinber);
-  border-color: #aa9900;
 }
 
-.dialogue-text.paco {
+.dialogue-bubble.paco {
+  border-color: #00e5ff;
   color: var(--dialogue-paco);
-  border-color: #0088aa;
+}
+
+.dialogue-body {
+  font-size: 11px;
+  line-height: 1.6;
+  text-shadow: 1px 1px #000;
+  text-align: left;
+  width: 100%;
+}
+
+.dialogue-continue-btn {
+  background: #112255;
+  border: 1px solid #4466cc;
+  color: #ffff55;
+  font-family: inherit;
+  font-size: 8px;
+  padding: 5px 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  align-self: flex-end;
+  transition: all 0.15s ease;
+  animation: blinkContinueBtn 1.2s infinite;
+}
+
+.dialogue-continue-btn:hover {
+  background: #2244aa;
+  border-color: #ffff55;
+  color: #ffffff;
+}
+
+.dialogue-continue-btn.typing {
+  opacity: 0.4;
+  animation: none;
+  cursor: default;
+}
+
+@keyframes blinkContinueBtn {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(0.97); }
 }
 
 /* 2. DOCK FLOTANTE SCUMM (Translúcido, elegante, no tapa el escenario) */
