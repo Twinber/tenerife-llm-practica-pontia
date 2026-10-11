@@ -1,5 +1,5 @@
 // ==============================================================================
-// PRESENTATION: PhotoAlbumModal (Visor Paginado del Álbum de Fotos de Tenerife)
+// PRESENTATION: PhotoAlbumModal (Visor Individual a Pantalla Completa - 1 Foto por Página)
 // ==============================================================================
 import photosData from '../domain/photosData.json';
 import { AudioService } from '../infrastructure/AudioService';
@@ -9,12 +9,13 @@ export interface PhotoEntry {
   filename: string;
   title: string;
   enclave: string;
+  trigger: string;
   quote: string;
 }
 
 export class PhotoAlbumModal {
   private modalElem: HTMLElement;
-  private gridElem: HTMLElement;
+  private viewerElem: HTMLElement;
   private counterElem: HTMLElement;
   private pageIndicatorElem: HTMLElement;
   private prevBtn: HTMLButtonElement;
@@ -24,9 +25,7 @@ export class PhotoAlbumModal {
   private audioService: AudioService;
   private photos: PhotoEntry[] = photosData;
   private unlockedIds: Set<number> = new Set<number>();
-  private currentPage: number = 0;
-  private readonly itemsPerPage: number = 4;
-  private readonly totalPages: number = Math.ceil(photosData.length / 4);
+  private currentPhotoIndex: number = 0; // 0 a 27 (28 fotos)
 
   public onPhotoUnlocked?: (unlockedCount: number, total: number) => void;
 
@@ -34,7 +33,7 @@ export class PhotoAlbumModal {
     this.audioService = audioService;
 
     this.modalElem = document.getElementById('photo-album-modal')!;
-    this.gridElem = document.getElementById('album-slots-grid')!;
+    this.viewerElem = document.getElementById('album-slots-grid')!;
     this.counterElem = document.getElementById('album-counter')!;
     this.pageIndicatorElem = document.getElementById('album-page-indicator')!;
     this.prevBtn = document.getElementById('btn-album-prev') as HTMLButtonElement;
@@ -51,33 +50,33 @@ export class PhotoAlbumModal {
     });
 
     this.prevBtn.addEventListener('click', () => {
-      if (this.currentPage > 0) {
-        this.currentPage--;
+      if (this.currentPhotoIndex > 0) {
+        this.currentPhotoIndex--;
         this.audioService.playClick();
-        this.renderPage();
+        this.renderSinglePhoto();
       }
     });
 
     this.nextBtn.addEventListener('click', () => {
-      if (this.currentPage < this.totalPages - 1) {
-        this.currentPage++;
+      if (this.currentPhotoIndex < this.photos.length - 1) {
+        this.currentPhotoIndex++;
         this.audioService.playClick();
-        this.renderPage();
+        this.renderSinglePhoto();
       }
     });
 
     window.addEventListener('keydown', (e) => {
       if (!this.isOpen()) return;
       if (e.key === 'Escape') this.close();
-      if (e.key === 'ArrowLeft' && this.currentPage > 0) {
-        this.currentPage--;
+      if (e.key === 'ArrowLeft' && this.currentPhotoIndex > 0) {
+        this.currentPhotoIndex--;
         this.audioService.playClick();
-        this.renderPage();
+        this.renderSinglePhoto();
       }
-      if (e.key === 'ArrowRight' && this.currentPage < this.totalPages - 1) {
-        this.currentPage++;
+      if (e.key === 'ArrowRight' && this.currentPhotoIndex < this.photos.length - 1) {
+        this.currentPhotoIndex++;
         this.audioService.playClick();
-        this.renderPage();
+        this.renderSinglePhoto();
       }
     });
   }
@@ -86,13 +85,14 @@ export class PhotoAlbumModal {
     return !this.modalElem.classList.contains('hidden');
   }
 
-  public open(startAtPage?: number): void {
-    if (startAtPage !== undefined) {
-      this.currentPage = Math.max(0, Math.min(this.totalPages - 1, startAtPage));
+  public open(targetPhotoId?: number): void {
+    if (targetPhotoId !== undefined) {
+      const idx = this.photos.findIndex((p) => p.id === targetPhotoId);
+      if (idx !== -1) this.currentPhotoIndex = idx;
     }
     this.modalElem.classList.remove('hidden');
     this.audioService.playClick();
-    this.renderPage();
+    this.renderSinglePhoto();
   }
 
   public close(): void {
@@ -104,9 +104,9 @@ export class PhotoAlbumModal {
     if (this.unlockedIds.has(photoId)) return false;
     this.unlockedIds.add(photoId);
 
-    // Calcular página de la foto para saltar opcionalmente a ella
-    const targetPage = Math.floor((photoId - 1) / this.itemsPerPage);
-    this.currentPage = targetPage;
+    // Enfocar automáticamente en la foto recién obtenida
+    const idx = this.photos.findIndex((p) => p.id === photoId);
+    if (idx !== -1) this.currentPhotoIndex = idx;
 
     if (this.onPhotoUnlocked) {
       this.onPhotoUnlocked(this.unlockedIds.size, this.photos.length);
@@ -122,49 +122,53 @@ export class PhotoAlbumModal {
     return this.unlockedIds.size;
   }
 
-  private renderPage(): void {
+  private renderSinglePhoto(): void {
     this.counterElem.innerText = `${this.unlockedIds.size}/${this.photos.length}`;
-    this.pageIndicatorElem.innerText = `PÁGINA ${this.currentPage + 1} / ${this.totalPages}`;
+    this.pageIndicatorElem.innerText = `FOTO ${this.currentPhotoIndex + 1} / ${this.photos.length}`;
 
-    this.prevBtn.disabled = this.currentPage === 0;
-    this.nextBtn.disabled = this.currentPage === this.totalPages - 1;
+    this.prevBtn.disabled = this.currentPhotoIndex === 0;
+    this.nextBtn.disabled = this.currentPhotoIndex === this.photos.length - 1;
 
-    const startIdx = this.currentPage * this.itemsPerPage;
-    const currentItems = this.photos.slice(startIdx, startIdx + this.itemsPerPage);
+    const item = this.photos[this.currentPhotoIndex];
+    const isUnlocked = this.unlockedIds.has(item.id);
 
-    this.gridElem.innerHTML = '';
+    this.viewerElem.innerHTML = '';
 
-    currentItems.forEach((item) => {
-      const isUnlocked = this.unlockedIds.has(item.id);
-      const card = document.createElement('div');
-      card.className = `album-photo-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+    const singleContainer = document.createElement('div');
+    singleContainer.className = `single-photo-view ${isUnlocked ? 'unlocked' : 'locked'}`;
 
-      if (isUnlocked) {
-        card.innerHTML = `
-          <div class="photo-img-wrapper">
-            <img src="${item.filename}" alt="${item.title}" class="real-photo-img" />
-            <span class="photo-id-tag">#${String(item.id).padStart(2, '0')}</span>
+    if (isUnlocked) {
+      singleContainer.innerHTML = `
+        <div class="full-photo-frame">
+          <img src="${item.filename}" alt="${item.title}" class="full-photo-img" />
+          <span class="full-photo-badge">#${String(item.id).padStart(2, '0')}</span>
+        </div>
+        <div class="full-photo-caption">
+          <div class="caption-header">
+            <span class="caption-title">${item.title}</span>
+            <span class="caption-enclave">📍 ${item.enclave}</span>
           </div>
-          <div class="photo-info">
-            <div class="photo-title">${item.title}</div>
-            <div class="photo-enclave">📍 ${item.enclave}</div>
-            <div class="photo-quote">${item.quote}</div>
+          <p class="caption-text">${item.quote}</p>
+        </div>
+      `;
+    } else {
+      singleContainer.innerHTML = `
+        <div class="full-photo-frame locked-full-frame">
+          <div class="locked-polaroid-art">
+            <div class="locked-camera-glyph">📷</div>
+            <div class="locked-num">#${String(item.id).padStart(2, '0')}</div>
           </div>
-        `;
-      } else {
-        card.innerHTML = `
-          <div class="photo-img-wrapper locked-slot">
-            <div class="locked-icon">📷 ❓</div>
-            <span class="photo-id-tag">#${String(item.id).padStart(2, '0')}</span>
+        </div>
+        <div class="full-photo-caption locked-caption">
+          <div class="caption-header">
+            <span class="caption-title locked-title">FOTO #${String(item.id).padStart(2, '0')}</span>
+            <span class="caption-locked-tag">[ BLOQUEADA ]</span>
           </div>
-          <div class="photo-info locked-info">
-            <div class="photo-title locked-title">FOTO #${String(item.id).padStart(2, '0')}</div>
-            <div class="photo-locked-badge">[ BLOQUEADA ]</div>
-          </div>
-        `;
-      }
+          <p class="caption-text locked-subtext">Descúbrela explorando los enclaves de Tenerife.</p>
+        </div>
+      `;
+    }
 
-      this.gridElem.appendChild(card);
-    });
+    this.viewerElem.appendChild(singleContainer);
   }
 }

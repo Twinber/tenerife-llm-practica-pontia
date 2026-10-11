@@ -145,9 +145,11 @@ export class ActionDispatcher {
         { speaker: 'twinber', text: "Twinber: 'Paco, un curtido pescador canario de pelo blanco y boina marinera. Fuma plácidamente en su pipa de madera de tea.'" }
       ]);
     } else if (hotspotId === 'hotspot-teide') {
+      // GEOFENCING: En Puerto de la Cruz solo se divisa a lo lejos; la foto de cumbre requiere estar en Las Cañadas
       this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber [TENERIFE.pdf // pág. 42]: 'El Teide se alza a 3.718 metros. Sagrado para los antiguos guanches como Echeyde, morada del temido dios Guayota.'" }
+        { speaker: 'twinber', text: "Twinber: 'El volcán Teide se divisa a lo lejos sobre las nubes a 3.718 metros. Para capturar la foto oficial de la cumbre tendré que viajar al Parque Nacional de Las Cañadas.'" }
       ]);
+      if (this.onLogMessage) this.onLogMessage("[RAG GEOFENCING] Foto del Teide restringida a la zona 'Las Cañadas'. No desbloqueada desde el puerto.");
     } else if (hotspotId === 'hotspot-barca') {
       this.twinber.moveTo(35, () => {
         this.dialogueManager.enqueue([
@@ -157,15 +159,28 @@ export class ActionDispatcher {
     } else if (hotspotId === 'hotspot-casa') {
       this.twinber.moveTo(60, () => {
         this.dialogueManager.enqueue([
-          { speaker: 'twinber', text: "Twinber [TENERIFE.pdf // pág. 18]: 'Típica casona señorial canaria del siglo XVII con mirador y balconada tallada en madera noble de pino canario (tea).'" }
+          { speaker: 'twinber', text: "Twinber: 'Casona señorial canaria del siglo XVII con mirador y balconada tallada en madera de tea de pino canario.'" }
         ]);
       });
     } else if (hotspotId === 'hotspot-faro') {
+      // MIRAR DESBLOQUEA FOTO #01 VÍA METADATOS RAG
       const leftEdge = this.twinber.minX ?? 18;
       this.twinber.moveTo(leftEdge, () => {
         this.twinber.facing = -1;
+        this.audioService.playHint();
+
+        if (this.photoAlbumModal) {
+          const isNew = this.photoAlbumModal.unlockPhoto(1);
+          const count = this.photoAlbumModal.getUnlockedCount();
+          if (this.onStateUpdate) this.onStateUpdate({ photos: `${count}/28` });
+          if (isNew && this.onLogMessage) {
+            this.onLogMessage("[RAG RETRIEVAL] Query: 'Faro y fortín de San Telmo' -> Match: photo_id=01 (pág. 11 TENERIFE.pdf) -> Desbloqueada en Álbum");
+          }
+        }
+
         this.dialogueManager.enqueue([
-          { speaker: 'twinber', text: "Twinber [TENERIFE.pdf // pág. 15]: 'Batería y fortín de San Telmo, construido en 1780 para defender el puerto frente a los corsarios del Atlántico.'" }
+          { speaker: 'twinber', text: "Twinber [RAG // Pág. 11]: 'Batería y faro histórico de San Telmo (1780), erigidos para proteger el muelle pesquero.'" },
+          { speaker: 'twinber', text: "Twinber: '¡Foto #01 agregada a mi Álbum de Recuerdos! Usa [MIRAR] sobre el Álbum para verla a tamaño completo.'" }
         ]);
       });
     }
@@ -285,11 +300,22 @@ export class ActionDispatcher {
     this.twinber.moveTo(nearPacoX, () => {
       this.twinber.facing = 1;
       this.paco.facing = -1;
+
+      // Desbloqueo RAG vía conversación (Foto #02 Lago Martiánez)
+      if (this.photoAlbumModal) {
+        const isNew = this.photoAlbumModal.unlockPhoto(2);
+        const count = this.photoAlbumModal.getUnlockedCount();
+        if (this.onStateUpdate) this.onStateUpdate({ photos: `${count}/28` });
+        if (isNew && this.onLogMessage) {
+          this.onLogMessage("[RAG DIALOGUE] Paco revela secreto costero -> Match: photo_id=02 'Lago Martiánez' (pág. 12) -> Desbloqueada en Álbum");
+        }
+      }
+
       this.dialogueManager.enqueue([
         { speaker: 'twinber', text: "Twinber: '¡Buenos días! Acabo de desembarcar en Puerto de la Cruz. ¿Qué me recomienda ver en la isla?'" },
         { speaker: 'paco', text: "Paco: '¡Chacho, bienvenido a Tenerife, mi niño! Si buscas buen comer y buen gofio, sube al Molino de Chano en La Orotava.'" },
-        { speaker: 'paco', text: "Paco: 'Y no tengas prisa por subir al Teide; primero sella todo el Norte en tu pasaporte y tómate un buen barraquito en el muelle.'" },
-        { speaker: 'twinber', text: "Twinber: '¡Oído cocina, Paco! Guardaré bien mis 15 monedas para ese gofio.'" }
+        { speaker: 'paco', text: "Paco [RAG // Pág. 12]: 'Y si quieres refrescarte, ve al Lago Martiánez al final del paseo: ¡las piscinas de agua salada de César Manrique! [Foto #02 añadida al Álbum]'" },
+        { speaker: 'twinber', text: "Twinber: '¡Muchas gracias, Paco! Guardaré bien mis 15 monedas y anotaré el Lago Martiánez.'" }
       ]);
     });
   }
