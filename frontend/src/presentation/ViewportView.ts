@@ -75,8 +75,22 @@ export class ViewportView {
     // NPC activo: clic & hover
     this.pacoElem.addEventListener('click', (e) => {
       e.stopPropagation();
+      if (this.dialogueManager.currentLine) {
+        this.dialogueManager.advanceOrSkip();
+        return;
+      }
       this.actionDispatcher.talkToCurrentNpc();
     });
+
+    // Clic en el dock de acción inferior (avanza diálogo si el NPC o Twinber están hablando)
+    const actionDock = document.getElementById('action-dock');
+    if (actionDock) {
+      actionDock.addEventListener('click', () => {
+        if (this.dialogueManager.currentLine) {
+          this.dialogueManager.advanceOrSkip();
+        }
+      });
+    }
     this.pacoElem.addEventListener('mouseenter', () => {
       const npcName = this.actionDispatcher.currentLocation.npc?.name || 'Personaje';
       this.actionDispatcher.setHoverTarget(npcName, 'npc');

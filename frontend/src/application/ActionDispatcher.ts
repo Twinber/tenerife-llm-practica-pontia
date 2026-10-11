@@ -373,6 +373,9 @@ export class ActionDispatcher {
     if (this.onDialogueModeChange) {
       this.onDialogueModeChange(true, npcName, shopItem, twinBrotherName);
     }
+    if (this.onDialogueSpeechState) {
+      this.onDialogueSpeechState(true);
+    }
     this.updateSentence();
 
     const greeting = this.currentLocation.npc?.greeting || `¡Hola! Bienvenido a ${this.currentLocation.name}.`;
@@ -398,6 +401,7 @@ export class ActionDispatcher {
 
   public selectDialogueChoice(choice: 'passport' | 'lore' | 'twin' | 'buy' | 'custom' | 'exit', customText?: string): void {
     if (!this.isInNpcDialogue) return;
+    if (this.isDialogueSpeaking) return;
     this.isDialogueSpeaking = true;
     if (this.onDialogueSpeechState) this.onDialogueSpeechState(true);
     this.updateSentence();

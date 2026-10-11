@@ -53,7 +53,12 @@ export class ScummDockView {
       twinBrotherName?: string
     ) => {
       if (active) {
-        this.dockDialogue.classList.remove('hidden', 'dialogue-speaking');
+        this.dockDialogue.classList.remove('hidden');
+        if (this.actionDispatcher.isDialogueSpeaking) {
+          this.dockDialogue.classList.add('dialogue-speaking');
+        } else {
+          this.dockDialogue.classList.remove('dialogue-speaking');
+        }
         if (this.dialogueFreeInput) {
           this.dialogueFreeInput.value = '';
           this.dialogueFreeInput.placeholder = `Escribe tu propia pregunta a ${npcName || 'personaje'}...`;
@@ -120,6 +125,7 @@ export class ScummDockView {
         this.currentKeyActions[exitKey] = () => this.actionDispatcher.selectDialogueChoice('exit');
       } else {
         this.dockDialogue.classList.add('hidden');
+        this.dockDialogue.classList.remove('dialogue-speaking');
         this.currentKeyActions = {};
       }
     };
@@ -192,6 +198,7 @@ export class ScummDockView {
     // Botones de Opciones de Diálogo
     document.querySelectorAll<HTMLButtonElement>('.dialogue-choice-btn').forEach(btn => {
       btn.addEventListener('click', () => {
+        if (this.actionDispatcher.isDialogueSpeaking) return;
         const choice = btn.dataset.choice as 'passport' | 'lore' | 'twin' | 'buy' | 'exit';
         if (choice) {
           this.audioService.playClick();
@@ -204,6 +211,7 @@ export class ScummDockView {
     if (this.dialogueFreeForm) {
       this.dialogueFreeForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        if (this.actionDispatcher.isDialogueSpeaking) return;
         const text = this.dialogueFreeInput.value.trim();
         if (text) {
           this.audioService.playClick();
