@@ -50,12 +50,8 @@
         <!-- Subtítulos de Diálogo (Amarillo Twinber / Cian Paco) -->
         <div class="dialogue-overlay" id="dialogue-container"></div>
 
-        <!-- Hotspots Interactivos del Muelle (Alineados con la imagen completa 100%) -->
-        <div id="hotspot-faro" class="hotspot" style="left: 2%; top: 40%; width: 14%; height: 22%;" title="Faro y Fortín de San Telmo"></div>
-        <div id="hotspot-barca" class="hotspot" style="left: 33%; bottom: 25%; width: 18%; height: 16%;" title="Barca 'El Mojo'"></div>
-        <div id="hotspot-teide" class="hotspot" style="left: 63%; top: 5%; width: 23%; height: 28%;" title="El Teide"></div>
-        <div id="hotspot-casa" class="hotspot" style="left: 64%; top: 28%; width: 26%; height: 32%;" title="Casa Colonial Balcón de Tea"></div>
-        <div id="hotspot-paco" class="hotspot" style="left: 79%; bottom: 6%; width: 15%; height: 46%;" title="Paco el Pescador"></div>
+        <!-- Contenedor Dinámico de Hotspots Interactivos -->
+        <div id="hotspots-container"></div>
 
         <!-- Actores: Sprites Transparentes sobre los Adoquines -->
         <img id="twinber-actor" class="sprite-actor" src="/assets/img/sprites/twinber_idle_0.png" alt="Twinber">
@@ -93,10 +89,21 @@
         </div>
       </footer>
 
-      <!-- Consola de Auditoría Retro (Tecla 'T') -->
+      <!-- Consola de Auditoría Retro (Tecla 'T') con CLI Interactivo de Telemetría -->
       <aside class="crt-console" id="crt-console">
-        <div>*** CONSOLA DE AUDITORÍA Y TELEMETRÍA RETRO (TECLA 'T') ***</div>
-        <div>-------------------------------------------------------</div>
+        <div class="crt-header">
+          <span>*** CONSOLA DE TELEMETRÍA Y COMANDOS RETRO (TECLA 'T') ***</span>
+          <button id="btn-close-crt" class="crt-close-btn" title="Cerrar consola [ESC]">✕</button>
+        </div>
+        <div class="crt-logs" id="crt-logs">
+          <div>[INIT] Consola de telemetría lista. Escribe AYUDA o LISTAR_DESTINOS.</div>
+          <div>-----------------------------------------------------------------</div>
+        </div>
+        <form class="crt-cmd-form" id="crt-cmd-form">
+          <span class="crt-cmd-prompt">&gt;</span>
+          <input type="text" id="crt-cmd-input" class="crt-cmd-input" placeholder="Comando (ej: LISTAR_DESTINOS, VIAJAR la_orotava, AYUDA)..." autocomplete="off" />
+          <button type="submit" class="crt-cmd-submit" id="crt-cmd-submit">EJECUTAR ↵</button>
+        </form>
       </aside>
 
       <!-- Modal Retro del Álbum de Fotos (Paginado) -->

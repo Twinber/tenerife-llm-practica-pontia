@@ -7,12 +7,17 @@ import { DialogueManager } from './DialogueManager';
 import { AudioService } from '../infrastructure/AudioService';
 import type { PhotoAlbumModal } from '../presentation/PhotoAlbumModal';
 import type { PassportModal } from '../presentation/PassportModal';
+import { LOCATIONS_CATALOG, LocationSceneDef, HotspotLocationDef } from '../domain/locationsData';
+import type { ViewportView } from '../presentation/ViewportView';
 
 export class ActionDispatcher {
   public activeVerb: VerbType = 'HABLAR';
   public selectedItemName: string | null = null;
   public hoverTargetName: string = '';
   public hoverTargetType: 'npc' | 'scenery' | 'item' | 'ground' = 'ground';
+
+  public currentLocation: LocationSceneDef = LOCATIONS_CATALOG[0];
+  public viewportView?: ViewportView;
 
   private twinber: Actor;
   private paco: Actor;
@@ -164,94 +169,181 @@ export class ActionDispatcher {
     if (this.onLogMessage) this.onLogMessage(`Twinber camina hacia X: ${targetX.toFixed(1)}%`);
   }
 
-  public interactWithHotspot(hotspotId: string, _hotspotName: string = ''): void {
+  public setupSceneHotspots(): void {
+    if (this.viewportView) {
+      this.viewportView.renderHotspots(this.currentLocation.hotspots);
+    }
+  }
+
+  public listDestinations(): string {
+    let out = '=== DESTINOS IMPLEMENTADOS EN TENERIFE (CATÁLOGO OFICIAL) ===\n';
+    const zones = ['Norte', 'Metropolitana', 'Sur', 'Cumbre'] as const;
+    for (const zone of zones) {
+      out += `\n[ZONA ${zone.toUpperCase()}]\n`;
+      const inZone = LOCATIONS_CATALOG.filter(l => l.zone === zone);
+      for (const loc of inZone) {
+        const npcInfo = loc.npc ? `${loc.npc.name} (${loc.npc.role})${loc.npc.hasShop ? ' [Tienda]' : ''}` : 'Sin NPC';
+        const stampInfo = loc.stampKey ? `[Sello: ${loc.stampKey}]` : '[Sin sello]';
+        const mirarPhotos = loc.hotspots
+          .filter(h => h.photoId)
+          .map(h => `#${String(h.photoId).padStart(2, '0')}`)
+          .join(', ');
+        const photosInfo = mirarPhotos ? ` | Fotos [MIRAR]: ${mirarPhotos}` : '';
+        out += `  • ${loc.id.padEnd(14)} -> ${loc.name.padEnd(25)} | NPC: ${npcInfo} | ${stampInfo}${photosInfo}\n`;
+      }
+    }
+    out += '\n------------------------------------------------------------\n';
+    out += 'Comando para saltar: VIAJAR <ID_O_NOMBRE> (Ej: VIAJAR la_orotava ó VIAJAR Masca)\n';
+    return out;
+  }
+
+  public teleportTo(query: string): { success: boolean; message: string; location?: LocationSceneDef } {
+    const clean = query.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (!clean) {
+      const msg = "Debes indicar un destino. Ejemplo: VIAJAR la_orotava (o usa LISTAR_DESTINOS).";
+      if (this.onLogMessage) this.onLogMessage(`[ERROR TELEMETRÍA] ${msg}`);
+      return { success: false, message: msg };
+    }
+
+    const found = LOCATIONS_CATALOG.find(l => {
+      const cleanId = l.id.toLowerCase();
+      const cleanName = l.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      return cleanId === clean || cleanName === clean || cleanId.includes(clean) || cleanName.includes(clean);
+    });
+
+    if (!found) {
+      const msg = `Destino no reconocido: '${query}'. Escribe LISTAR_DESTINOS para ver los 13 enclaves disponibles.`;
+      if (this.onLogMessage) this.onLogMessage(`[ERROR TELEMETRÍA] ${msg}`);
+      return { success: false, message: msg };
+    }
+
+    this.currentLocation = found;
+
+    // 1. Reposicionar Twinber a posición neutral caminable
+    this.twinber.xPct = 24.0;
+    this.twinber.targetXPct = 24.0;
+    this.twinber.facing = 1;
+
+    // 2. Reposicionar y configurar NPC
+    if (found.npc) {
+      this.paco.name = found.npc.name;
+      this.paco.xPct = found.npc.initialX;
+      this.paco.targetXPct = found.npc.initialX;
+      this.paco.facing = -1;
+    }
+
+    // 3. Actualizar Viewport (Background, HUD, NPC visible y Hotspots)
+    if (this.viewportView) {
+      this.viewportView.updateScene(
+        found.bgImage,
+        found.hudTitle,
+        found.npc?.name,
+        !!found.npc
+      );
+      this.viewportView.renderHotspots(found.hotspots);
+    }
+
+    // 4. Limpiar diálogos en curso
+    this.dialogueManager.clear();
+    if (this.isInNpcDialogue) {
+      this.endNpcDialogue();
+    }
+
+    // 5. Notificación retro en telemetría
+    this.audioService.playClick();
+    const logMsg = `[TELEMETRÍA] Salto forzado a '${found.name}' [${found.id}]. Reglas de viaje y sellos ignorados para depuración.`;
+    if (this.onLogMessage) this.onLogMessage(logMsg);
+
+    this.dialogueManager.enqueue([
+      { speaker: 'twinber', text: `Twinber: '[DEPURACIÓN] Teletransportado con éxito a ${found.name}.'` }
+    ]);
+
+    return { success: true, message: `Teletransportado a ${found.name}`, location: found };
+  }
+
+  public interactWithHotspot(hotspotId: string, hotspotName: string = ''): void {
     if (this.dialogueManager.currentLine) {
       this.dialogueManager.advanceOrSkip();
       return;
     }
 
-    // Contextual: Personajes -> Hablar / Escenario -> Mirar
+    const def = this.currentLocation.hotspots.find(h => h.id === hotspotId);
+    if (def) {
+      this.interactWithHotspotDef(def);
+      return;
+    }
+
     if (hotspotId === 'hotspot-paco' || hotspotId === 'paco-actor') {
-      this.handleTalk(hotspotId);
+      this.talkToCurrentNpc();
     } else {
-      this.handleLook(hotspotId);
-    }
-  }
-
-  private handleTalk(hotspotId: string): void {
-    if (hotspotId === 'hotspot-paco' || hotspotId === 'paco-actor') {
-      this.talkToPaco();
-    } else if (hotspotId === 'hotspot-teide') {
       this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber: '¡Hola, imponente señor Teide!... Solo me responde el murmullo de los vientos alisios.'" }
-      ]);
-    } else if (hotspotId === 'hotspot-barca') {
-      this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber: 'No creo que una barca de pesca vacía tenga mucho que contarme.'" }
-      ]);
-    } else if (hotspotId === 'hotspot-casa') {
-      this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber: 'El balcón de tea está en silencio. Nadie responde a mis saludos.'" }
-      ]);
-    } else if (hotspotId === 'hotspot-faro') {
-      this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber: 'El farero de San Telmo debe de estar descansando de la guardia nocturna.'" }
+        { speaker: 'twinber', text: `Twinber: 'Examinando ${hotspotName || 'este punto'} detenidamente.'` }
       ]);
     }
   }
 
-  private handleLook(hotspotId: string): void {
-    if (hotspotId === 'hotspot-paco' || hotspotId === 'paco-actor') {
-      this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber: 'Paco, un curtido pescador canario de pelo blanco y boina marinera. Fuma plácidamente en su pipa de madera de tea.'" }
-      ]);
-    } else if (hotspotId === 'hotspot-teide') {
-      // GEOFENCING: En Puerto de la Cruz solo se divisa a lo lejos; la foto de cumbre requiere estar en Las Cañadas
-      this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber: 'El volcán Teide se divisa a lo lejos sobre las nubes a 3.718 metros. Para capturar la foto oficial de la cumbre tendré que viajar al Parque Nacional de Las Cañadas.'" }
-      ]);
-      if (this.onLogMessage) this.onLogMessage("[RAG GEOFENCING] Foto del Teide restringida a la zona 'Las Cañadas'. No desbloqueada desde el puerto.");
-    } else if (hotspotId === 'hotspot-barca') {
-      this.twinber.moveTo(35, () => {
-        this.dialogueManager.enqueue([
-          { speaker: 'twinber', text: "Twinber: 'La barca \"El Mojo\"... Embarcación tradicional de pesca artesanal del Puerto de la Cruz. Huele a madera curada y salitre.'" }
-        ]);
-      });
-    } else if (hotspotId === 'hotspot-casa') {
-      this.twinber.moveTo(60, () => {
-        this.dialogueManager.enqueue([
-          { speaker: 'twinber', text: "Twinber: 'Casona señorial canaria del siglo XVII con mirador y balconada tallada en madera de tea de pino canario.'" }
-        ]);
-      });
-    } else if (hotspotId === 'hotspot-faro') {
-      // MIRAR DESBLOQUEA FOTO #01 VÍA METADATOS RAG
-      const leftEdge = this.twinber.minX ?? 18;
-      this.twinber.moveTo(leftEdge, () => {
-        this.twinber.facing = -1;
-        this.audioService.playHint();
+  public interactWithHotspotDef(hotspot: HotspotLocationDef): void {
+    if (this.dialogueManager.currentLine) {
+      this.dialogueManager.advanceOrSkip();
+      return;
+    }
 
-        if (this.photoAlbumModal) {
-          const isNew = this.photoAlbumModal.unlockPhoto(1);
+    if (hotspot.type === 'npc') {
+      this.talkToCurrentNpc();
+      return;
+    }
+
+    // Caminar hacia el hotspot respetando los límites de Twinber
+    const minX = this.twinber.minX ?? 18;
+    const maxX = this.twinber.maxX ?? 72;
+    const targetX = Math.max(minX, Math.min(maxX, hotspot.leftPct + hotspot.widthPct / 2));
+
+    this.twinber.moveTo(targetX, () => {
+      this.twinber.facing = hotspot.leftPct > this.twinber.xPct ? 1 : -1;
+      this.audioService.playClick();
+
+      let unlockedPhoto = false;
+      if (hotspot.photoId && this.photoAlbumModal) {
+        unlockedPhoto = this.photoAlbumModal.unlockPhoto(hotspot.photoId);
+        if (unlockedPhoto) {
+          this.audioService.playHint();
           const count = this.photoAlbumModal.getUnlockedCount();
           if (this.onStateUpdate) this.onStateUpdate({ photos: `${count}/28` });
-          if (isNew && this.onLogMessage) {
-            this.onLogMessage("[RAG RETRIEVAL] Query: 'Faro y fortín de San Telmo' -> Match: photo_id=01 (pág. 11 TENERIFE.pdf) -> Desbloqueada en Álbum");
+          if (this.onLogMessage) {
+            this.onLogMessage(`[RAG RETRIEVAL] Foto #${String(hotspot.photoId).padStart(2, '0')} desbloqueada al mirar '${hotspot.name}' (${this.currentLocation.name})`);
           }
         }
+      }
 
-        this.dialogueManager.enqueue([
-          { speaker: 'twinber', text: "Twinber [RAG // Pág. 11]: 'Batería y faro histórico de San Telmo (1780), erigidos para proteger el muelle pesquero.'" },
-          { speaker: 'twinber', text: "Twinber: '¡Foto #01 agregada a mi Álbum de Recuerdos! Usa [MIRAR] sobre el Álbum para verla a tamaño completo.'" }
-        ]);
-      });
-    }
+      const lines: Array<{ speaker: 'twinber' | 'paco'; text: string }> = [
+        { speaker: 'twinber', text: `Twinber: '${hotspot.lookText}'` }
+      ];
+
+      if (unlockedPhoto && hotspot.photoId) {
+        lines.push({
+          speaker: 'twinber',
+          text: `Twinber: '¡Foto #${String(hotspot.photoId).padStart(2, '0')} agregada a mi Álbum de Recuerdos! Usa el Álbum para verla a tamaño completo.'`
+        });
+      }
+
+      this.dialogueManager.enqueue(lines);
+    });
   }
 
-
+  public talkToCurrentNpc(): void {
+    if (this.isInNpcDialogue) return;
+    const npc = this.currentLocation.npc;
+    if (!npc) {
+      this.dialogueManager.enqueue([
+        { speaker: 'twinber', text: "Twinber: 'No hay nadie en este lugar con quien conversar ahora mismo.'" }
+      ]);
+      return;
+    }
+    this.startNpcDialogue(npc.id, npc.name);
+  }
 
   public talkToPaco(): void {
-    if (this.isInNpcDialogue) return;
-    this.startNpcDialogue('paco', 'Paco el Pescador');
+    this.talkToCurrentNpc();
   }
 
   public startNpcDialogue(_npcId: string, npcName: string): void {
@@ -270,9 +362,9 @@ export class ActionDispatcher {
       }
       this.updateSentence();
 
-      // Saludo inicial breve antes de desplegar las opciones
+      const greeting = this.currentLocation.npc?.greeting || `¡Hola! Bienvenido a ${this.currentLocation.name}.`;
       this.dialogueManager.enqueue([
-        { speaker: 'paco', text: "Paco: '¡Hola, forastero! Bienvenido al Puerto de la Cruz. ¿Qué se te ofrece por el muelle?'" }
+        { speaker: 'paco', text: `${npcName}: '${greeting}'` }
       ]);
     });
   }
@@ -315,100 +407,138 @@ export class ActionDispatcher {
   }
 
   private handleBuyChoice(): void {
-    if (this.currentDialogueNpc === 'Paco el Pescador') {
-      this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber: '¿Tiene algo a la venta por aquí, señor Paco?'" },
-        { speaker: 'paco', text: "Paco: '¡Chacho, yo hoy no vendo pescado en el muelle! Pero si buscas buen gofio recién molido o provisiones, acércate al molino de Chano en La Orotava.'" },
-        { speaker: 'twinber', text: "Twinber: '¡Entendido! Guardaré mis 15 monedas de oro para los comercios de La Orotava y Las Cañadas.'" }
-      ]);
+    const npc = this.currentLocation.npc;
+    const npcName = npc?.name || 'Comerciante';
+
+    if (npc?.hasShop && npc.shopItem) {
+      const item = npc.shopItem;
+      if (this.coins >= item.price) {
+        this.coins -= item.price;
+        let icon = '/assets/img/sprites/item_gofio.png';
+        if (item.name.includes('Plátano')) icon = '/assets/img/sprites/item_platano.png';
+        else if (item.name.includes('Comanda')) icon = '/assets/img/sprites/item_comanda.png';
+        else if (item.name.includes('Billete')) icon = '/assets/img/sprites/item_billete.png';
+        else if (item.name.includes('Gofio')) icon = '/assets/img/sprites/item_gofio.png';
+
+        this.acquireItem(item.name, icon, 1);
+        this.audioService.playCoin();
+        if (this.onLogMessage) {
+          this.onLogMessage(`[COMERCIO] Adquirido '${item.name}' por ${item.price} monedas. Saldo restante: ${this.coins}`);
+        }
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: `Twinber: 'Me gustaría comprar ${item.name} por ${item.price} monedas.'` },
+          { speaker: 'paco', text: `${npcName}: '${item.dialogueText}'` },
+          { speaker: 'twinber', text: `Twinber: '¡Trato hecho! Guardo ${item.name} en mi inventario.'` }
+        ]);
+      } else {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: `Twinber: 'Quisiera comprar ${item.name}, pero no me alcanzan las monedas...'` },
+          { speaker: 'paco', text: `${npcName}: '¡Chacho, necesitas ${item.price} monedas y solo te quedan ${this.coins}!'` }
+        ]);
+      }
     } else {
       this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber: '¿Qué artículos tiene disponibles a la venta?'" },
-        { speaker: 'paco', text: "Paco: 'No hay mercancía comercial por aquí ahora mismo.'" }
+        { speaker: 'twinber', text: "Twinber: '¿Tiene algo a la venta por aquí?'" },
+        { speaker: 'paco', text: `${npcName}: 'No tengo artículos a la venta en este momento, muchacho.'` }
       ]);
     }
   }
 
   private handlePassportChoice(): void {
-    const hasStamp = this.stampedZones.has('Puerto de la Cruz');
+    const stampKey = this.currentLocation.stampKey;
+    const locName = this.currentLocation.name;
+    const npcName = this.currentLocation.npc?.name || 'Guía';
+
+    if (!stampKey) {
+      this.dialogueManager.enqueue([
+        { speaker: 'twinber', text: "Twinber: '¿Podría sellarme el pasaporte de explorador?'" },
+        { speaker: 'paco', text: `${npcName}: 'En este enclave no disponemos de cuño oficial. Busca en las villas y parques principales de Tenerife.'` }
+      ]);
+      return;
+    }
+
+    const hasStamp = this.stampedZones.has(locName);
     if (!hasStamp) {
-      this.stampedZones.add('Puerto de la Cruz');
+      this.stampedZones.add(locName);
       if (this.passportModal) {
-        this.passportModal.unlockStamp('puerto_cruz');
+        this.passportModal.unlockStamp(stampKey);
       }
       this.audioService.playCoin();
       if (this.onStateUpdate) {
         this.onStateUpdate({ passport: `${this.stampedZones.size}/10` });
       }
       if (this.onLogMessage) {
-        this.onLogMessage(`[PASAPORTE] Sello añadido: 'Puerto de la Cruz' (${this.stampedZones.size}/10 sellos oficiales)`);
+        this.onLogMessage(`[PASAPORTE] Sello oficial estampado: '${locName}' [${stampKey}] (${this.stampedZones.size}/10 sellos oficiales)`);
       }
       this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber: '¿Podría sellarme el pasaporte de explorador?'" },
-        { speaker: 'paco', text: "Paco: '¡Faltaría más, mi niño! Te estampo el sello del Puerto de la Cruz en tu pasaporte. ¡Ya tienes el primero de los 10 sellos de la isla!'" }
+        { speaker: 'twinber', text: "Twinber: '¿Podría sellarme el pasaporte de explorador oficial de Tenerife?'" },
+        { speaker: 'paco', text: `${npcName}: '¡Por supuesto! Estampo el sello de ${locName} en tu pasaporte. ¡Ya sumas ${this.stampedZones.size} de los 10 sellos oficiales de la isla!'` }
       ]);
     } else {
       this.dialogueManager.enqueue([
         { speaker: 'twinber', text: "Twinber: '¿Podría sellarme el pasaporte?'" },
-        { speaker: 'paco', text: "Paco: '¡Chacho, si ya tienes bien sellado el Puerto de la Cruz! Ahora te toca buscar los sellos de La Orotava, Icod o el Teide.'" }
+        { speaker: 'paco', text: `${npcName}: '¡Chacho, si ya tienes estampada la marca oficial de ${locName}! Sigue explorando para completar las 10 páginas.'` }
       ]);
     }
   }
 
   private handleLoreChoice(): void {
+    const npc = this.currentLocation.npc;
+    const npcName = npc?.name || 'Lugareño';
+    const locName = this.currentLocation.name;
+
     if (this.onLogMessage) {
-      this.onLogMessage("[RAG RETRIEVAL // ZONA] Query: 'Qué me puede contar de Puerto de la Cruz' -> Match: TENERIFE.pdf (Pág. 12)");
+      this.onLogMessage(`[RAG RETRIEVAL // ZONA] Consulta de lore: '${locName}' -> Contexto: TENERIFE.pdf`);
     }
 
     let isNewPhoto = false;
-    if (this.photoAlbumModal) {
-      isNewPhoto = this.photoAlbumModal.unlockPhoto(2);
+    const photoId = npc?.photoIdOnLore;
+    if (photoId && this.photoAlbumModal) {
+      isNewPhoto = this.photoAlbumModal.unlockPhoto(photoId);
       const count = this.photoAlbumModal.getUnlockedCount();
       if (this.onStateUpdate) this.onStateUpdate({ photos: `${count}/28` });
       if (isNewPhoto) {
         this.audioService.playHint();
         if (this.onLogMessage) {
-          this.onLogMessage("[RAG METADATA] photo_id=02 'Lago Martiánez' desbloqueada en el Álbum.");
+          this.onLogMessage(`[RAG METADATA] Foto #${String(photoId).padStart(2, '0')} desbloqueada en el Álbum por diálogo con ${npcName}.`);
         }
       }
     }
 
-    if (isNewPhoto) {
+    if (isNewPhoto && photoId) {
       this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber: '¿Qué me puede contar de esta zona, señor Paco?'" },
-        { speaker: 'paco', text: "Paco: '¡Chacho, el Puerto es historia viva! Aquí al lado tienes este muelle pesquero y el histórico fortín de San Telmo que nos protegía de corsarios.'" },
-        { speaker: 'paco', text: "Paco [RAG // Pág. 12]: 'Y si caminas por el paseo costero verás el Lago Martiánez: unas piscinas de agua marina ideadas por César Manrique entre roca volcánica. ¡Te he guardado una foto en tu Álbum!'" }
+        { speaker: 'twinber', text: `Twinber: '¿Qué me puede contar sobre los secretos de ${locName}?'` },
+        { speaker: 'paco', text: `${npcName}: 'Tenerife guarda incontables maravillas. Te he dejado una foto testimonial en tu Álbum de Recuerdos.'` },
+        { speaker: 'twinber', text: `Twinber: '¡Foto #${String(photoId).padStart(2, '0')} guardada en mi Álbum de Recuerdos!'` }
       ]);
     } else {
+      const lore = npc?.lookText || `Un rincón emblemático del archipiélago canario lleno de encanto, volcanes y tradición.`;
       this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber: '¿Qué más me puede contar de la zona?'" },
-        { speaker: 'paco', text: "Paco: 'Pues que en el barrio marinero de La Ranilla se come el mejor pescado recién faenado con papas arrugadas y mojo. ¡Y en días despejados el Teide parece rozar el cielo!'" }
+        { speaker: 'twinber', text: `Twinber: '¿Qué me puede contar sobre la historia de ${locName}?'` },
+        { speaker: 'paco', text: `${npcName}: '${lore}'` }
       ]);
     }
   }
 
   private handleCustomChoice(userText: string): void {
+    const npcName = this.currentLocation.npc?.name || 'Personaje';
     if (this.onLogMessage) {
-      this.onLogMessage(`[PROMPT ABIERTO AL LLM] Twinber: "${userText}"`);
+      this.onLogMessage(`[PROMPT ABIERTO AL LLM] Twinber -> ${npcName}: "${userText}"`);
     }
 
     const lower = userText.toLowerCase();
-    let reply = "Paco: '¡Chacho, qué buena pregunta! Como viejo lobo de mar te digo: en Tenerife cada rincón guarda una leyenda. ¡Sigue explorando la isla, mi niño!'";
+    let reply = `${npcName}: '¡Chacho, qué buena pregunta! En Tenerife cada rincón guarda una leyenda. ¡Sigue explorando la isla!'`;
 
     if (lower.includes('gofio') || lower.includes('comer') || lower.includes('molino') || lower.includes('comida') || lower.includes('papas') || lower.includes('mojo')) {
-      reply = "Paco: '¡Chacho, para buen comer pide unas papas arrugadas con mojo picón y sube a La Orotava al Molino de Chano por un buen gofio amasado!'";
+      reply = `${npcName}: '¡Para comer bien pide unas papas arrugadas con mojo y sube a La Orotava al Molino de Chano por buen gofio recién molido!'`;
     } else if (lower.includes('teide') || lower.includes('volcan') || lower.includes('volcán') || lower.includes('cumbre') || lower.includes('subir') || lower.includes('pico')) {
-      reply = "Paco: 'El padre Teide vigila a 3.718 metros. Para subir tendrás que tomar una guagua a Las Cañadas y luego subir en el teleférico.'";
-    } else if (lower.includes('barco') || lower.includes('barca') || lower.includes('pesca') || lower.includes('pescar') || lower.includes('mar')) {
-      reply = "Paco: 'Esa barquita es \"El Mojo\". Llevo 40 años saliendo al alba a faenar viejas y sargos en estas aguas atlánticas.'";
-    } else if (lower.includes('tiempo') || lower.includes('clima') || lower.includes('alisios') || lower.includes('calima') || lower.includes('viento') || lower.includes('llover') || lower.includes('sol')) {
-      reply = "Paco: 'Hoy los vientos alisios soplan frescos del norte y el mar está en calma chicha. ¡Solo vigila si asoma calima del desierto!'";
-    } else if (lower.includes('dinero') || lower.includes('monedas') || lower.includes('perras') || lower.includes('comprar') || lower.includes('oro')) {
-      reply = "Paco: '¡Cuida bien tus 15 monedas! Te harán falta para comprar provisiones o pagar tu billete de transporte.'";
-    } else if (lower.includes('hola') || lower.includes('buenos dias') || lower.includes('buenas') || lower.includes('saludos')) {
-      reply = "Paco: '¡Muy buenas, muchacho! Siempre da alegría ver visitantes con ganas de empaparse de nuestra tierra.'";
-    } else if (lower.includes('quien eres') || lower.includes('quién eres') || lower.includes('llamas') || lower.includes('nombre')) {
-      reply = "Paco: 'Soy Paco, patrón de pesca jubilado y el marinero más veterano de este muelle del Puerto de la Cruz.'";
+      reply = `${npcName}: 'El padre Teide vigila a 3.718 metros. Toma la guagua a Las Cañadas y luego la cabina del teleférico.'`;
+    } else if (lower.includes('tiempo') || lower.includes('clima') || lower.includes('alisios') || lower.includes('calima') || lower.includes('viento')) {
+      reply = `${npcName}: 'Los vientos alisios soplan frescos del norte. En el sur reina el sol y en la cumbre el aire es limpio y transparente.'`;
+    } else if (lower.includes('dinero') || lower.includes('monedas') || lower.includes('perras') || lower.includes('comprar')) {
+      reply = `${npcName}: '¡Cuida bien tus monedas! Te harán falta para adquirir provisiones y billetes de viaje.'`;
+    } else if (lower.includes('hola') || lower.includes('buenos dias') || lower.includes('buenas')) {
+      reply = `${npcName}: '¡Muy buenas, muchacho! Siempre da alegría ver viajeros con ganas de conocer nuestra tierra.'`;
     }
 
     this.dialogueManager.enqueue([
@@ -418,10 +548,11 @@ export class ActionDispatcher {
   }
 
   private handleExitChoice(): void {
+    const npcName = this.currentLocation.npc?.name || 'Amigo';
     this.pendingDialogueExit = true;
     this.dialogueManager.enqueue([
-      { speaker: 'twinber', text: "Twinber: 'Tengo que marcharme. ¡Hasta luego, Paco!'" },
-      { speaker: 'paco', text: "Paco: '¡Que los alisios te sean favorables, muchacho! Pásate por el muelle cuando quieras.'" }
+      { speaker: 'twinber', text: `Twinber: 'Tengo que marcharme. ¡Hasta luego, ${npcName}!'` },
+      { speaker: 'paco', text: `${npcName}: '¡Que los alisios te sean favorables, muchacho! Buen viaje por la isla.'` }
     ]);
   }
 
