@@ -134,7 +134,24 @@ def extract_paco():
         out_dir='frontend/public/assets/img/sprites'
     )
 
+def extract_nieves():
+    extract_aligned_actor(
+        sheet_path='frontend/public/assets/img/sprite_nieves_sheet.jpg',
+        num_rows=2,
+        rows_config=[
+            (0, 'idle', [(85, 261), (429, 605), (773, 947), (1118, 1290)]),
+            (1, 'talk', [(86, 259), (430, 625), (774, 947), (1118, 1290)])
+        ],
+        canvas_w=280,
+        canvas_h=400,
+        anchor_x=140,
+        anchor_y=390,
+        actor_name='nieves',
+        out_dir='frontend/public/assets/img/sprites'
+    )
+
 if __name__ == '__main__':
     extract_twinber()
     extract_paco()
+    extract_nieves()
     print("\n¡Extracción y normalización de todos los actores completada con éxito!")

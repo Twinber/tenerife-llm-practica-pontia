@@ -7,7 +7,7 @@ export class AssetLoader {
   private cache: Map<string, HTMLImageElement> = new Map();
 
   public preloadAll(): void {
-    // Sprites de Twinber
+    // Sprites de Twinber, Paco y Doña Nieves
     for (let i = 0; i < 6; i++) {
       this.loadImage(`/assets/img/sprites/twinber_walk_${i}.png`);
     }
@@ -16,6 +16,8 @@ export class AssetLoader {
       this.loadImage(`/assets/img/sprites/twinber_talk_${i}.png`);
       this.loadImage(`/assets/img/sprites/paco_idle_${i}.png`);
       this.loadImage(`/assets/img/sprites/paco_talk_${i}.png`);
+      this.loadImage(`/assets/img/sprites/nieves_idle_${i}.png`);
+      this.loadImage(`/assets/img/sprites/nieves_talk_${i}.png`);
     }
 
     // Iconos de Inventario
@@ -38,6 +40,8 @@ export class AssetLoader {
 
   public getActorSpritePath(actorId: string, state: ActorState, frameIdx: number): string {
     const stateStr = state.toLowerCase();
-    return `/assets/img/sprites/${actorId}_${stateStr}_${frameIdx}.png`;
+    const available = ['twinber', 'paco', 'nieves'];
+    const resolvedId = available.includes(actorId) ? actorId : 'paco';
+    return `/assets/img/sprites/${resolvedId}_${stateStr}_${frameIdx}.png`;
   }
 }

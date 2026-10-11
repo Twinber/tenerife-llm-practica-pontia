@@ -226,6 +226,7 @@ export class ActionDispatcher {
 
     // 2. Reposicionar y configurar NPC
     if (found.npc) {
+      this.paco.id = found.npc.id;
       this.paco.name = found.npc.name;
       this.paco.xPct = found.npc.initialX;
       this.paco.targetXPct = found.npc.initialX;

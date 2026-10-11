@@ -111,7 +111,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     name: 'La Orotava',
     zone: 'Norte',
     hudTitle: '🏛️ LA OROTAVA // VALLE DE TAORO & MOLINO DE CHANO',
-    bgImage: '/assets/img/bg_puerto_de_la_cruz.jpg', // Placeholder de escenario
+    bgImage: '/assets/img/bg_la_orotava.jpg',
     stampKey: 'la_orotava',
     npc: {
       id: 'chano',
@@ -170,7 +170,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     name: 'Santa Úrsula',
     zone: 'Norte',
     hudTitle: '🍷 SANTA ÚRSULA // GUACHINCHE & RUTA DEL MAR DE NUBES',
-    bgImage: '/assets/img/bg_puerto_de_la_cruz.jpg',
+    bgImage: '/assets/img/bg_santa_ursula.jpg',
     npc: {
       id: 'manolo',
       name: 'Manolo el Tabernero',
@@ -215,7 +215,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     name: 'Icod de los Vinos',
     zone: 'Norte',
     hudTitle: '🌳 ICOD DE LOS VINOS // DRAGO MILENARIO & PLAZA MAYOR',
-    bgImage: '/assets/img/bg_puerto_de_la_cruz.jpg',
+    bgImage: '/assets/img/bg_icod.jpg',
     stampKey: 'icod_garachico',
     npc: {
       id: 'candido',
@@ -256,10 +256,10 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     name: 'Garachico',
     zone: 'Norte',
     hudTitle: '🌊 GARACHICO // EL CALETÓN & VILLA HISTÓRICA DE LAVA',
-    bgImage: '/assets/img/bg_puerto_de_la_cruz.jpg',
+    bgImage: '/assets/img/bg_garachico.jpg',
     stampKey: 'icod_garachico',
     npc: {
-      id: 'vecina_garachico',
+      id: 'nieves',
       name: 'Doña Nieves',
       role: 'Cronista de la villa',
       initialX: 74.0,
@@ -310,7 +310,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     name: 'San Cristóbal de La Laguna',
     zone: 'Metropolitana',
     hudTitle: '🎓 LA LAGUNA // CIUDAD UNIVERSITARIA & PATRIMONIO UNESCO',
-    bgImage: '/assets/img/bg_puerto_de_la_cruz.jpg',
+    bgImage: '/assets/img/bg_la_laguna.jpg',
     stampKey: 'la_laguna',
     npc: {
       id: 'profesora_laguna',
@@ -352,7 +352,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     name: 'Santa Cruz de Tenerife',
     zone: 'Metropolitana',
     hudTitle: '🚢 SANTA CRUZ // CAPITAL INSULAR & AUDITORIO DE TENERIFE',
-    bgImage: '/assets/img/bg_puerto_de_la_cruz.jpg',
+    bgImage: '/assets/img/bg_santa_cruz.jpg',
     stampKey: 'santa_cruz',
     npc: {
       id: 'oficial_puerto',
@@ -395,7 +395,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     name: 'Parque Rural de Anaga',
     zone: 'Metropolitana',
     hudTitle: '🌿 PARQUE RURAL DE ANAGA // BOSQUE DE LAURISILVA TERCIARIA',
-    bgImage: '/assets/img/bg_puerto_de_la_cruz.jpg',
+    bgImage: '/assets/img/bg_anaga.jpg',
     stampKey: 'anaga',
     npc: {
       id: 'guarda_anaga',
@@ -437,7 +437,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     name: 'Costa Adeje & Las Américas',
     zone: 'Sur',
     hudTitle: '🏖️ COSTA ADEJE // LITORAL DEL SUR & PARQUES ACUÁTICOS',
-    bgImage: '/assets/img/bg_puerto_de_la_cruz.jpg',
+    bgImage: '/assets/img/bg_costa_adeje.jpg',
     stampKey: 'costa_adeje',
     npc: {
       id: 'socorrista_adeje',
@@ -492,7 +492,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     name: 'Los Gigantes & Masca',
     zone: 'Sur',
     hudTitle: '🧗 MASCA & LOS GIGANTES // ACANTILADOS BASÁLTICOS DE 600M',
-    bgImage: '/assets/img/bg_puerto_de_la_cruz.jpg',
+    bgImage: '/assets/img/bg_masca.jpg',
     stampKey: 'los_gigantes_masca',
     npc: {
       id: 'guia_masca',
@@ -535,7 +535,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     name: 'El Médano & Montaña Roja',
     zone: 'Sur',
     hudTitle: '🪁 EL MÉDANO // MONTAÑA ROJA & CAPITAL DEL VIENTO',
-    bgImage: '/assets/img/bg_puerto_de_la_cruz.jpg',
+    bgImage: '/assets/img/bg_el_medano.jpg',
     stampKey: 'el_medano_cristianos',
     npc: {
       id: 'frutero_sur',
@@ -584,7 +584,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     name: 'Las Cañadas del Teide',
     zone: 'Cumbre',
     hudTitle: '🌋 LAS CAÑADAS DEL TEIDE // ROQUES DE GARCÍA (2.356m)',
-    bgImage: '/assets/img/bg_puerto_de_la_cruz.jpg',
+    bgImage: '/assets/img/bg_las_canadas.jpg',
     npc: {
       id: 'taquillero_teide',
       name: 'Operario del Teleférico',
@@ -630,7 +630,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     name: 'Pico del Teide — 3.718m',
     zone: 'Cumbre',
     hudTitle: '✨ PICO DEL TEIDE // CUMBRE DE ESPAÑA (3.718m) & STARLIGHT',
-    bgImage: '/assets/img/bg_puerto_de_la_cruz.jpg',
+    bgImage: '/assets/img/bg_pico_teide.jpg',
     stampKey: 'el_teide',
     npc: {
       id: 'guardian_cumbre',
