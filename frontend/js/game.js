@@ -255,10 +255,13 @@ class RetroAdventureGame {
       this.consoleElem.classList.toggle('visible');
     });
 
-    // Tecla ~ para consola
+    // Tecla 'T' o '~' para abrir/cerrar la consola de telemetría
     window.addEventListener('keydown', (e) => {
-      if (e.key === '~' || e.key === '`') {
-        this.consoleElem.classList.toggle('visible');
+      if (e.key === 't' || e.key === 'T' || e.key === '~' || e.key === '`') {
+        // Evitar que se active si el foco está en un campo de texto
+        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+          this.consoleElem.classList.toggle('visible');
+        }
       }
     });
   }
