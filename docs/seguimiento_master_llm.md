@@ -208,8 +208,91 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
      * Ranuras bloqueadas con recuadro punteado de seguridad oficial y advertencia `🔒 PENDIENTE DE EXPEDICIÓN`.
      * Navegación por pliegos con flechas, teclado y sonido de pasar página de papel (`playPageTurn()`).
 
+### Sesión 08: Expansión Panorámica a 13 Enclaves y Ergonomía Visual
+* **Estado:** ✅ Completada y Validada (`docs/enclaves_validation.md`)
+* **Hitos alcanzados:**
+  * Generación y adaptación de fondos píxel art VGA panorámicos 16:9 (1280x720 px) para los 13 enclaves oficiales de la isla:
+    - *Norte (5):* Puerto de la Cruz, La Orotava, Santa Úrsula, Icod de los Vinos, Garachico.
+    - *Metropolitana (3):* San Cristóbal de La Laguna, Santa Cruz de Tenerife, Parque Rural de Anaga.
+    - *Sur (3):* Costa Adeje, Barranco de Masca, El Médano.
+    - *Cumbre (2):* Las Cañadas del Teide, Pico del Teide (3.718m).
+  * Rediseño ergonómico de la interfaz de aventura gráfica:
+    - Reubicación de subtítulos de diálogo al cuadrante superior izquierdo (`top: 7%, left: 4%, max-width: 50%`) para despejar totalmente los personajes y la escena central.
+    - Anclaje físico de Twinber y de los NPCs al suelo transitable (`bottom: 7-8%`) sobre adoquines, arena o riscos según el escenario.
 
+### Sesión 09: Generación de Sprites y Motor Zero-Jitter Engine
+* **Estado:** ✅ Completada y Validada
+* **Hitos alcanzados:**
+  * Generación de hojas de sprites pixel art (2 filas x 4 columnas: 4 frames IDLE + 4 frames TALK) para los 13 NPCs temáticos más Twinber (14 personajes / 112 frames en total).
+  * Creación del pipeline canónico de extracción y normalización en `scripts/extract_assets.py` con el **Zero-Jitter Engine**:
+    - **Lienzo Uniforme Fijo:** Todos los frames de un personaje comparten exactamente el mismo ancho y alto con canal alfa transparente.
+    - **Ground Foot Anchor:** El centro de gravedad horizontal de los pies (15% inferior de píxeles) se alinea estrictamente al centro del lienzo (`anchor_x = canvas_w // 2`) y la suela del calzado a una línea de tierra constante (`anchor_y = 450 px`).
+    - Eliminación completa de saltos, temblores y bamboleos laterales al alternar entre reposo y diálogo.
 
+### Sesión 10: Mapa Cartográfico de Tenerife & Animación Indiana Jones
+* **Estado:** ✅ Completada y Validada
+* **Hitos alcanzados:**
+  * Generación de la carta náutica/mapa en pergamino de Tenerife en formato panorámico 16:9 (`map_tenerife.jpg`).
+  * Implementación del componente `IslandMapModal.ts` con overlay SVG cartográfico:
+    - Trazado de las principales vías insulares (TF-1 Autopista del Sur, TF-5 Autopista del Norte, TF-24 Dorsal de La Esperanza / Mar de Nubes, TF-21 Carretera del Teide).
+    - Animación cinemática de trayecto tipo *Indiana Jones* con línea de puntos rojos discontinua que avanza progresivamente desde el origen hasta el destino, acompañada del icono del medio de transporte (avión o guagua/coche).
+    - Reglas de movilidad deterministas del Pasaporte (`TravelRules.ts`): enclaves bloqueados hasta reunir los sellos requeridos de la zona.
+    - Subsanación de incidencias visuales: eliminación del glitch de parpadeo/temblor vertical al hacer hover sobre los marcadores y corrección del anclaje del icono en La Orotava.
 
+### Sesión 11: Auditoría y Calibración Visual de Zonas Calientes (Chroma Key)
+* **Estado:** ✅ Completada y Documentada (`docs/calibracion_zonas_calientes_chroma.md`)
+* **Hitos alcanzados:**
+  * Implementación de un sistema de diagnóstico visual mediante máscara Chroma Key fluorescente semitransparente (`rgba(0, 255, 68, 0.38)`) con bordes discontinuos y etiquetas en tiempo real.
+  * Auditoría individual de los 13 escenarios con captura automatizada mediante Playwright:
+    - Corrección de desalineaciones críticas e inversiones de etiquetas (ej: Castillo de San Miguel en Garachico, Auditorio de Calatrava en Santa Cruz, Montaña Roja en El Médano, Caserío de Masca).
+    - Delimitación milimétrica de elementos patrimoniales y naturales clave (Roque Cinchado, Barricas del Guachinche, Rueda del Molino de Gofio, Drago Milenario, Telescopio de cumbre).
+  * Retirada limpia de la máscara Chroma Key tras la validación exhaustiva, dejando los *hotspots* transparentes y perfectamente calibrados.
 
+### Sesión 12: Corrección Artesanal de Sprites (Manolo el Tabernero)
+* **Estado:** ✅ Completada y Verificada
+* **Hitos alcanzados:**
+  * Detección y solución del recorte en `manolo_talk_1.png`, donde la jarra de vino de barro presentaba un corte vertical recto en el margen derecho.
+  * Análisis del spritesheet original: el arte pixel art contenía la jarra completa hasta `x = 623 px`, pero al normalizar sobre un lienzo de 280 px con pies en `x = 140 px`, la jarra sobrepasaba el límite derecho en 30 píxeles.
+  * Ajuste en `scripts/extract_assets.py` ampliando el lienzo de Manolo a `360x460 px` con anclaje a `(180, 450 px)` para todos sus frames de reposo y habla, preservando el anclaje Zero-Jitter sin saltos y restituyendo la jarra de barro 100% íntegra con sus contornos redondeados.
 
+### Sesión 13: Laboratorio Visual de Animaciones (`SHOW_ANIMS`)
+* **Estado:** ✅ Completada y Lista para Verificación
+* **Hitos alcanzados:**
+  * Implementación del componente `AnimationViewerModal.ts` y su integración en la consola interactiva de telemetría (tecla `T`).
+  * Creación del comando de consola `SHOW_ANIMS [filtro]` (con alias `ANIMS`, `ANIMACIONES`, `SHOW_ANIMATIONS`) y botón de acceso rápido `[🎬 ANIMS]` en la cabecera CRT.
+  * Funcionalidades del laboratorio:
+    - Visualización simultánea de los **14 personajes** (Twinber + 13 NPCs) en una cuadrícula retro VGA.
+    - Comparativa en paralelo por personaje: columna de **REPOSO (IDLE)** y columna de **HABLA (TALK)** reproduciéndose en bucles continuos con sus cadencias reales de animación.
+    - Selector de velocidad de reproducción (`1.0x Normal`, `0.5x Lento`, `0.25x Super Lento`, `2.0x Rápido`) y botón de pausa para inspección fotograma a fotograma.
+    - Selector de fondos de contraste: `🏁 AJEDREZ` (patrón de transparencia), `⬛ OSCURO` (escena nocturna), `⬜ CLARO` (siluetas y contornos) y `🟩 CHROMA` (fondo verde fluorescente de recorte).
+    - Filtros temáticos por región (`Todos`, `Norte`, `Metropolitana`, `Sur`, `Teide`).
+
+### Sesión 14: Gestión de Versiones y Repositorio Oficial en GitHub
+* **Estado:** ✅ Sincronizado y al Día
+* **Hitos alcanzados:**
+  * Creación y vinculación del repositorio remoto: [`https://github.com/Twinber/tenerife-llm-practica-pontia`](https://github.com/Twinber/tenerife-llm-practica-pontia).
+  * Sincronización continua de la rama `master` con commits atómicos convencionales (`feat`, `fix`, `docs`).
+  * Todos los cambios de código, scripts, assets, documentación y evidencias gráficas respaldados en la nube.
+
+---
+
+## 5. Próximos Pasos Inmediatos: Entrada en FASE 3 (Backend LLM & RAG)
+
+Con la capa de presentación y experiencia de usuario (Frontend) 100% implementada y calibrada, la hoja de ruta se enfoca ahora en el núcleo de inteligencia artificial:
+
+1. **Configuración del Entorno Backend (`src/`):**
+   - Carga de credenciales y variables de entorno (`.env` con OpenAI API Key y configuración de modelos).
+   - Verificación de dependencias en `requirements.txt` (`fastapi`, `uvicorn`, `openai`, `chromadb`, `pydantic`).
+2. **Pipeline RAG Vectorial (`src/application/rag_service.py`):**
+   - Ingesta semántica estructurada de `data/TENERIFE.pdf` sin fragmentación ciega.
+   - Indexación vectorial en Chroma DB persistente con metadatos de enclaves, páginas y fotografías asociadas.
+   - Retriever con geocercado estricto y citas explícitas de página mediante Pydantic.
+3. **Servicio de Function Calling y Open-Meteo (`src/infrastructure/weather_client.py`):**
+   - Implementación de `get_weather`, `get_starlight_conditions` y `get_calima_alert` con llamadas HTTP reales y fallback resiliente.
+   - Sistema de logging estructurado de auditoría en disco (`game_audit.log`).
+4. **Gestión de Memoria Conversacional Multiturno (`src/application/memory_service.py`):**
+   - Summary Buffer híbrido con control riguroso de ventana de tokens.
+5. **API REST + SSE en FastAPI (`src/api/`):**
+   - Endpoints para conectar el frontend web existente con el motor de IA para el streaming teletipo de respuestas en tiempo real.
+6. **Notebook de Entrega Oficial (`notebook_principal.ipynb`):**
+   - Cuaderno reproducible con la memoria técnica, justificaciones teóricas, batería de pruebas de evaluación, análisis de costes y modo de juego integrado.
