@@ -180,6 +180,28 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
     * `get_calima_alert`: endpoint air-quality probado con `dust` y `pm10` (estándar AEMET).
   * Política no bloqueante del clima y consola retro (`~`) para observabilidad.
 
+### Sesión 07: Prototipado y Validación Frontend del Primer Escenario (Puerto de la Cruz)
+* **Estado:** ✅ Completada y Validada 100% en Navegador
+* **Puntos acordados y documentados:**
+  1. **Locomoción y Límites Físicos:**
+     * Twinber confinado a los adoquines transitables del muelle `[minX: 18.0%, maxX: 72.0%]` con línea de suelo en `bottom: 11%`. Evita que el personaje vuele sobre el mar o traspase barriles.
+  2. **Matriz Canónica de 6 Verbos SCUMM:**
+     * `HABLAR`, `MIRAR`, `USAR`, `COMPRAR` (economía de 15 monedas con NPCs), `VIAJAR` (guaguas y red insular), `💡 PENSAR` (monólogo interior con pistas adaptativas).
+  3. **Álbum de Fotos y Pipeline RAG:**
+     * Las 28 fotos catalogadas en `docs/matriz_fotos_rag.md` (12 vía `MIRAR` en escenario, 16 vía `HABLAR` con NPCs).
+     * Modal de 1 foto a pantalla completa por página, sin pistas en ranuras bloqueadas (`[ 📷 FOTO #XX - BLOQUEADA ]`), pie de foto conciso de `TENERIFE.pdf`.
+     * Desbloqueo gobernado por el Retriever mediante metadatos (`photo_id`) con geocercado estricto (la vista lejana del Teide no desbloquea la cumbre).
+  4. **Control Manual de Diálogos:**
+     * Eliminación de temporizadores automáticos de desaparición.
+     * Botón interactivo parpadeante `[ ▶ CONTINUAR [ESPACIO] ]` que pausa indefinidamente hasta confirmación del jugador por ratón o teclado.
+  5. **Sistema de Diálogo Ramificado con NPCs (Estilo LucasArts):**
+     * Sustitución del dock de verbos por 4 opciones al hablar con un lugareño:
+       - `1. "¿Puede sellarme el pasaporte?"` (Mecánica de juego sin RAG, marca la zona comarcal en el pasaporte: `1/10`).
+       - `2. "¿Qué me puede contar de esta zona?"` (Consulta RAG genérica de zona, sin preconocimiento del PDF, desbloquea foto asociada).
+       - `3. ⌨️ [ Input libre del usuario ]` (Prompt abierto al LLM tecleado en tiempo real con respuesta contextual del NPC y log de auditoría).
+       - `4. "Tengo que marcharme. ¡Hasta luego!"` o `[ESC]` (Cierra el diálogo y restaura la botonera normal).
+
+
 
 
 

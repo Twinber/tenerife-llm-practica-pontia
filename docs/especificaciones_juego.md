@@ -92,13 +92,16 @@
     11. *El Teide* (Parador de las Cañadas, Roques de García, Teleférico y Cielo Starlight nocturno).
 
 ### 1.2. El Objetivo Secundario (Coleccionable Multimodal): El Álbum de Fotos de Tenerife
-* **Misión Opcional / Completionist:** Twinber lleva un **Álbum de Explorador** cuyo objetivo es desbloquear el 100% de las fotografías reales extraídas de `TENERIFE.pdf` (aproximadamente 28 fotos catalogadas).
-* **Mecánica de Desbloqueo (Gatillo RAG):**
-  * Al visitar un enclave, se desbloquea la postal principal del lugar.
-  * Para desbloquear las fotos secundarias (miradores recónditos, playas salvajes como Bollullo/Los Patos, balcones coloniales, platos de comida o teleférico), el jugador debe **interrogar al RAG** haciendo preguntas específicas al LLM.
-  * Cuando el retriever devuelve un chunk con `image_path`, la imagen se "revela" automáticamente en el álbum:  
-    > 📸 *¡Nueva foto añadida a tu Álbum de Explorador: "Mirador de La Tarta (Pág. 11)"! [Progreso: 5/28 (18%)]*
-* **Visualización en UI:** Un panel desplegable tipo álbum de cromos/diapositivas retro donde las fotos no descubiertas aparecen oscurecidas con un interrogante `[ ❓ Foto sin descubrir ]`.
+* **Misión Opcional / Completionist:** Twinber lleva un **Álbum de Fotos de Tenerife** (28 fotografías reales extraídas y optimizadas de `TENERIFE.pdf`, catalogadas exhaustivamente en [`docs/matriz_fotos_rag.md`](file:///home/twinber/Projects/Master-IA/10-LLM/proyecto-tenerife/docs/matriz_fotos_rag.md)).
+* **Mecánica de Desbloqueo (Gatillo RAG Determinista):**
+  * **12 Fotos desbloqueadas por `MIRAR`:** Se gatillan al examinar hitos visualmente presentes en el escenario pixel-art (ej. Faro de San Telmo, Drago Milenario, Auditorio de Tenerife, Roques de García). El motor emite un query semántico al RAG y el Retriever devuelve el chunk con metadatos (`photo_id`) y un pie de foto fotográfico conciso (máximo 2 líneas).
+  * **16 Fotos desbloqueadas por `HABLAR`:** Se gatillan al conversar con los NPCs locales (ej. Paco en Puerto de la Cruz revela el Lago Martiánez de César Manrique; barquero en Buenavista revela Punta de Teno). El LLM/Retriever inyecta la foto asociada en los metadatos de respuesta.
+  * **Determinismo del Desbloqueo:** El LLM genera la narrativa inmersiva, pero el desbloqueo de la foto lo gobierna estrictamente el Retriever en base a los metadatos vectoriales asociados en ChromaDB (cero alucinaciones).
+  * **Geocercado Estricto (*Geofencing*):** Solo se desbloquean fotos del enclave físico actual. La inspección lejana del Teide desde la costa advierte que la foto de cumbre exige viajar físicamente a Las Cañadas.
+* **Diseño y Visualización en UI (Modal Retro Paginado):**
+  * **1 Foto por Página a Pantalla Completa:** Vista amplia e inmersiva sin rejillas apretadas, con botones de navegación `◀ ANTERIOR` y `SIGUIENTE ▶`.
+  * **Pie de Foto Conciso:** Al pie de la fotografía aparece el texto oficial de `TENERIFE.pdf` y la página de procedencia.
+  * **Cero Pistas / Spoilers:** Las fotos no desbloqueadas se muestran como ranuras vacías bloqueadas con el texto `[ 📷 FOTO #XX - BLOQUEADA ]`, sin desvelar nombres ni pistas que arruinen la exploración.
 
 ### 1.3. Reglas de Gating Deterministas (Progresión por Zonas en Python)
 * **El Estado manda (Cero Alucinaciones):** El pasaporte se modela como un objeto Pydantic determinista (`PasaporteTenerife`).
@@ -153,6 +156,26 @@ Para evitar la frustración clásica de las aventuras gráficas:
   3. **Operario del Teleférico (El Teide):** Técnico, precavido, obsesionado con la velocidad del viento y la seguridad de la cumbre. Vende el billete (5 monedas).
   4. **Paco el Pescador (Puerto de la Cruz):** Marinero curtido y nostálgico. Da pistas sobre el mar y las playas salvajes.
   5. **Yeray el Conductor de Guagua (TITSA):** Pragmático y simpático. Revisa los sellos del pasaporte antes de abrir las rutas entre zonas.
+
+### 1.8.1. Arquitectura del Sistema de Diálogo Ramificado con NPCs (Estilo LucasArts)
+* **Filosofía de Conversación:** Se evita sobrecargar al jugador con listas extensas de preguntas prefabricadas que exigirían conocer previamente el contenido de `TENERIFE.pdf`. La conversación sigue una estructura limpia y ágil de **3 opciones operativas + 1 de despedida**:
+  1. **Opción 1 (Mecánica sin RAG) — `"¿Puede sellarme el pasaporte?"`:**
+     * Interacción funcional directa: el habitante o autoridad de la zona estampa el sello correspondiente en el Pasaporte de Explorador (`1/10` sellos comarcales).
+     * Si ya está sellado, el NPC informa amablemente de que esa zona ya está validada y orienta hacia los siguientes enclaves.
+  2. **Opción 2 (Consulta RAG Genérica de Zona) — `"¿Qué me puede contar de esta zona?"`:**
+     * Actúa como prompt de consulta semántica genérico para el enclave actual (ej. Puerto de la Cruz $\rightarrow$ San Telmo, muelle y Lago Martiánez de César Manrique).
+     * El Retriever devuelve la información cultural relevante sin exigir que el jugador conozca los secretos de antemano y **desbloquea la fotografía coleccionable asociada en el Álbum** (ej. Foto #02).
+  3. **Opción 3 (Prompt Abierto al LLM) — `⌨️ [ Input libre del usuario ]`:**
+     * Un campo de texto interactivo con estética retro en el dock donde el jugador puede escribir cualquier pregunta o inquietud libre al NPC (gastronomía, historia, clima, leyendas locales).
+     * Twinber vocaliza la pregunta formulada por el jugador y el NPC responde en tiempo real con su personalidad canaria y contexto geocercado.
+     * Toda consulta queda registrada en la consola de telemetría bajo el tag `[PROMPT ABIERTO AL LLM]`.
+  4. **Opción 4 (Despedida) — `"Tengo que marcharme. ¡Hasta luego!"` o `[ESC]`:**
+     * Cierra el modo diálogo y restaura la botonera SCUMM normal (los 6 verbos e inventario).
+* **Control Manual de Progresión de Subtítulos (Sin Temporizadores Automáticos):**
+  * **Pausa Indefinida:** Se eliminan los temporizadores de desvanecimiento automático (`waitTimer`). El texto permanece visible en pantalla hasta que el usuario decida avanzar, garantizando una lectura cómoda a su propio ritmo.
+  * **Botón Interactivo `[ ▶ CONTINUAR [ESPACIO] ]`:** Se muestra un indicador parpadeante en el bocadillo de diálogo.
+  * **Métodos de Avance:** Tecla `Espacio`, tecla `Enter`, clic sobre el botón de continuar, clic sobre el bocadillo de diálogo o clic en el escenario.
+  * **Salto de Teletipo:** Si el usuario pulsa mientras el texto aún se está escribiendo letra por letra, la frase se completa inmediatamente; una segunda pulsación avanza a la siguiente réplica.
 
 ### 1.9. Separación Clave de Arquitectura: Estado vs. Conversación
 * **El Texto es No Determinista (LLM):** La narración, descripciones y diálogos con lugareños o personajes no jugadores (NPCs) los genera el LLM con estilo inmersivo y humor fino.
