@@ -56,11 +56,17 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
     [x] 1.6 Sesión 06: Multiagente, MCP y Skills Modulares (Completada y Aprobada)
 
 [>] FASE 2: Diseño y Arquitectura de la Solución
-    [x] 2.0 Arquitectura Limpia Desacoplada Cliente-Servidor y Frontend Nativo (Aprobada)
-        * Separación estricta Backend (`src/`) y Frontend ligero (`frontend/`) vía API REST y Server-Sent Events (SSE).
-        * Justificación de diseño para el tribunal: supera el notebook monolítico permitiendo portabilidad futura a App Móvil o Unreal Engine 5.
-        * Backend en FastAPI (`src/api/`) sirviendo API agnóstica y estáticos web.
-        * Frontend en HTML5 semántico, CSS3 retro con scanlines CRT y Vanilla JavaScript ES6 (sin frameworks pesados ni NodeJS).
+    [x] 2.0 Arquitectura Limpia Desacoplada Cliente-Servidor y Frontend Modular (Aprobada)
+        * Separación estricta Backend (`src/`) y Frontend desacoplado (`frontend/`) vía API REST y Server-Sent Events (SSE).
+        * Justificación de diseño para el tribunal: Clean Architecture simétrica en ambas capas (Domain, Application, Infrastructure, Presentation), superando scripts monolíticos y permitiendo portabilidad futura a App Móvil o Unreal Engine 5.
+        * Backend en FastAPI (`src/api/`) sirviendo API agnóstica y estáticos web compilados.
+        * Frontend con Vite + TypeScript estructurado en capas limpias:
+          - `domain/`: Entidades de negocio puras (`Actor`, interfaces de inventario y estado).
+          - `application/`: Casos de uso y orquestación (`GameEngine`, `ActionDispatcher`, `DialogueManager`).
+          - `infrastructure/`: Clientes externos (`ApiClient` para REST/SSE, `AudioService` Web Audio API, `AssetLoader`).
+          - `presentation/`: Renderizado visual reactivo (`ViewportView`, `ScummDockView`, `TelemetryView`).
+          - `styles/retro.css`: Diseño 16:9 nativo con muelle SCUMM flotante translúcido y hotkeys de auditoría.
+        * Verificación visual automatizada: Script Playwright headless para capturas de pantalla de alta fidelidad.
     [x] 2.1 Análisis documental de TENERIFE.pdf y Pipeline de Ingesta/Extracción de Assets (Aprobado)
         * Chunking semántico por enclaves (unidades temáticas completas por lugar sin troceo ciego).
         * Almacenamiento dual en Chroma DB: Embeddings (búsqueda) + Documento textual literal (inyección en prompt) + Metadatos (`pagina`, `zona`, `lugar`, `image_path`).
@@ -74,7 +80,7 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
           - Guardrail rápido: `gpt-4o-mini` (`OPENAI_MODEL_FAST`).
           - Embeddings: `text-embedding-3-small` (`OPENAI_EMBEDDING_MODEL`).
         * Vector Store: Chroma DB local (`chromadb`).
-        * Frontend: HTML5, CSS3, Vanilla JS ES6 y Web Audio API.
+        * Frontend: TypeScript + Vite, Web Audio API y Clean Architecture.
     [x] 2.3 Especificación del guión narrativo y mecánicas de la aventura (Aprobado)
         * Objetivo Principal: Pasaporte de Explorador con 10+1 pantallas visitables (5 Norte, 5 Sur y El Teide como clímax final).
         * Objetivo Secundario (Coleccionable Multimodal): Álbum de Fotos de Tenerife (28 fotos desbloqueables interrogando al RAG).
