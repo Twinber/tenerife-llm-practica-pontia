@@ -39,6 +39,14 @@ export class DialogueManager {
     }
   }
 
+  public clear(): void {
+    this.queue = [];
+    this.currentLine = null;
+    this.displayedText = '';
+    this.isFullyTyped = false;
+    if (this.onSpeakerChange) this.onSpeakerChange(null);
+  }
+
   private playNext(): void {
     if (this.queue.length === 0) {
       this.currentLine = null;

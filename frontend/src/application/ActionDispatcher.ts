@@ -59,9 +59,8 @@ export class ActionDispatcher {
       this.triggerThinking();
     } else if (verb === 'VIAJAR') {
       this.triggerTravel();
-    } else {
-      this.updateSentence();
     }
+    this.updateSentence();
   }
 
   public selectItem(itemName: string): void {
@@ -109,6 +108,7 @@ export class ActionDispatcher {
   }
 
   public inspectLockedItem(itemName: string): void {
+    this.dialogueManager.clear();
     this.audioService.playHint();
     if (itemName === 'Saco de Gofio') {
       this.dialogueManager.enqueue([

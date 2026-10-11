@@ -89,7 +89,7 @@ export class ScummDockView {
         const item = slot.dataset.item;
         if (!item) return;
 
-        // Si clican en Mapa de Tenerife, activar inmediatamente modo VIAJAR (equivalente a botón VIAJAR)
+        // 1. Mapa de Tenerife -> Activar inmediatamente modo VIAJAR
         if (item === 'Mapa de Tenerife') {
           this.audioService.playClick();
           this.actionDispatcher.setVerb('VIAJAR');
@@ -99,19 +99,23 @@ export class ScummDockView {
           return;
         }
 
-        // Si el verbo activo es MIRAR o HABLAR y clican en Álbum o Pasaporte, abrir modal directamente
-        if (this.actionDispatcher.activeVerb === 'MIRAR' || this.actionDispatcher.activeVerb === 'HABLAR') {
-          if (item === 'Álbum de Fotos' && this.actionDispatcher.photoAlbumModal) {
+        // 2. Álbum de Fotos -> Abrir modal directamente
+        if (item === 'Álbum de Fotos') {
+          if (this.actionDispatcher.photoAlbumModal) {
             this.actionDispatcher.photoAlbumModal.open();
             return;
           }
-          if (item === 'Pasaporte de Explorador' && this.actionDispatcher.passportModal) {
+        }
+
+        // 3. Pasaporte de Explorador -> Abrir modal directamente
+        if (item === 'Pasaporte de Explorador') {
+          if (this.actionDispatcher.passportModal) {
             this.actionDispatcher.passportModal.open();
             return;
           }
         }
 
-        // Si es un slot bloqueado de compra (Gofio, Comanda, Billete, Plátano), dar feedback de compra
+        // 4. Objetos bloqueados de compra (Gofio, Comanda, Billete, Plátano) -> Inspección directa
         if (slot.classList.contains('locked-slot')) {
           this.audioService.playClick();
           this.actionDispatcher.inspectLockedItem(item);
