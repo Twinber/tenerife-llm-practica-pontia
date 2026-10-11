@@ -62,6 +62,22 @@ export class AudioService {
     setTimeout(() => this.beep(330, 'triangle', 0.05, 0.04), 30);
   }
 
+  public playError(): void {
+    this.beep(160, 'sawtooth', 0.12, 0.08);
+    setTimeout(() => this.beep(120, 'sawtooth', 0.16, 0.08), 80);
+  }
+
+  public playTravelTick(): void {
+    this.beep(950 + Math.random() * 150, 'triangle', 0.02, 0.04);
+  }
+
+  public playTravelArrival(): void {
+    this.beep(523, 'triangle', 0.09, 0.10);
+    setTimeout(() => this.beep(659, 'triangle', 0.09, 0.10), 90);
+    setTimeout(() => this.beep(784, 'triangle', 0.11, 0.12), 180);
+    setTimeout(() => this.beep(1046, 'sine', 0.28, 0.14), 280);
+  }
+
   public toggleMute(): boolean {
     this.isMuted = !this.isMuted;
     return this.isMuted;

@@ -7,6 +7,7 @@ import { DialogueManager } from './DialogueManager';
 import { AudioService } from '../infrastructure/AudioService';
 import type { PhotoAlbumModal } from '../presentation/PhotoAlbumModal';
 import type { PassportModal } from '../presentation/PassportModal';
+import type { IslandMapModal } from '../presentation/IslandMapModal';
 import { LOCATIONS_CATALOG, LocationSceneDef, HotspotLocationDef } from '../domain/locationsData';
 import type { ViewportView } from '../presentation/ViewportView';
 
@@ -25,6 +26,7 @@ export class ActionDispatcher {
   private audioService: AudioService;
   public photoAlbumModal?: PhotoAlbumModal;
   public passportModal?: PassportModal;
+  public islandMapModal?: IslandMapModal;
   public onSentenceChange?: (text: string) => void;
   public onLogMessage?: (msg: string) => void;
   public teidePhotoTaken: boolean = false;
@@ -91,7 +93,7 @@ export class ActionDispatcher {
     this.dialogueManager.clear();
 
     if (itemName === 'Mapa de Tenerife') {
-      this.triggerTravel();
+      this.openIslandMap();
       return;
     }
 
@@ -195,6 +197,89 @@ export class ActionDispatcher {
     return out;
   }
 
+  public openIslandMap(): void {
+    if (this.islandMapModal) {
+      const acquiredNames = this.acquiredItems.map(i => i.name);
+      this.islandMapModal.open(this.currentLocation, this.stampedZones, acquiredNames);
+      return;
+    }
+    this.triggerTravel();
+  }
+
+  public changeLocation(targetLocation: LocationSceneDef, isTeleport: boolean = false): void {
+    this.currentLocation = targetLocation;
+
+    // 1. Reposicionar y configurar NPC
+    if (targetLocation.npc) {
+      this.paco.id = targetLocation.npc.id;
+      this.paco.name = targetLocation.npc.name;
+      this.paco.xPct = targetLocation.npc.initialX;
+      this.paco.targetXPct = targetLocation.npc.initialX;
+      this.paco.bottomPct = targetLocation.npc.initialBottom !== undefined ? targetLocation.npc.initialBottom : 8;
+      this.paco.frameIdx = 0;
+      this.paco.state = 'IDLE';
+      this.paco.facing = -1;
+
+      // 2. Posicionar a Twinber a distancia coherente del NPC (a su izquierda, mirándole)
+      const npcX = targetLocation.npc.initialX;
+      const twinberX = targetLocation.npc.twinberX !== undefined ? targetLocation.npc.twinberX : Math.max(16, npcX - 11.5);
+      this.twinber.xPct = twinberX;
+      this.twinber.targetXPct = twinberX;
+      this.twinber.bottomPct = targetLocation.npc.twinberBottom !== undefined 
+        ? targetLocation.npc.twinberBottom 
+        : (targetLocation.npc.initialBottom !== undefined ? targetLocation.npc.initialBottom : 8);
+      this.twinber.state = 'IDLE';
+      this.twinber.frameIdx = 0;
+      this.twinber.facing = 1;
+    } else {
+      this.twinber.xPct = 50.0;
+      this.twinber.targetXPct = 50.0;
+      this.twinber.state = 'IDLE';
+      this.twinber.frameIdx = 0;
+      this.twinber.facing = 1;
+    }
+
+    // 3. Actualizar Viewport (Background, HUD, NPC visible y Hotspots)
+    if (this.viewportView) {
+      this.viewportView.updateScene(
+        targetLocation.bgImage,
+        targetLocation.hudTitle,
+        targetLocation.npc?.name,
+        !!targetLocation.npc
+      );
+      this.viewportView.renderHotspots(targetLocation.hotspots);
+    }
+
+    // 4. Limpiar diálogos en curso
+    this.dialogueManager.clear();
+    if (this.isInNpcDialogue) {
+      this.endNpcDialogue();
+    }
+
+    // 5. Notificación retro y narración de llegada
+    if (isTeleport) {
+      this.audioService.playClick();
+      const logMsg = `[TELEMETRÍA] Salto forzado a '${targetLocation.name}' [${targetLocation.id}]. Reglas de viaje y sellos ignorados para depuración.`;
+      if (this.onLogMessage) this.onLogMessage(logMsg);
+      this.dialogueManager.enqueue([
+        { speaker: 'twinber', text: `Twinber: '[DEPURACIÓN] Teletransportado con éxito a ${targetLocation.name}.'` }
+      ]);
+    } else {
+      const logMsg = `[VIAJE INSULAR] Llegada a '${targetLocation.name}' (${targetLocation.zone}).`;
+      if (this.onLogMessage) this.onLogMessage(logMsg);
+      const lines: Array<{ speaker: 'twinber' | 'paco'; text: string }> = [
+        { speaker: 'twinber', text: `Twinber: 'He llegado a ${targetLocation.name}.'` }
+      ];
+      if (targetLocation.npc) {
+        lines.push({
+          speaker: 'twinber',
+          text: `Twinber: 'Veo a ${targetLocation.npc.name} (${targetLocation.npc.role}) en las inmediaciones.'`
+        });
+      }
+      this.dialogueManager.enqueue(lines);
+    }
+  }
+
   public teleportTo(query: string): { success: boolean; message: string; location?: LocationSceneDef } {
     const clean = query.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     if (!clean) {
@@ -215,64 +300,7 @@ export class ActionDispatcher {
       return { success: false, message: msg };
     }
 
-    this.currentLocation = found;
-
-    // 1. Reposicionar y configurar NPC
-    if (found.npc) {
-      this.paco.id = found.npc.id;
-      this.paco.name = found.npc.name;
-      this.paco.xPct = found.npc.initialX;
-      this.paco.targetXPct = found.npc.initialX;
-      this.paco.bottomPct = found.npc.initialBottom !== undefined ? found.npc.initialBottom : 8;
-      this.paco.frameIdx = 0;
-      this.paco.state = 'IDLE';
-      this.paco.facing = -1;
-
-      // 2. Posicionar a Twinber a distancia coherente del NPC (a su izquierda, mirándole)
-      const npcX = found.npc.initialX;
-      const twinberX = found.npc.twinberX !== undefined ? found.npc.twinberX : Math.max(16, npcX - 11.5);
-      this.twinber.xPct = twinberX;
-      this.twinber.targetXPct = twinberX;
-      this.twinber.bottomPct = found.npc.twinberBottom !== undefined 
-        ? found.npc.twinberBottom 
-        : (found.npc.initialBottom !== undefined ? found.npc.initialBottom : 8);
-      this.twinber.state = 'IDLE';
-      this.twinber.frameIdx = 0;
-      this.twinber.facing = 1;
-    } else {
-      this.twinber.xPct = 50.0;
-      this.twinber.targetXPct = 50.0;
-      this.twinber.state = 'IDLE';
-      this.twinber.frameIdx = 0;
-      this.twinber.facing = 1;
-    }
-
-    // 3. Actualizar Viewport (Background, HUD, NPC visible y Hotspots)
-    if (this.viewportView) {
-      this.viewportView.updateScene(
-        found.bgImage,
-        found.hudTitle,
-        found.npc?.name,
-        !!found.npc
-      );
-      this.viewportView.renderHotspots(found.hotspots);
-    }
-
-    // 4. Limpiar diálogos en curso
-    this.dialogueManager.clear();
-    if (this.isInNpcDialogue) {
-      this.endNpcDialogue();
-    }
-
-    // 5. Notificación retro en telemetría
-    this.audioService.playClick();
-    const logMsg = `[TELEMETRÍA] Salto forzado a '${found.name}' [${found.id}]. Reglas de viaje y sellos ignorados para depuración.`;
-    if (this.onLogMessage) this.onLogMessage(logMsg);
-
-    this.dialogueManager.enqueue([
-      { speaker: 'twinber', text: `Twinber: '[DEPURACIÓN] Teletransportado con éxito a ${found.name}.'` }
-    ]);
-
+    this.changeLocation(found, true);
     return { success: true, message: `Teletransportado a ${found.name}`, location: found };
   }
 

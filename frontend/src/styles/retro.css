@@ -1106,3 +1106,240 @@ html, body {
   text-shadow: 1px 1px #000;
 }
 
+/* ==============================================================================
+   MODAL RETRO DEL MAPA DE TENERIFE (ESTILO INDIANA JONES & VGA 1990)
+   ============================================================================== */
+.retro-map-window {
+  width: 95vw;
+  max-width: 980px;
+  background: #06111f;
+  border: 3px solid #c5a059;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.95), inset 0 0 20px rgba(197, 160, 89, 0.25);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  animation: modal-pop 0.18s ease-out;
+}
+
+.map-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  background: #081628;
+  border-bottom: 2px solid #c5a059;
+}
+
+.map-modal-title {
+  color: #ffd700;
+  font-size: 9.5px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 2px #000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.map-icon {
+  font-size: 14px;
+}
+
+.map-current-pill {
+  background: #004466;
+  border: 1px solid #00e5ff;
+  color: #00e5ff;
+  font-size: 8px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-weight: normal;
+  letter-spacing: 0;
+}
+
+.map-viewport-frame {
+  position: relative;
+  background: #030810;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.map-svg-container {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1000 / 650;
+  max-height: 72vh;
+  display: block;
+}
+
+.island-svg-map {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Pie de Controles y Banner de Ruta */
+.map-modal-footer {
+  display: flex;
+  align-items: center;
+  padding: 6px 14px;
+  background: #081628;
+  border-top: 2px solid #c5a059;
+}
+
+.map-route-banner {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(4, 10, 18, 0.9);
+  border: 1px solid #c5a059;
+  border-radius: 3px;
+  padding: 5px 10px;
+  min-height: 28px;
+}
+
+.banner-prompt {
+  color: #ffd700;
+  font-size: 8.5px;
+  font-weight: bold;
+}
+
+.banner-text {
+  color: #ffffff;
+  font-size: 8px;
+  line-height: 1.3;
+  text-shadow: 1px 1px 1px #000;
+  font-family: inherit;
+}
+
+/* Pines Interactivos en el SVG */
+.map-pin-group {
+  cursor: pointer;
+  transform-origin: center;
+  transition: transform 0.12s ease;
+}
+
+.map-pin-group.unlocked:hover {
+  transform: scale(1.18);
+}
+
+.map-pin-group.locked {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.map-pin-group.locked:hover {
+  opacity: 0.95;
+}
+
+.map-pin-group .pin-label {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  font-weight: bold;
+  fill: #ffffff;
+  text-shadow: 0 1px 3px #000, 0 0 5px #000;
+  pointer-events: none;
+  letter-spacing: 0.5px;
+}
+
+/* Estado: Desbloqueado */
+.map-pin-group.unlocked .pin-ring {
+  fill: none;
+  stroke: #ffd700;
+  stroke-width: 2;
+}
+.map-pin-group.unlocked .pin-core {
+  fill: #16a085;
+}
+.map-pin-group.unlocked .pin-badge {
+  fill: #ffffff;
+  font-family: monospace;
+  font-weight: bold;
+}
+
+/* Estado: Ubicación Actual */
+.map-pin-group.current .pin-ring {
+  fill: none;
+  stroke: #00e5ff;
+  stroke-width: 2.5;
+  animation: pin-pulse 1.6s infinite ease-in-out;
+}
+.map-pin-group.current .pin-core {
+  fill: #00e5ff;
+}
+.map-pin-group.current .pin-badge {
+  fill: #06111f;
+  font-family: monospace;
+  font-weight: bold;
+}
+.map-pin-group.current .pin-label {
+  fill: #00e5ff;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.8), 0 1px 3px #000;
+}
+
+/* Estado: Bloqueado */
+.map-pin-group.locked .pin-ring {
+  fill: none;
+  stroke: #775533;
+  stroke-width: 1.5;
+}
+.map-pin-group.locked .pin-core {
+  fill: #2a1810;
+}
+.map-pin-group.locked .pin-label {
+  fill: #b3a08f;
+}
+
+/* Animaciones y Efectos */
+@keyframes pin-pulse {
+  0% {
+    r: 10px;
+    opacity: 1;
+    stroke: #00e5ff;
+  }
+  50% {
+    r: 17px;
+    opacity: 0.35;
+    stroke: #ffd700;
+  }
+  100% {
+    r: 10px;
+    opacity: 1;
+    stroke: #00e5ff;
+  }
+}
+
+.pin-shake {
+  animation: shake-error 0.35s ease-in-out;
+}
+
+@keyframes shake-error {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+.arrival-flash {
+  animation: arrival-ripple 0.5s ease-out;
+}
+
+@keyframes arrival-ripple {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0px #ffd700);
+  }
+  50% {
+    transform: scale(1.35);
+    filter: drop-shadow(0 0 16px #ffd700);
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 2px #ffd700);
+  }
+}
+

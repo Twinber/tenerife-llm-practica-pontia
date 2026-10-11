@@ -23,6 +23,7 @@ export interface LocationSceneDef {
   hudTitle: string;
   bgImage: string;
   stampKey?: string;
+  mapCoords: { x: number; y: number };
   npc?: {
     id: string;
     name: string;
@@ -53,6 +54,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hudTitle: '🌴 PUERTO DE LA CRUZ // MUELLE PESQUERO & SAN TELMO',
     bgImage: '/assets/img/bg_puerto_de_la_cruz.jpg',
     stampKey: 'puerto_cruz',
+    mapCoords: { x: 450, y: 210 },
     npc: {
       id: 'paco',
       name: 'Paco el Pescador',
@@ -123,6 +125,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hudTitle: '🏛️ LA OROTAVA // VALLE DE TAORO & MOLINO DE CHANO',
     bgImage: '/assets/img/bg_la_orotava.jpg',
     stampKey: 'la_orotava',
+    mapCoords: { x: 505, y: 260 },
     npc: {
       id: 'chano',
       name: 'Chano el Molinero',
@@ -181,6 +184,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     zone: 'Norte',
     hudTitle: '🍷 SANTA ÚRSULA // GUACHINCHE & RUTA DEL MAR DE NUBES',
     bgImage: '/assets/img/bg_santa_ursula.jpg',
+    mapCoords: { x: 560, y: 215 },
     npc: {
       id: 'manolo',
       name: 'Manolo el Tabernero',
@@ -227,6 +231,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hudTitle: '🌳 ICOD DE LOS VINOS // DRAGO MILENARIO & PLAZA MAYOR',
     bgImage: '/assets/img/bg_icod.jpg',
     stampKey: 'icod_garachico',
+    mapCoords: { x: 330, y: 255 },
     npc: {
       id: 'candido',
       name: 'Don Cándido el Bodeguero',
@@ -269,6 +274,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hudTitle: '🌊 GARACHICO // EL CALETÓN & VILLA HISTÓRICA DE LAVA',
     bgImage: '/assets/img/bg_garachico.jpg',
     stampKey: 'icod_garachico',
+    mapCoords: { x: 255, y: 255 },
     npc: {
       id: 'nieves',
       name: 'Doña Nieves',
@@ -323,6 +329,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hudTitle: '🎓 LA LAGUNA // CIUDAD UNIVERSITARIA & PATRIMONIO UNESCO',
     bgImage: '/assets/img/bg_la_laguna.jpg',
     stampKey: 'la_laguna',
+    mapCoords: { x: 655, y: 180 },
     npc: {
       id: 'herminia',
       name: 'Profesora Herminia',
@@ -365,6 +372,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hudTitle: '🚢 SANTA CRUZ // CAPITAL INSULAR & AUDITORIO DE TENERIFE',
     bgImage: '/assets/img/bg_santa_cruz.jpg',
     stampKey: 'santa_cruz',
+    mapCoords: { x: 725, y: 240 },
     npc: {
       id: 'morales',
       name: 'Oficial Morales',
@@ -408,6 +416,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hudTitle: '🌿 PARQUE RURAL DE ANAGA // BOSQUE DE LAURISILVA TERCIARIA',
     bgImage: '/assets/img/bg_anaga.jpg',
     stampKey: 'anaga',
+    mapCoords: { x: 790, y: 135 },
     npc: {
       id: 'yeray',
       name: 'Guarda Forestal Yeray',
@@ -450,6 +459,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hudTitle: '🏖️ COSTA ADEJE // LITORAL DEL SUR & PARQUES ACUÁTICOS',
     bgImage: '/assets/img/bg_costa_adeje.jpg',
     stampKey: 'costa_adeje',
+    mapCoords: { x: 290, y: 480 },
     npc: {
       id: 'socorrista',
       name: 'Ayoze el Socorrista',
@@ -511,6 +521,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hudTitle: '🧗 MASCA & LOS GIGANTES // ACANTILADOS BASÁLTICOS DE 600M',
     bgImage: '/assets/img/bg_masca.jpg',
     stampKey: 'los_gigantes_masca',
+    mapCoords: { x: 205, y: 340 },
     npc: {
       id: 'tanausu',
       name: 'Tanausú el Guía de Montaña',
@@ -555,6 +566,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hudTitle: '🪁 EL MÉDANO // MONTAÑA ROJA & CAPITAL DEL VIENTO',
     bgImage: '/assets/img/bg_el_medano.jpg',
     stampKey: 'el_medano_cristianos',
+    mapCoords: { x: 565, y: 515 },
     npc: {
       id: 'frutero',
       name: 'El Frutero Canario',
@@ -603,6 +615,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     zone: 'Cumbre',
     hudTitle: '🌋 LAS CAÑADAS DEL TEIDE // ROQUES DE GARCÍA (2.356m)',
     bgImage: '/assets/img/bg_las_canadas.jpg',
+    mapCoords: { x: 470, y: 345 },
     npc: {
       id: 'operario',
       name: 'Operario del Teleférico',
@@ -651,6 +664,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hudTitle: '✨ PICO DEL TEIDE // CUMBRE DE ESPAÑA (3.718m) & STARLIGHT',
     bgImage: '/assets/img/bg_pico_teide.jpg',
     stampKey: 'el_teide',
+    mapCoords: { x: 440, y: 300 },
     npc: {
       id: 'guardian',
       name: 'Guardián del Teide',

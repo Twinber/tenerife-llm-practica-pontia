@@ -14,6 +14,8 @@ import { ScummDockView } from './presentation/ScummDockView';
 import { TelemetryView } from './presentation/TelemetryView';
 import { PhotoAlbumModal } from './presentation/PhotoAlbumModal';
 import { PassportModal } from './presentation/PassportModal';
+import { IslandMapModal } from './presentation/IslandMapModal';
+import { LOCATIONS_CATALOG } from './domain/locationsData';
 
 window.addEventListener('DOMContentLoaded', () => {
   // 1. Capa de Infraestructura
@@ -70,8 +72,19 @@ window.addEventListener('DOMContentLoaded', () => {
   const telemetryView = new TelemetryView();
   const photoAlbumModal = new PhotoAlbumModal(audioService);
   const passportModal = new PassportModal(audioService);
+  const islandMapModal = new IslandMapModal(audioService, actionDispatcher.currentLocation);
+
   actionDispatcher.photoAlbumModal = photoAlbumModal;
   actionDispatcher.passportModal = passportModal;
+  actionDispatcher.islandMapModal = islandMapModal;
+
+  islandMapModal.onTravelConfirmed = (targetLocationId: string) => {
+    const loc = LOCATIONS_CATALOG.find(l => l.id === targetLocationId);
+    if (loc) {
+      actionDispatcher.changeLocation(loc, false);
+    }
+  };
+  islandMapModal.onLogMessage = (msg: string) => telemetryView.log(msg);
 
   new ScummDockView(actionDispatcher, audioService);
   const viewportView = new ViewportView(
@@ -115,10 +128,17 @@ window.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    if (cmd === 'MAPA' || cmd === 'MAP') {
+      actionDispatcher.openIslandMap();
+      telemetryView.log("Desplegando el Mapa de Tenerife...");
+      return;
+    }
+
     if (cmd === 'AYUDA' || cmd === 'HELP' || cmd === '?') {
       telemetryView.logRaw(`
         <div style="color:#00e5ff; margin:4px 0; line-height: 1.4;">
           <b>[COMANDOS DISPONIBLES EN TELEMETRÍA]</b><br>
+          • <b>MAPA</b>: Abre el mapa de carreteras de Tenerife (o pulsa la tecla 'M').<br>
           • <b>LISTAR_DESTINOS</b>: Muestra todos los 13 enclaves con sus NPCs, tiendas, sellos y fotos.<br>
           • <b>VIAJAR &lt;DESTINO&gt;</b>: Salto inmediato ignorando bloqueos y sellos (Ej: VIAJAR la_orotava ó VIAJAR Masca).<br>
           • <b>LIMPIAR</b>: Limpia el historial de la pantalla.<br>
@@ -140,6 +160,16 @@ window.addEventListener('DOMContentLoaded', () => {
 
     telemetryView.log(`[COMANDO NO RECONOCIDO]: '${rawCmd}'. Escribe AYUDA o LISTAR_DESTINOS.`);
   };
+
+  // Atajo de teclado: Tecla 'M' abre el Mapa de Tenerife
+  window.addEventListener('keydown', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+    if (actionDispatcher.isInNpcDialogue) return;
+    if (e.key === 'm' || e.key === 'M') {
+      actionDispatcher.openIslandMap();
+    }
+  });
 
   // Botón de silenciar audio
   const btnAudio = document.getElementById('btn-audio');

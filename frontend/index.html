@@ -156,6 +156,30 @@
         </div>
       </div>
 
+      <!-- Modal Retro del Mapa de Tenerife (Estilo Indiana Jones & VGA 1990) -->
+      <div id="island-map-modal" class="retro-modal-overlay hidden">
+        <div class="retro-map-window">
+          <header class="map-modal-header">
+            <div class="map-modal-title">
+              <span class="map-icon">🗺️</span> MAPA DE CARRETERAS DE TENERIFE // EXPEDICIÓN INSULAR
+              <span class="map-current-pill" id="map-current-location-pill">UBICACIÓN: Puerto de la Cruz</span>
+            </div>
+            <button id="btn-close-map" class="modal-close-btn">✕ CERRAR [ESC]</button>
+          </header>
+
+          <main class="map-viewport-frame" id="map-viewport-frame">
+            <div id="map-svg-container" class="map-svg-container"></div>
+          </main>
+
+          <footer class="map-modal-footer">
+            <div class="map-route-banner" id="map-route-banner">
+              <span class="banner-prompt">🚌 RUTA:</span>
+              <span class="banner-text" id="map-banner-text">Haz clic en un enclave desbloqueado para viajar. Usa el Pasaporte para ver tus sellos.</span>
+            </div>
+          </footer>
+        </div>
+      </div>
+
     </main>
 
     <!-- Franja Lateral Derecha: Objetos Adquiridos (Vacías al inicio, se muestran al conseguirlos) -->
