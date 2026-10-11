@@ -56,6 +56,12 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
       initialX: 82.0,
       lookText: "Paco, un curtido pescador canario de pelo blanco y boina marinera. Fuma plácidamente en su pipa de tea.",
       greeting: "¡Hola, forastero! Bienvenido al Puerto de la Cruz. ¿Qué se te ofrece por el muelle?",
+      hasShop: true,
+      shopItem: {
+        name: 'Plátano de Canarias',
+        price: 1,
+        dialogueText: "¡Toma un buen plátano que me traje en la barca para la faena, chacho! No hay mareo que se le resista."
+      },
       photoIdOnLore: 2 // Lago Martiánez (Pág. 12)
     },
     hotspots: [
@@ -313,7 +319,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     bgImage: '/assets/img/bg_la_laguna.jpg',
     stampKey: 'la_laguna',
     npc: {
-      id: 'profesora_laguna',
+      id: 'herminia',
       name: 'Profesora Herminia',
       role: 'Historiadora de la Universidad de La Laguna',
       initialX: 75.0,
@@ -355,7 +361,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     bgImage: '/assets/img/bg_santa_cruz.jpg',
     stampKey: 'santa_cruz',
     npc: {
-      id: 'oficial_puerto',
+      id: 'morales',
       name: 'Oficial Morales',
       role: 'Comisionado de la Autoridad Portuaria',
       initialX: 76.0,
@@ -398,7 +404,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     bgImage: '/assets/img/bg_anaga.jpg',
     stampKey: 'anaga',
     npc: {
-      id: 'guarda_anaga',
+      id: 'yeray',
       name: 'Guarda Forestal Yeray',
       role: 'Guarda de la Reserva de la Biosfera',
       initialX: 74.0,
@@ -440,12 +446,18 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     bgImage: '/assets/img/bg_costa_adeje.jpg',
     stampKey: 'costa_adeje',
     npc: {
-      id: 'socorrista_adeje',
+      id: 'socorrista',
       name: 'Ayoze el Socorrista',
       role: 'Vigilante costero de Playa de Troya',
       initialX: 76.0,
       lookText: "Ayoze, socorrista moreno con silbato y flotador torpedo rojo vigilando la orilla.",
       greeting: "¡Aló, forastero! El agua está a 22 grados y no hay corrientes peligrosas hoy. ¡A disfrutar del sur!",
+      hasShop: true,
+      shopItem: {
+        name: 'Plátano de Canarias',
+        price: 1,
+        dialogueText: "¡Aquí tienes, forastero! Un plátano con bien de potasio para que no te dé una rampa nadando hacia La Gomera."
+      },
       photoIdOnLore: 22 // Papagayo Beach Club (Pág. 18)
     },
     hotspots: [
@@ -495,7 +507,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     bgImage: '/assets/img/bg_masca.jpg',
     stampKey: 'los_gigantes_masca',
     npc: {
-      id: 'guia_masca',
+      id: 'tanausu',
       name: 'Tanausú el Guía de Montaña',
       role: 'Guía de senderismo del barranco',
       initialX: 74.0,
@@ -538,7 +550,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     bgImage: '/assets/img/bg_el_medano.jpg',
     stampKey: 'el_medano_cristianos',
     npc: {
-      id: 'frutero_sur',
+      id: 'frutero',
       name: 'El Frutero Canario',
       role: 'Vendedor ambulante de fruta local',
       initialX: 75.0,
@@ -586,7 +598,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hudTitle: '🌋 LAS CAÑADAS DEL TEIDE // ROQUES DE GARCÍA (2.356m)',
     bgImage: '/assets/img/bg_las_canadas.jpg',
     npc: {
-      id: 'taquillero_teide',
+      id: 'operario',
       name: 'Operario del Teleférico',
       role: 'Responsable técnico de cabina',
       initialX: 74.0,
@@ -633,7 +645,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     bgImage: '/assets/img/bg_pico_teide.jpg',
     stampKey: 'el_teide',
     npc: {
-      id: 'guardian_cumbre',
+      id: 'guardian',
       name: 'Guardián del Teide',
       role: 'Sabio de la cumbre y astrónomo',
       initialX: 75.0,

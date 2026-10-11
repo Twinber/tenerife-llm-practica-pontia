@@ -45,10 +45,34 @@ export class ScummDockView {
       }
     };
 
-    this.actionDispatcher.onDialogueModeChange = (active: boolean) => {
+    this.actionDispatcher.onDialogueModeChange = (active: boolean, npcName?: string, shopItem?: { name: string; price: number }) => {
       if (active) {
         this.dockDialogue.classList.remove('hidden', 'dialogue-speaking');
-        if (this.dialogueFreeInput) this.dialogueFreeInput.value = '';
+        if (this.dialogueFreeInput) {
+          this.dialogueFreeInput.value = '';
+          this.dialogueFreeInput.placeholder = `Escribe tu propia pregunta a ${npcName || 'personaje'}...`;
+        }
+
+        const buyBtn = document.getElementById('dialogue-choice-buy');
+        const buyText = document.getElementById('dialogue-buy-text');
+        const inputNum = document.getElementById('dialogue-input-num');
+        const exitNum = document.getElementById('dialogue-exit-num');
+
+        if (buyBtn && buyText) {
+          if (shopItem) {
+            buyBtn.classList.remove('hidden');
+            buyBtn.style.display = 'flex';
+            buyText.innerText = `"Comprar ${shopItem.name} (${shopItem.price} 💰)"`;
+            if (inputNum) inputNum.innerText = '4.';
+            if (exitNum) exitNum.innerText = '5.';
+          } else {
+            buyBtn.classList.add('hidden');
+            buyBtn.style.display = 'none';
+            buyText.innerText = '';
+            if (inputNum) inputNum.innerText = '3.';
+            if (exitNum) exitNum.innerText = '4.';
+          }
+        }
       } else {
         this.dockDialogue.classList.add('hidden');
       }
@@ -157,8 +181,24 @@ export class ScummDockView {
         this.audioService.playClick();
         this.actionDispatcher.selectDialogueChoice('lore');
       } else if (e.key === '3') {
-        if (this.dialogueFreeInput) this.dialogueFreeInput.focus();
-      } else if (e.key === '4' || e.key === 'Escape') {
+        const buyBtn = document.getElementById('dialogue-choice-buy');
+        const isBuyVisible = buyBtn && !buyBtn.classList.contains('hidden') && buyBtn.style.display !== 'none';
+        if (isBuyVisible) {
+          this.audioService.playClick();
+          this.actionDispatcher.selectDialogueChoice('buy');
+        } else {
+          if (this.dialogueFreeInput) this.dialogueFreeInput.focus();
+        }
+      } else if (e.key === '4') {
+        const buyBtn = document.getElementById('dialogue-choice-buy');
+        const isBuyVisible = buyBtn && !buyBtn.classList.contains('hidden') && buyBtn.style.display !== 'none';
+        if (isBuyVisible) {
+          if (this.dialogueFreeInput) this.dialogueFreeInput.focus();
+        } else {
+          this.audioService.playClick();
+          this.actionDispatcher.selectDialogueChoice('exit');
+        }
+      } else if (e.key === '5' || e.key === 'Escape') {
         this.audioService.playClick();
         this.actionDispatcher.selectDialogueChoice('exit');
       }

@@ -150,8 +150,144 @@ def extract_nieves():
         out_dir='frontend/public/assets/img/sprites'
     )
 
+def extract_chano():
+    extract_aligned_actor(
+        sheet_path='frontend/public/assets/img/sprite_chano_sheet.jpg',
+        num_rows=2,
+        rows_config=[
+            (0, 'idle', [(258, 403), (478, 623), (716, 855), (939, 1085)]),
+            (1, 'talk', [(248, 400), (475, 674), (713, 875), (947, 1096)])
+        ],
+        canvas_w=280,
+        canvas_h=400,
+        anchor_x=140,
+        anchor_y=390,
+        actor_name='chano',
+        out_dir='frontend/public/assets/img/sprites'
+    )
+
+def extract_candido():
+    extract_aligned_actor(
+        sheet_path='frontend/public/assets/img/sprite_candido_sheet.jpg',
+        num_rows=2,
+        rows_config=[
+            (0, 'idle', [(64, 257), (362, 553), (661, 848), (960, 1153)]),
+            (1, 'talk', [(62, 254), (362, 564), (661, 855), (960, 1152)])
+        ],
+        canvas_w=280,
+        canvas_h=400,
+        anchor_x=140,
+        anchor_y=390,
+        actor_name='candido',
+        out_dir='frontend/public/assets/img/sprites'
+    )
+
+def extract_manolo():
+    extract_aligned_actor(
+        sheet_path='frontend/public/assets/img/sprite_manolo_sheet.jpg',
+        num_rows=2,
+        rows_config=[
+            (0, 'idle', [(51, 254), (344, 549), (628, 846), (940, 1145)]),
+            (1, 'talk', [(51, 256), (345, 624), (644, 848), (941, 1185)])
+        ],
+        canvas_w=280,
+        canvas_h=400,
+        anchor_x=140,
+        anchor_y=390,
+        actor_name='manolo',
+        out_dir='frontend/public/assets/img/sprites'
+    )
+
+def extract_herminia():
+    extract_aligned_actor(
+        sheet_path='frontend/public/assets/img/sprite_herminia_sheet.jpg',
+        num_rows=2,
+        rows_config=[
+            (0, 'idle', [(65, 216), (363, 514), (660, 841), (958, 1109)]),
+            (1, 'talk', [(65, 216), (362, 551), (661, 811), (959, 1109)])
+        ],
+        canvas_w=280,
+        canvas_h=400,
+        anchor_x=140,
+        anchor_y=390,
+        actor_name='herminia',
+        out_dir='frontend/public/assets/img/sprites'
+    )
+
+def extract_morales():
+    extract_aligned_actor(
+        sheet_path='frontend/public/assets/img/sprite_morales_sheet.jpg',
+        num_rows=2,
+        rows_config=[
+            (0, 'idle', [(126, 247), (451, 575), (790, 939), (1126, 1252)]),
+            (1, 'talk', [(126, 252), (446, 666), (776, 905), (1112, 1238)])
+        ],
+        canvas_w=280,
+        canvas_h=400,
+        anchor_x=140,
+        anchor_y=390,
+        actor_name='morales',
+        out_dir='frontend/public/assets/img/sprites'
+    )
+
+def extract_yeray():
+    extract_aligned_actor(
+        sheet_path='frontend/public/assets/img/sprite_yeray_sheet.jpg',
+        num_rows=2,
+        rows_config=[
+            (0, 'idle', [(77, 274), (378, 573), (665, 842), (968, 1166)]),
+            (1, 'talk', [(73, 275), (378, 593), (660, 887), (966, 1169)])
+        ],
+        canvas_w=280,
+        canvas_h=400,
+        anchor_x=140,
+        anchor_y=390,
+        actor_name='yeray',
+        out_dir='frontend/public/assets/img/sprites'
+    )
+
+def extract_socorrista():
+    extract_aligned_actor(
+        sheet_path='frontend/public/assets/img/sprite_socorrista_sheet.jpg',
+        num_rows=2,
+        rows_config=[
+            (0, 'idle', [(27, 227), (326, 527), (627, 879), (926, 1127)]),
+            (1, 'talk', [(31, 227), (331, 524), (632, 879), (929, 1126)])
+        ],
+        canvas_w=280,
+        canvas_h=400,
+        anchor_x=140,
+        anchor_y=390,
+        actor_name='socorrista',
+        out_dir='frontend/public/assets/img/sprites'
+    )
+
+def extract_frutero():
+    extract_aligned_actor(
+        sheet_path='frontend/public/assets/img/sprite_frutero_sheet.jpg',
+        num_rows=2,
+        rows_config=[
+            (0, 'idle', [(76, 281), (420, 626), (728, 965), (1106, 1307)]),
+            (1, 'talk', [(82, 279), (421, 637), (764, 967), (1109, 1309)])
+        ],
+        canvas_w=280,
+        canvas_h=400,
+        anchor_x=140,
+        anchor_y=390,
+        actor_name='frutero',
+        out_dir='frontend/public/assets/img/sprites'
+    )
+
 if __name__ == '__main__':
     extract_twinber()
     extract_paco()
     extract_nieves()
+    extract_chano()
+    extract_candido()
+    extract_manolo()
+    extract_herminia()
+    extract_morales()
+    extract_yeray()
+    extract_socorrista()
+    extract_frutero()
     print("\n¡Extracción y normalización de todos los actores completada con éxito!")

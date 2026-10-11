@@ -59,7 +59,7 @@ export class ViewportView {
       this.dialogueManager.advanceOrSkip();
     });
 
-    // Clic en el suelo
+    // Clic en el escenario (avanza diálogos o cancela menú)
     this.viewportElem.addEventListener('click', (e) => {
       if (this.dialogueManager.currentLine) {
         this.dialogueManager.advanceOrSkip();
@@ -67,13 +67,9 @@ export class ViewportView {
       }
       const target = e.target as HTMLElement;
       if (target.classList.contains('hotspot') || target.id === 'paco-actor') return;
-
-      const rect = this.viewportElem.getBoundingClientRect();
-      const clickXPct = ((e.clientX - rect.left) / rect.width) * 100;
-      const minX = this.twinber.minX ?? 18;
-      const maxX = this.twinber.maxX ?? 72;
-      const targetX = Math.max(minX, Math.min(maxX, clickXPct));
-      this.actionDispatcher.clickGround(targetX);
+      if (this.actionDispatcher.isInNpcDialogue) {
+        this.actionDispatcher.endNpcDialogue();
+      }
     });
 
     // NPC activo: clic & hover
@@ -148,16 +144,23 @@ export class ViewportView {
       this.twinberElem.src = tSrc;
     }
 
-    // 2. Renderizar Paco
-    this.pacoElem.style.left = `${this.paco.xPct}%`;
-    this.pacoElem.style.transform = `translateX(-50%) scaleX(${this.paco.facing})`;
-    const pSrc = this.assetLoader.getActorSpritePath(
-      'paco',
-      this.paco.state,
-      this.paco.frameIdx
-    );
-    if (this.pacoElem.getAttribute('src') !== pSrc) {
-      this.pacoElem.src = pSrc;
+    // 2. Renderizar NPC Activo del Escenario
+    const currentNpc = this.actionDispatcher.currentLocation.npc;
+    if (currentNpc) {
+      this.pacoElem.style.display = 'block';
+      this.pacoElem.style.left = `${this.paco.xPct}%`;
+      this.pacoElem.style.transform = `translateX(-50%) scaleX(${this.paco.facing})`;
+      const npcActorId = currentNpc.id || this.paco.id || 'paco';
+      const pSrc = this.assetLoader.getActorSpritePath(
+        npcActorId,
+        this.paco.state,
+        this.paco.frameIdx
+      );
+      if (this.pacoElem.getAttribute('src') !== pSrc) {
+        this.pacoElem.src = pSrc;
+      }
+    } else {
+      this.pacoElem.style.display = 'none';
     }
 
     // 3. Renderizar Subtítulo con botón interactivo de continuación

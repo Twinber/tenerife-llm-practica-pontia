@@ -37,8 +37,9 @@ export class ActionDispatcher {
   public coins: number = 15;
   public bananaCount: number = 0;
   public acquiredItems: Array<{ name: string; icon: string; count?: number }> = [];
+  public purchasedFromNpcs: Set<string> = new Set();
 
-  public onDialogueModeChange?: (active: boolean, npcName?: string) => void;
+  public onDialogueModeChange?: (active: boolean, npcName?: string, shopItem?: { name: string; price: number }) => void;
   public onDialogueSpeechState?: (isSpeaking: boolean) => void;
   public onStateUpdate?: (updates: {
     photos?: string;
@@ -156,7 +157,7 @@ export class ActionDispatcher {
     this.updateSentence();
   }
 
-  public clickGround(targetX: number): void {
+  public clickGround(_targetX: number): void {
     if (this.dialogueManager.currentLine) {
       this.dialogueManager.advanceOrSkip();
       return;
@@ -164,9 +165,6 @@ export class ActionDispatcher {
     if (this.isInNpcDialogue) {
       this.endNpcDialogue();
     }
-    this.twinber.moveTo(targetX);
-    this.setHoverTarget('', 'ground');
-    if (this.onLogMessage) this.onLogMessage(`Twinber camina hacia X: ${targetX.toFixed(1)}%`);
   }
 
   public setupSceneHotspots(): void {
@@ -219,18 +217,30 @@ export class ActionDispatcher {
 
     this.currentLocation = found;
 
-    // 1. Reposicionar Twinber a posición neutral caminable
-    this.twinber.xPct = 24.0;
-    this.twinber.targetXPct = 24.0;
-    this.twinber.facing = 1;
-
-    // 2. Reposicionar y configurar NPC
+    // 1. Reposicionar y configurar NPC
     if (found.npc) {
       this.paco.id = found.npc.id;
       this.paco.name = found.npc.name;
       this.paco.xPct = found.npc.initialX;
       this.paco.targetXPct = found.npc.initialX;
+      this.paco.frameIdx = 0;
+      this.paco.state = 'IDLE';
       this.paco.facing = -1;
+
+      // 2. Posicionar a Twinber a distancia coherente del NPC (a su izquierda, mirándole)
+      const npcX = found.npc.initialX;
+      const twinberX = Math.max(16, npcX - 11.5);
+      this.twinber.xPct = twinberX;
+      this.twinber.targetXPct = twinberX;
+      this.twinber.state = 'IDLE';
+      this.twinber.frameIdx = 0;
+      this.twinber.facing = 1;
+    } else {
+      this.twinber.xPct = 50.0;
+      this.twinber.targetXPct = 50.0;
+      this.twinber.state = 'IDLE';
+      this.twinber.frameIdx = 0;
+      this.twinber.facing = 1;
     }
 
     // 3. Actualizar Viewport (Background, HUD, NPC visible y Hotspots)
@@ -294,41 +304,36 @@ export class ActionDispatcher {
       return;
     }
 
-    // Caminar hacia el hotspot respetando los límites de Twinber
-    const minX = this.twinber.minX ?? 18;
-    const maxX = this.twinber.maxX ?? 72;
-    const targetX = Math.max(minX, Math.min(maxX, hotspot.leftPct + hotspot.widthPct / 2));
+    // Orientar a Twinber mirando hacia el punto de interés observado
+    const hotspotCenterX = hotspot.leftPct + hotspot.widthPct / 2;
+    this.twinber.facing = hotspotCenterX > this.twinber.xPct ? 1 : -1;
+    this.audioService.playClick();
 
-    this.twinber.moveTo(targetX, () => {
-      this.twinber.facing = hotspot.leftPct > this.twinber.xPct ? 1 : -1;
-      this.audioService.playClick();
-
-      let unlockedPhoto = false;
-      if (hotspot.photoId && this.photoAlbumModal) {
-        unlockedPhoto = this.photoAlbumModal.unlockPhoto(hotspot.photoId);
-        if (unlockedPhoto) {
-          this.audioService.playHint();
-          const count = this.photoAlbumModal.getUnlockedCount();
-          if (this.onStateUpdate) this.onStateUpdate({ photos: `${count}/28` });
-          if (this.onLogMessage) {
-            this.onLogMessage(`[RAG RETRIEVAL] Foto #${String(hotspot.photoId).padStart(2, '0')} desbloqueada al mirar '${hotspot.name}' (${this.currentLocation.name})`);
-          }
+    let unlockedPhoto = false;
+    if (hotspot.photoId && this.photoAlbumModal) {
+      unlockedPhoto = this.photoAlbumModal.unlockPhoto(hotspot.photoId);
+      if (unlockedPhoto) {
+        this.audioService.playHint();
+        const count = this.photoAlbumModal.getUnlockedCount();
+        if (this.onStateUpdate) this.onStateUpdate({ photos: `${count}/28` });
+        if (this.onLogMessage) {
+          this.onLogMessage(`[RAG RETRIEVAL] Foto #${String(hotspot.photoId).padStart(2, '0')} desbloqueada al mirar '${hotspot.name}' (${this.currentLocation.name})`);
         }
       }
+    }
 
-      const lines: Array<{ speaker: 'twinber' | 'paco'; text: string }> = [
-        { speaker: 'twinber', text: `Twinber: '${hotspot.lookText}'` }
-      ];
+    const lines: Array<{ speaker: 'twinber' | 'paco'; text: string }> = [
+      { speaker: 'twinber', text: `Twinber: '${hotspot.lookText}'` }
+    ];
 
-      if (unlockedPhoto && hotspot.photoId) {
-        lines.push({
-          speaker: 'twinber',
-          text: `Twinber: '¡Foto #${String(hotspot.photoId).padStart(2, '0')} agregada a mi Álbum de Recuerdos! Usa el Álbum para verla a tamaño completo.'`
-        });
-      }
+    if (unlockedPhoto && hotspot.photoId) {
+      lines.push({
+        speaker: 'twinber',
+        text: `Twinber: '¡Foto #${String(hotspot.photoId).padStart(2, '0')} agregada a mi Álbum de Recuerdos! Usa el Álbum para verla a tamaño completo.'`
+      });
+    }
 
-      this.dialogueManager.enqueue(lines);
-    });
+    this.dialogueManager.enqueue(lines);
   }
 
   public talkToCurrentNpc(): void {
@@ -348,26 +353,27 @@ export class ActionDispatcher {
   }
 
   public startNpcDialogue(_npcId: string, npcName: string): void {
-    const nearNpcX = Math.min(72, this.twinber.maxX ?? 72);
-    this.twinber.moveTo(nearNpcX, () => {
-      this.twinber.facing = 1;
-      this.paco.facing = -1;
+    // Twinber y el NPC se encaran mutuamente
+    this.twinber.facing = this.twinber.xPct < this.paco.xPct ? 1 : -1;
+    this.paco.facing = this.twinber.xPct < this.paco.xPct ? -1 : 1;
 
-      this.isInNpcDialogue = true;
-      this.isDialogueSpeaking = true;
-      this.currentDialogueNpc = npcName;
-      this.pendingDialogueExit = false;
+    this.isInNpcDialogue = true;
+    this.isDialogueSpeaking = true;
+    this.currentDialogueNpc = npcName;
+    this.pendingDialogueExit = false;
 
-      if (this.onDialogueModeChange) {
-        this.onDialogueModeChange(true, npcName);
-      }
-      this.updateSentence();
+    const npc = this.currentLocation.npc;
+    const isSoldOut = npc?.id ? this.purchasedFromNpcs.has(npc.id) : false;
+    const shopItem = (npc?.hasShop && !isSoldOut) ? npc.shopItem : undefined;
+    if (this.onDialogueModeChange) {
+      this.onDialogueModeChange(true, npcName, shopItem);
+    }
+    this.updateSentence();
 
-      const greeting = this.currentLocation.npc?.greeting || `¡Hola! Bienvenido a ${this.currentLocation.name}.`;
-      this.dialogueManager.enqueue([
-        { speaker: 'paco', text: `${npcName}: '${greeting}'` }
-      ]);
-    });
+    const greeting = this.currentLocation.npc?.greeting || `¡Hola! Bienvenido a ${this.currentLocation.name}.`;
+    this.dialogueManager.enqueue([
+      { speaker: 'paco', text: `${npcName}: '${greeting}'` }
+    ]);
   }
 
   public endNpcDialogue(): void {
@@ -375,6 +381,9 @@ export class ActionDispatcher {
     this.isDialogueSpeaking = false;
     this.currentDialogueNpc = null;
     this.pendingDialogueExit = false;
+
+    // Twinber vuelve a mirar hacia el NPC
+    this.twinber.facing = this.twinber.xPct < this.paco.xPct ? 1 : -1;
 
     if (this.onDialogueModeChange) {
       this.onDialogueModeChange(false);
@@ -413,15 +422,50 @@ export class ActionDispatcher {
 
     if (npc?.hasShop && npc.shopItem) {
       const item = npc.shopItem;
+
+      // Comprobar si este comerciante ya ha agotado sus existencias
+      if (npc.id && this.purchasedFromNpcs.has(npc.id)) {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: `Twinber: '¿Le queda algún otro artículo a la venta?'` },
+          { speaker: 'paco', text: `${npcName}: 'Ya te vendí todo lo que tenía de sobra, forastero.'` }
+        ]);
+        return;
+      }
+
+      // Comprobar si ya tiene el objeto único
+      const alreadyHas = this.acquiredItems.some(i => i.name === item.name);
+      if (alreadyHas && item.name !== 'Plátano de Canarias') {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: `Twinber: 'Ya tengo ${item.name} a buen recaudo en mi inventario.'` },
+          { speaker: 'paco', text: `${npcName}: '¡Cuídalo bien, forastero!'` }
+        ]);
+        return;
+      }
+
+      // Comprobar límite de plátanos (máximo 3)
+      if (item.name === 'Plátano de Canarias' && (this.bananaCount || 0) >= 3) {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: "Twinber: '¡Ya llevo 3 plátanos de Canarias encima! No me caben más en la riñonera.'" },
+          { speaker: 'paco', text: `${npcName}: '¡Vaya apetito por la fruta canaria!'` }
+        ]);
+        return;
+      }
+
       if (this.coins >= item.price) {
         this.coins -= item.price;
-        let icon = '/assets/img/sprites/item_gofio.png';
-        if (item.name.includes('Plátano')) icon = '/assets/img/sprites/item_platano.png';
-        else if (item.name.includes('Comanda')) icon = '/assets/img/sprites/item_comanda.png';
-        else if (item.name.includes('Billete')) icon = '/assets/img/sprites/item_billete.png';
-        else if (item.name.includes('Gofio')) icon = '/assets/img/sprites/item_gofio.png';
+        let icon = '/assets/img/items/item_gofio.svg';
+        if (item.name.includes('Plátano')) icon = '/assets/img/items/item_platano.svg';
+        else if (item.name.includes('Comanda')) icon = '/assets/img/items/item_comanda.svg';
+        else if (item.name.includes('Billete')) icon = '/assets/img/items/item_billete.svg';
+        else if (item.name.includes('Gofio')) icon = '/assets/img/items/item_gofio.svg';
 
         this.acquireItem(item.name, icon, 1);
+        if (npc.id) {
+          this.purchasedFromNpcs.add(npc.id);
+          if (this.onDialogueModeChange) {
+            this.onDialogueModeChange(true, npcName, undefined);
+          }
+        }
         this.audioService.playCoin();
         if (this.onLogMessage) {
           this.onLogMessage(`[COMERCIO] Adquirido '${item.name}' por ${item.price} monedas. Saldo restante: ${this.coins}`);
@@ -602,13 +646,13 @@ export class ActionDispatcher {
     const target = this.hoverTargetName;
 
     if (this.hoverTargetType === 'npc') {
-      text = target ? `Hablar con ${target}` : 'Caminar hacia el muelle...';
+      text = target ? `Hablar con ${target}` : '';
     } else if (this.hoverTargetType === 'scenery') {
-      text = target ? `Mirar ${target}` : 'Caminar hacia el muelle...';
+      text = target ? `Mirar ${target}` : '';
     } else if (this.hoverTargetType === 'item') {
-      text = target || 'Caminar hacia el muelle...';
+      text = target || '';
     } else {
-      text = target ? `Caminar hacia ${target}` : 'Caminar hacia el muelle...';
+      text = target || '';
     }
 
     if (this.onSentenceChange) this.onSentenceChange(text);

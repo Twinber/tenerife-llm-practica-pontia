@@ -8,14 +8,14 @@ export interface ActorConfig {
   name: string;
   initialX: number;
   initialFacing: number; // 1: derecha, -1: izquierda
-  speed: number;
-  walkFrameCount: number;
+  speed?: number;
+  walkFrameCount?: number;
   idleFrameCount: number;
   talkFrameCount: number;
   minIdlePauseSecs: number;
   maxIdlePauseSecs: number;
-  minX?: number; // Límite izquierdo de caminata en %
-  maxX?: number; // Límite derecho de caminata en %
+  minX?: number; // Límite izquierdo en %
+  maxX?: number; // Límite derecho en %
 }
 
 export class Actor {
@@ -29,9 +29,7 @@ export class Actor {
   public minX?: number;
   public maxX?: number;
 
-  private speed: number;
   private animTimer: number = 0;
-  private walkFrameCount: number;
   private idleFrameCount: number;
   private talkFrameCount: number;
   private minIdleTicks: number;
@@ -47,8 +45,6 @@ export class Actor {
     this.xPct = config.initialX;
     this.targetXPct = config.initialX;
     this.facing = config.initialFacing;
-    this.speed = config.speed;
-    this.walkFrameCount = config.walkFrameCount;
     this.idleFrameCount = config.idleFrameCount;
     this.talkFrameCount = config.talkFrameCount;
     this.minX = config.minX;
@@ -63,17 +59,14 @@ export class Actor {
   }
 
   public moveTo(targetX: number, onArrival: (() => void) | null = null): void {
-    // Restringir el avance estrictamente a los límites del suelo/escenario
     if (this.minX !== undefined) targetX = Math.max(this.minX, targetX);
     if (this.maxX !== undefined) targetX = Math.min(this.maxX, targetX);
 
+    this.xPct = targetX;
     this.targetXPct = targetX;
-    this.onArrivalCallback = onArrival;
-    if (Math.abs(this.xPct - targetX) > 0.6) {
-      this.state = 'WALK';
-      this.facing = targetX > this.xPct ? 1 : -1;
-      this.idleFidgetPhase = 0;
-    } else if (onArrival) {
+    this.state = 'IDLE';
+    this.frameIdx = 0;
+    if (onArrival) {
       onArrival();
     }
   }
@@ -90,28 +83,12 @@ export class Actor {
 
   public update(): void {
     if (this.state === 'WALK') {
-      const diff = this.targetXPct - this.xPct;
-      if (Math.abs(diff) <= this.speed) {
-        this.xPct = this.targetXPct;
-        this.state = 'IDLE';
-        this.frameIdx = 0;
-        this.idlePauseTimer = this.randomRange(this.minIdleTicks, this.maxIdleTicks);
-        this.idleFidgetPhase = 0;
-        if (this.onArrivalCallback) {
-          const cb = this.onArrivalCallback;
-          this.onArrivalCallback = null;
-          cb();
-        }
-      } else {
-        this.xPct += diff > 0 ? this.speed : -this.speed;
-        this.animTimer++;
-        if (this.animTimer >= 8) {
-          this.animTimer = 0;
-          this.frameIdx = (this.frameIdx + 1) % this.walkFrameCount;
-          if ((this.frameIdx === 0 || this.frameIdx === 3) && this.onStepSound) {
-            this.onStepSound();
-          }
-        }
+      this.state = 'IDLE';
+      this.frameIdx = 0;
+      if (this.onArrivalCallback) {
+        const cb = this.onArrivalCallback;
+        this.onArrivalCallback = null;
+        cb();
       }
     } else if (this.state === 'IDLE') {
       if (this.idlePauseTimer > 0) {

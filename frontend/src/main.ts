@@ -25,18 +25,15 @@ window.addEventListener('DOMContentLoaded', () => {
   const twinber = new Actor({
     id: 'twinber',
     name: 'Twinber',
-    initialX: 24.0,
+    initialX: 70.5, // Situado a distancia natural de Paco (82.0%)
     initialFacing: 1,
-    speed: 0.16,
-    walkFrameCount: 6,
+    speed: 0,
+    walkFrameCount: 0,
     idleFrameCount: 4,
     talkFrameCount: 4,
     minIdlePauseSecs: 3.0,
-    maxIdlePauseSecs: 6.5,
-    minX: 18.0, // Límite del muelle: no avanzar más allá de la hilera de adoquines/mar
-    maxX: 72.0  // Límite frente a Paco y los barriles
+    maxIdlePauseSecs: 6.5
   });
-  twinber.onStepSound = () => audioService.playStep();
 
   const paco = new Actor({
     id: 'paco',
