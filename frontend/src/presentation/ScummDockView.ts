@@ -81,15 +81,19 @@ export class ScummDockView {
         const item = slot.dataset.item;
         if (!item) return;
 
-        // Si el verbo activo es MIRAR y clican en Álbum de Fotos o Pasaporte, abrir modal
-        if (this.actionDispatcher.activeVerb === 'MIRAR') {
-          if (item === 'Álbum de Fotos' || item === 'Pasaporte de Explorador') {
-            this.actionDispatcher.selectItem(item);
+        // Si el verbo activo es MIRAR o HABLAR y clican en Álbum o Pasaporte, abrir modal directamente
+        if (this.actionDispatcher.activeVerb === 'MIRAR' || this.actionDispatcher.activeVerb === 'HABLAR') {
+          if (item === 'Álbum de Fotos' && this.actionDispatcher.photoAlbumModal) {
+            this.actionDispatcher.photoAlbumModal.open();
+            return;
+          }
+          if (item === 'Pasaporte de Explorador' && this.actionDispatcher.passportModal) {
+            this.actionDispatcher.passportModal.open();
             return;
           }
         }
 
-        // Limpiar selección previa o alternar
+        // Limpiar selección previa o alternar para otros verbos (USAR, etc.)
         const isSelected = slot.classList.contains('selected');
         document.querySelectorAll('.inventory-slot').forEach(s => s.classList.remove('selected'));
 
@@ -110,6 +114,20 @@ export class ScummDockView {
           });
         }
       });
+
+      // Clic directo en la insignia/badge (ej. 0/10 o 0/28) siempre abre el modal
+      const badge = slot.querySelector('.slot-badge');
+      if (badge) {
+        badge.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (slot.dataset.item === 'Álbum de Fotos' && this.actionDispatcher.photoAlbumModal) {
+            this.actionDispatcher.photoAlbumModal.open();
+          }
+          if (slot.dataset.item === 'Pasaporte de Explorador' && this.actionDispatcher.passportModal) {
+            this.actionDispatcher.passportModal.open();
+          }
+        });
+      }
 
       // Doble clic en cualquier momento en el álbum o pasaporte para abrirlo
       slot.addEventListener('dblclick', () => {
