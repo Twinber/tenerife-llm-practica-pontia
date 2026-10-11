@@ -1,11 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 :root {
-  --bg-dark: #0a0a12;
-  --scumm-blue: rgba(8, 12, 60, 0.92);
-  --scumm-border: #4a4adf;
-  --scumm-text: #ffffff;
-  --scumm-verb: #00dddd;
+  --bg-dark: #000000;
+  --hud-bg: rgba(6, 10, 40, 0.88);
+  --hud-border: #4455dd;
+  --scumm-verb: #00e5ff;
   --scumm-verb-active: #ffff55;
   --sentence-color: #ffaa00;
   --dialogue-twinber: #ffff55;
@@ -19,39 +18,37 @@
   user-select: none;
 }
 
-body {
+html, body {
+  width: 100%;
+  height: 100%;
   background-color: var(--bg-dark);
-  color: var(--scumm-text);
+  color: #ffffff;
   font-family: 'Press Start 2P', monospace, sans-serif;
+  overflow: hidden;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100vw;
-  height: 100vh;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
 }
 
-/* Contenedor Principal del Juego - Aprovecha toda la pantalla en 16:9 */
+/* Contenedor del Juego: Mantiene la proporción 16:9 EXACTA del background sin recortar nada */
 .game-screen {
   position: relative;
   width: 100vw;
   height: 100vh;
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 177.78vh; /* 16:9 aspect ratio */
+  max-height: 56.25vw;
   background: #000;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
 }
 
-/* 1. Viewport / Escenario Gráfico - 78% del alto para lucir todo el fondo */
+/* 1. Viewport / Escenario: 100% DEL TAMAÑO para ver el fondo íntegro */
 .scene-viewport {
   position: relative;
   width: 100%;
-  height: 78%;
+  height: 100%;
   overflow: hidden;
   cursor: crosshair;
 }
@@ -59,12 +56,11 @@ body {
 .scene-background {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
+  object-fit: fill; /* Muestra el 100% de la imagen desde el sol superior hasta el ancla inferior */
   display: block;
 }
 
-/* Barra Flotante Superior Minimalista */
+/* HUD Superior Minimalista */
 .top-hud-bar {
   position: absolute;
   top: 10px;
@@ -73,14 +69,14 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 25;
+  z-index: 30;
   pointer-events: none;
 }
 
 .hud-title {
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
   padding: 6px 12px;
-  border: 1px solid #333366;
+  border: 1px solid #444477;
   border-radius: 4px;
   font-size: 10px;
   color: #ffaa00;
@@ -94,7 +90,7 @@ body {
 }
 
 .hud-btn {
-  background: rgba(10, 15, 45, 0.85);
+  background: rgba(8, 12, 38, 0.85);
   color: #aaccff;
   border: 1px solid #4455aa;
   padding: 6px 10px;
@@ -109,18 +105,18 @@ body {
   color: #ffffff;
 }
 
-/* Hotspots Interactivos del Escenario */
+/* Hotspots Invisibles */
 .hotspot {
   position: absolute;
   cursor: pointer;
   z-index: 5;
 }
 
-/* Sprites de Personajes */
+/* Sprites de Personajes en el Escenario */
 .sprite-actor {
   position: absolute;
-  bottom: 10%;
-  height: 38%;
+  bottom: 8%; /* Situados perfectamente sobre los adoquines del muelle */
+  height: 34%;
   z-index: 10;
   pointer-events: none;
   transform-origin: bottom center;
@@ -133,22 +129,21 @@ body {
 
 #paco-actor {
   left: 82%;
-  height: 38%;
-  bottom: 9%;
+  height: 35%;
+  bottom: 7%;
   pointer-events: auto;
   cursor: pointer;
-  /* Mirar a la izquierda hacia Twinber por defecto */
-  transform: scaleX(-1);
+  transform: scaleX(-1); /* Mirando hacia Twinber */
 }
 
 /* Subtítulos de Diálogo */
 .dialogue-overlay {
   position: absolute;
-  top: 18%;
+  top: 16%;
   left: 8%;
   right: 8%;
   text-align: center;
-  z-index: 20;
+  z-index: 25;
   pointer-events: none;
   display: flex;
   align-items: center;
@@ -158,8 +153,8 @@ body {
 .dialogue-text {
   background: rgba(0, 0, 0, 0.88);
   border: 2px solid #333;
-  padding: 12px 20px;
-  font-size: 13px;
+  padding: 10px 18px;
+  font-size: 12px;
   line-height: 1.6;
   max-width: 80%;
   display: inline-block;
@@ -178,48 +173,56 @@ body {
   border-color: #0088aa;
 }
 
-/* 2. Línea de Frase Dinámica (Limpia y Compacta) */
-.sentence-bar {
-  width: 100%;
-  height: 4.5%;
-  background: #040624;
-  border-top: 2px solid var(--scumm-border);
-  border-bottom: 1px solid var(--scumm-border);
+/* 2. DOCK FLOTANTE SCUMM (Translúcido, elegante, no tapa el escenario) */
+.scumm-floating-dock {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92%;
+  max-width: 940px;
+  background: rgba(4, 8, 38, 0.85);
+  border: 2px solid #3d4dc6;
+  border-radius: 6px;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.9);
+  z-index: 20;
   display: flex;
-  align-items: center;
-  padding: 0 16px;
-  font-size: 11px;
-  color: var(--sentence-color);
-  text-shadow: 1px 1px #000;
-  z-index: 15;
+  flex-direction: column;
+  backdrop-filter: blur(4px);
+  transition: transform 0.2s ease;
 }
 
-.sentence-action {
+/* Línea de Frase Integrada en el Dock */
+.sentence-bar {
+  width: 100%;
+  padding: 5px 14px;
+  background: rgba(0, 0, 0, 0.6);
+  border-bottom: 1px solid #333388;
+  font-size: 10px;
+  color: var(--sentence-color);
+  text-shadow: 1px 1px #000;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* 3. Barra SCUMM Inferior Compacta (17.5% del alto total) */
-.scumm-panel {
-  width: 100%;
-  height: 17.5%;
-  background: var(--scumm-blue);
+/* Panel Inferior: Verbos + Inventario en una fila compacta */
+.dock-content {
   display: flex;
-  z-index: 15;
-  border-top: 1px solid #333388;
+  height: 60px;
+  padding: 4px 8px;
+  gap: 10px;
 }
 
-/* 3A. Matriz de Verbos */
+/* Matriz de Verbos Compacta */
 .verb-matrix {
-  width: 45%;
-  height: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  gap: 3px;
-  padding: 4px 8px;
-  border-right: 2px solid var(--scumm-border);
+  gap: 2px;
+  width: 42%;
+  border-right: 1px solid #333377;
+  padding-right: 8px;
 }
 
 .verb-btn {
@@ -227,7 +230,7 @@ body {
   color: var(--scumm-verb);
   border: 1px solid transparent;
   font-family: inherit;
-  font-size: 10px;
+  font-size: 9px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -238,7 +241,7 @@ body {
 
 .verb-btn:hover {
   color: var(--scumm-verb-active);
-  background: rgba(0, 50, 150, 0.4);
+  background: rgba(0, 80, 200, 0.4);
 }
 
 .verb-btn.active {
@@ -247,40 +250,38 @@ body {
   border-color: #ffff55;
 }
 
-/* 3B. Inventario de Twinber */
+/* Inventario de Twinber en fila horizontal */
 .inventory-grid {
-  width: 55%;
-  height: 100%;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 4px;
-  padding: 4px 8px;
-  background: rgba(4, 6, 32, 0.95);
+  display: flex;
+  gap: 8px;
+  width: 58%;
+  align-items: center;
 }
 
 .inventory-slot {
-  background: rgba(10, 15, 50, 0.8);
-  border: 1px solid #333377;
+  flex: 1;
+  height: 100%;
+  background: rgba(12, 18, 55, 0.7);
+  border: 1px solid #444488;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: 4px;
   transition: transform 0.1s, border-color 0.1s;
 }
 
 .inventory-slot:hover {
   border-color: #ffff55;
-  background: #001f5c;
-  transform: scale(1.04);
+  background: rgba(25, 45, 120, 0.85);
+  transform: scale(1.05);
 }
 
 .inventory-slot img {
-  max-width: 82%;
-  max-height: 82%;
+  max-width: 86%;
+  max-height: 86%;
   object-fit: contain;
   image-rendering: pixelated;
 }
@@ -294,7 +295,7 @@ body {
   text-shadow: 1px 1px #000;
 }
 
-/* Consola Retro Desplegable (Tecla ~) */
+/* Consola Retro (Tecla 'T') */
 .crt-console {
   display: none;
   position: absolute;
@@ -302,13 +303,13 @@ body {
   left: 0;
   width: 100%;
   height: 50%;
-  background: rgba(5, 10, 5, 0.95);
+  background: rgba(5, 10, 5, 0.96);
   border-bottom: 3px solid #00ff66;
   color: #00ff66;
   font-size: 10px;
   padding: 12px;
   overflow-y: auto;
-  z-index: 40;
+  z-index: 50;
   font-family: monospace;
 }
 .crt-console.visible {

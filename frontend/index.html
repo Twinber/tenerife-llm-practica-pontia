@@ -8,10 +8,10 @@
 </head>
 <body>
 
-  <!-- Pantalla Principal del Juego (Aprovecha todo el ancho y alto disponible) -->
+  <!-- Contenedor Principal (16:9 Nativo del Background) -->
   <main class="game-screen">
 
-    <!-- 1. ESCENARIO GRÁFICO MAXIMIZADO (83% de la pantalla) -->
+    <!-- 1. ESCENARIO GRÁFICO AL 100% (TODO EL FONDO VISIBLE) -->
     <section class="scene-viewport" id="scene-viewport">
       <img class="scene-background" src="assets/img/bg_puerto_de_la_cruz.jpg" alt="Puerto de la Cruz, Tenerife">
 
@@ -27,60 +27,59 @@
       <!-- Subtítulos de Diálogo (Amarillo Twinber / Cian Paco) -->
       <div class="dialogue-overlay" id="dialogue-container"></div>
 
-      <!-- Hotspots Interactivos del Muelle (Alineados con la imagen completa) -->
+      <!-- Hotspots Interactivos del Muelle (Alineados con la imagen completa 100%) -->
       <div id="hotspot-faro" class="hotspot" style="left: 2%; top: 40%; width: 14%; height: 22%;" title="Faro y Fortín de San Telmo"></div>
       <div id="hotspot-barca" class="hotspot" style="left: 33%; bottom: 25%; width: 18%; height: 16%;" title="Barca 'El Mojo'"></div>
       <div id="hotspot-teide" class="hotspot" style="left: 63%; top: 5%; width: 23%; height: 28%;" title="El Teide"></div>
       <div id="hotspot-casa" class="hotspot" style="left: 64%; top: 28%; width: 26%; height: 32%;" title="Casa Colonial Balcón de Tea"></div>
       <div id="hotspot-paco" class="hotspot" style="left: 79%; bottom: 6%; width: 15%; height: 46%;" title="Paco el Pescador"></div>
 
-      <!-- Actores: Sprites Transparentes -->
+      <!-- Actores: Sprites Transparentes sobre los Adoquines -->
       <img id="twinber-actor" class="sprite-actor" src="assets/img/sprites/twinber_idle_0.png" alt="Twinber">
       <img id="paco-actor" class="sprite-actor" src="assets/img/sprites/paco_idle_0.png" alt="Paco el Pescador">
     </section>
 
-    <!-- 2. LÍNEA DE FRASE DINÁMICA COMPACTA (4% de la pantalla) -->
-    <section class="sentence-bar">
-      <div class="sentence-action" id="sentence-action">Caminar hacia el muelle...</div>
-    </section>
-
-    <!-- 3. CUADRO DE MANDOS SCUMM INFERIOR COMPACTO (13% de la pantalla) -->
-    <section class="scumm-panel">
-      <!-- 3A. Matriz de Verbos -->
-      <nav class="verb-matrix">
-        <button class="verb-btn" data-verb="HABLAR">HABLAR</button>
-        <button class="verb-btn" data-verb="MIRAR">MIRAR</button>
-        <button class="verb-btn" data-verb="USAR">USAR</button>
-        <button class="verb-btn active" data-verb="IR A">IR A</button>
-        <button class="verb-btn" data-verb="CLIMA">CLIMA</button>
-        <button class="verb-btn" data-verb="PENSAR">💡 PENSAR</button>
-      </nav>
-
-      <!-- 3B. Inventario de Twinber -->
-      <div class="inventory-grid">
-        <div class="inventory-slot" data-item="Bolsa de Monedas de Oro">
-          <img src="assets/img/items/item_monedas.png" alt="Monedas">
-          <span class="slot-badge">15 💰</span>
-        </div>
-        <div class="inventory-slot" data-item="Pasaporte de Explorador">
-          <img src="assets/img/items/item_pasaporte.png" alt="Pasaporte">
-          <span class="slot-badge">0/10</span>
-        </div>
-        <div class="inventory-slot" data-item="Álbum de Fotos">
-          <img src="assets/img/items/item_album.png" alt="Álbum">
-          <span class="slot-badge">0/28</span>
-        </div>
-        <div class="inventory-slot" data-item="Brújula de Latón">
-          <img src="assets/img/items/item_brujula.png" alt="Brújula">
-        </div>
-        <div class="inventory-slot"></div>
-        <div class="inventory-slot"></div>
-        <div class="inventory-slot"></div>
-        <div class="inventory-slot"></div>
+    <!-- 2. DOCK FLOTANTE SCUMM (Compacto, elegante, no tapa el escenario) -->
+    <footer class="scumm-floating-dock">
+      <!-- Línea de Frase Dinámica -->
+      <div class="sentence-bar">
+        <span class="sentence-action" id="sentence-action">Caminar hacia el muelle...</span>
       </div>
-    </section>
 
-    <!-- Consola de Auditoría Retro (Tecla 'T' o '~') -->
+      <!-- Contenido del Dock: Verbos + Inventario en una fila -->
+      <div class="dock-content">
+        <!-- Matriz de Verbos Compacta -->
+        <nav class="verb-matrix">
+          <button class="verb-btn" data-verb="HABLAR">HABLAR</button>
+          <button class="verb-btn" data-verb="MIRAR">MIRAR</button>
+          <button class="verb-btn" data-verb="USAR">USAR</button>
+          <button class="verb-btn active" data-verb="IR A">IR A</button>
+          <button class="verb-btn" data-verb="CLIMA">CLIMA</button>
+          <button class="verb-btn" data-verb="PENSAR">💡 PENSAR</button>
+        </nav>
+
+        <!-- Inventario Horizontal de Twinber -->
+        <div class="inventory-grid">
+          <div class="inventory-slot" data-item="Bolsa de Monedas de Oro" title="Bolsa de Monedas de Oro">
+            <img src="assets/img/items/item_monedas.png" alt="Monedas">
+            <span class="slot-badge">15 💰</span>
+          </div>
+          <div class="inventory-slot" data-item="Pasaporte de Explorador" title="Pasaporte de Explorador">
+            <img src="assets/img/items/item_pasaporte.png" alt="Pasaporte">
+            <span class="slot-badge">0/10</span>
+          </div>
+          <div class="inventory-slot" data-item="Álbum de Fotos" title="Álbum de Fotos">
+            <img src="assets/img/items/item_album.png" alt="Álbum">
+            <span class="slot-badge">0/28</span>
+          </div>
+          <div class="inventory-slot" data-item="Brújula de Latón" title="Brújula de Latón">
+            <img src="assets/img/items/item_brujula.png" alt="Brújula">
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Consola de Auditoría Retro (Tecla 'T') -->
     <aside class="crt-console" id="crt-console">
       <div>*** CONSOLA DE AUDITORÍA Y TELEMETRÍA RETRO (TECLA 'T') ***</div>
       <div>-------------------------------------------------------</div>
