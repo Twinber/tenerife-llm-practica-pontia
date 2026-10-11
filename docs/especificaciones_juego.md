@@ -91,6 +91,19 @@
   * **Zona Centro (Clímax Final):**
     11. *El Teide* (Parador de las Cañadas, Roques de García, Teleférico y Cielo Starlight nocturno).
 
+* **Diseño y Visualización en UI (Cuaderno a Doble Página Abierta — 5 Pliegos):**
+  * **Estructura Real de Pasaporte Oficial:** Cuadernillo con cubierta de piel azul marino (`#0b1532`), ribete dorado y lomo central con efecto 3D y pespunte cosido (`#b89758`).
+  * **5 Pliegos Dobles (10 Páginas / 10 Sellos Oficiales):**
+    * *Pliego 1 / 5 (Págs. 01 - 02):* **Puerto de la Cruz** (Muelle Pesquero y San Telmo) + **La Orotava** (Valle de Taoro y Molino de Chano).
+    * *Pliego 2 / 5 (Págs. 03 - 04):* **Icod & Garachico** (Drago Milenario y El Caletón) + **San Cristóbal de La Laguna** (Ciudad Patrimonio UNESCO).
+    * *Pliego 3 / 5 (Págs. 05 - 06):* **Santa Cruz de Tenerife** (Capital Insular y Auditorio) + **Parque Rural de Anaga** (Reserva de la Biosfera y Laurisilva).
+    * *Pliego 4 / 5 (Págs. 07 - 08):* **Costa Adeje & Las Américas** (Litoral Sur) + **Los Gigantes & Masca** (Murallas Basálticas y Garganta).
+    * *Pliego 5 / 5 (Págs. 09 - 10):* **El Médano & Los Cristianos** (Montaña Roja y Bahía) + **Las Cañadas del Teide** (Cumbre 3.718m).
+  * **Sellos Gráficos Vectoriales Auténticos:**
+    * *Estado Sellado:* Sello circular retro con borde dentado, tipografía circular, icono emblemático en SVG (faro, molino, drago, catedral, auditorio, laurisilva, palmera, acantilado, volcán, Teide), fecha aduanera (`11 OCT 2026`), rúbrica del personaje que lo estampó (ej. *"Fdo: Paco el Pescador"*) e inclinación natural manual (`tilt-left` / `tilt-right`).
+    * *Estado Pendiente:* Recuadro punteado de seguridad oficial `[ ⭕ ESPACIO PARA VISADO ]`, marca de agua sutil y estado de advertencia `🔒 PENDIENTE DE EXPEDICIÓN`.
+  * **Navegación e Interacción:** Se abre usando `MIRAR` en el pasaporte o con doble clic en el inventario. Controles `◀ PLIEGO ANTERIOR` y `PLIEGO SIGUIENTE ▶`, atajos de teclado (`ArrowLeft`, `ArrowRight`, `Escape`) y sonido de pasar página de papel (`playPageTurn()`).
+
 ### 1.2. El Objetivo Secundario (Coleccionable Multimodal): El Álbum de Fotos de Tenerife
 * **Misión Opcional / Completionist:** Twinber lleva un **Álbum de Fotos de Tenerife** (28 fotografías reales extraídas y optimizadas de `TENERIFE.pdf`, catalogadas exhaustivamente en [`docs/matriz_fotos_rag.md`](file:///home/twinber/Projects/Master-IA/10-LLM/proyecto-tenerife/docs/matriz_fotos_rag.md)).
 * **Mecánica de Desbloqueo (Gatillo RAG Determinista):**

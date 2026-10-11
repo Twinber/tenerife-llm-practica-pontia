@@ -200,6 +200,11 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
        - `2. "¿Qué me puede contar de esta zona?"` (Consulta RAG genérica de zona, sin preconocimiento del PDF, desbloquea foto asociada).
        - `3. ⌨️ [ Input libre del usuario ]` (Prompt abierto al LLM tecleado en tiempo real con respuesta contextual del NPC y log de auditoría).
        - `4. "Tengo que marcharme. ¡Hasta luego!"` o `[ESC]` (Cierra el diálogo y restaura la botonera normal).
+  6. **Visualización del Pasaporte de Explorador a Doble Página (5 Pliegos):**
+     * Cuaderno oficial de visados abierto a doble página simultánea (5 pliegos x 2 páginas = 10 páginas / 10 sellos territoriales).
+     * Sellos vectoriales retro auténticos en tinta de colores, fecha de aduana, icono característico del enclave y firma del NPC.
+     * Ranuras bloqueadas con recuadro punteado de seguridad oficial y advertencia `🔒 PENDIENTE DE EXPEDICIÓN`.
+     * Navegación por pliegos con flechas, teclado y sonido de pasar página de papel (`playPageTurn()`).
 
 
 
