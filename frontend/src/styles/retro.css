@@ -141,6 +141,7 @@ html, body {
   left: 24%;
   bottom: 11%; /* Asentado firmemente sobre la superficie de los adoquines */
   z-index: 12;
+  transform: translateX(-50%) scaleX(1);
 }
 
 #paco-actor {
@@ -149,7 +150,7 @@ html, body {
   bottom: 8%; /* En línea con la red y los barriles */
   pointer-events: auto;
   cursor: pointer;
-  transform: scaleX(-1); /* Mirando hacia Twinber */
+  transform: translateX(-50%) scaleX(-1); /* Mirando hacia Twinber */
 }
 
 /* Subtítulos de Diálogo */

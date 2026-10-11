@@ -107,7 +107,7 @@ export class ViewportView {
   public render(): void {
     // 1. Renderizar Twinber
     this.twinberElem.style.left = `${this.twinber.xPct}%`;
-    this.twinberElem.style.transform = `scaleX(${this.twinber.facing})`;
+    this.twinberElem.style.transform = `translateX(-50%) scaleX(${this.twinber.facing})`;
     const tSrc = this.assetLoader.getActorSpritePath(
       'twinber',
       this.twinber.state,
@@ -119,7 +119,7 @@ export class ViewportView {
 
     // 2. Renderizar Paco
     this.pacoElem.style.left = `${this.paco.xPct}%`;
-    this.pacoElem.style.transform = `scaleX(${this.paco.facing})`;
+    this.pacoElem.style.transform = `translateX(-50%) scaleX(${this.paco.facing})`;
     const pSrc = this.assetLoader.getActorSpritePath(
       'paco',
       this.paco.state,

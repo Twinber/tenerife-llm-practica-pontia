@@ -1,15 +1,28 @@
 #!/usr/bin/env python3
 """
-Extractor de sprites transparentes para la aventura gráfica de Twinber.
-Extrae cada frame de Twinber, Paco y los objetos del inventario eliminando el fondo gris mediante flood-fill.
+Pipeline Canónico de Extracción y Normalización de Sprites (Zero-Jitter Engine)
+=============================================================================
+Reglas de Normalización para Animaciones 2D sin Desplazamientos Laterales:
+1. Lienzo Fijo Uniforme (Canvas Uniformity):
+   Todos los frames de un personaje (caminata, reposo, diálogo) deben compartir
+   exactamente el mismo ancho y alto de lienzo transparente (RGBA).
+2. Punto de Anclaje de Contacto con el Suelo (Ground Foot Anchor):
+   - Eje X: El centro de gravedad horizontal de los pies (el 15% inferior de píxeles)
+     se fija exactamente en el centro horizontal del lienzo (canvas_w // 2).
+   - Eje Y: La suela de los zapatos (píxel inferior del personaje) se alinea a una
+     línea de tierra constante (canvas_h - margen_inferior).
+3. Eliminación de Jitter:
+   Al gesticular con las manos o mover la boca en la animación de hablar, el cuerpo y
+   los pies permanecen fijos al milímetro sin bamboleo ni desplazamiento lateral.
 """
 from PIL import Image, ImageDraw
 import os
 
 def flood_remove_bg(crop_img, tol=30):
+    """Elimina el fondo neutro mediante flood-fill desde las esquinas."""
     im = crop_img.convert('RGBA')
     w, h = im.size
-    bg = im.getpixel((0, 0))[:3]
+    bg = im.getpixel((2, 2))[:3]
     mask = Image.new('L', (w, h), 0)
     pixels = im.load()
     mask_pixels = mask.load()
@@ -21,7 +34,7 @@ def flood_remove_bg(crop_img, tol=30):
                 mask_pixels[x, y] = 255
 
     # Inundar desde las 4 esquinas
-    for pt in [(0, 0), (w-1, 0), (0, h-1), (w-1, h-1)]:
+    for pt in [(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)]:
         if mask_pixels[pt[0], pt[1]] == 255:
             ImageDraw.floodfill(mask, pt, 128)
             
@@ -29,91 +42,99 @@ def flood_remove_bg(crop_img, tol=30):
         for y in range(h):
             if mask_pixels[x, y] == 128:
                 pixels[x, y] = (0, 0, 0, 0)
-                
-    # Auto-crop al contenido no transparente con padding de 2px
-    bbox = im.getbbox()
-    if bbox:
-        im = im.crop((max(0, bbox[0]-2), max(0, bbox[1]-2), min(w, bbox[2]+2), min(h, bbox[3]+2)))
     return im
 
-def extract_twinber():
-    sheet = Image.open('frontend/public/assets/img/sprite_twinber_sheet.jpg').convert('RGB')
+def extract_aligned_actor(sheet_path, num_rows, rows_config, canvas_w, canvas_h, anchor_x, anchor_y, actor_name, out_dir):
+    """
+    Extrae y centra cada frame de animación sobre un lienzo fijo uniforme,
+    alineando el punto de contacto de los pies con precisión milimétrica.
+    """
+    sheet = Image.open(sheet_path).convert('RGB')
     w, h = sheet.size
-    row_h = h // 3
-    out_dir = 'frontend/public/assets/img/sprites'
+    row_h = h // num_rows
     os.makedirs(out_dir, exist_ok=True)
     
-    # Fila 0: 6 frames walk
-    walk_boxes = [(29, 145), (309, 415), (563, 682), (773, 889), (1038, 1140), (1227, 1345)]
-    for i, (x1, x2) in enumerate(walk_boxes):
-        crop = sheet.crop((max(0, x1-10), 0, min(w, x2+10), row_h))
-        sprite = flood_remove_bg(crop)
-        sprite.save(f'{out_dir}/twinber_walk_{i}.png')
+    print(f"\n[ACTOR: {actor_name.upper()}] Normalizando sprites -> Lienzo: {canvas_w}x{canvas_h} | Anclaje: ({anchor_x}, {anchor_y})")
+    
+    for row_idx, anim_name, boxes in rows_config:
+        row_crop = sheet.crop((0, row_idx * row_h, w, (row_idx + 1) * row_h))
+        row_clean = flood_remove_bg(row_crop)
+        row_pix = row_clean.load()
         
-    # Fila 1: 4 frames idle
-    idle_boxes = [(146, 236), (475, 567), (799, 927), (1123, 1241)]
-    for i, (x1, x2) in enumerate(idle_boxes):
-        crop = sheet.crop((max(0, x1-10), row_h, min(w, x2+10), row_h * 2))
-        sprite = flood_remove_bg(crop)
-        sprite.save(f'{out_dir}/twinber_idle_{i}.png')
+        for i, (x1, x2) in enumerate(boxes):
+            # 1. Recopilar píxeles opacos del frame
+            pts = []
+            for x in range(max(0, x1 - 10), min(w, x2 + 10)):
+                for y in range(row_h):
+                    if row_pix[x, y][3] > 10:
+                        pts.append((x, y))
+                        
+            if not pts:
+                print(f"  [ALERTA] Frame vacío: {anim_name}_{i}")
+                continue
+                
+            min_x = min(p[0] for p in pts)
+            max_x = max(p[0] for p in pts)
+            min_y = min(p[1] for p in pts)
+            max_y = max(p[1] for p in pts)
+            
+            # 2. Extraer recorte ajustado del sprite
+            tight_sprite = row_clean.crop((min_x, min_y, max_x + 1, max_y + 1))
+            fw, fh = tight_sprite.size
+            
+            # 3. Calcular centro de gravedad horizontal de los pies (el 15% inferior de la silueta)
+            feet_thresh = max_y - int((max_y - min_y) * 0.15)
+            feet_pts = [p for p in pts if p[1] >= feet_thresh]
+            if not feet_pts:
+                feet_pts = pts
+            feet_cx = sum(p[0] for p in feet_pts) / len(feet_pts)
+            
+            # 4. Desplazamiento exacto para clavar los pies en (anchor_x, anchor_y)
+            offset_x = int(round(anchor_x - (feet_cx - min_x)))
+            offset_y = int(round(anchor_y - fh))
+            
+            # 5. Componer sobre lienzo fijo transparente
+            canvas = Image.new('RGBA', (canvas_w, canvas_h), (0, 0, 0, 0))
+            canvas.paste(tight_sprite, (offset_x, offset_y), tight_sprite)
+            
+            out_file = f"{out_dir}/{actor_name}_{anim_name}_{i}.png"
+            canvas.save(out_file)
+            print(f"  ✓ {actor_name}_{anim_name}_{i}.png | Sprite: {fw}x{fh} -> Offset: ({offset_x}, {offset_y})")
 
-    # Fila 2: 4 frames talk
-    talk_boxes = [(147, 269), (476, 614), (805, 935), (1128, 1221)]
-    for i, (x1, x2) in enumerate(talk_boxes):
-        crop = sheet.crop((max(0, x1-10), row_h * 2, min(w, x2+10), h))
-        sprite = flood_remove_bg(crop)
-        sprite.save(f'{out_dir}/twinber_talk_{i}.png')
-    print("Twinber sprites extracted successfully!")
+def extract_twinber():
+    extract_aligned_actor(
+        sheet_path='frontend/public/assets/img/sprite_twinber_sheet.jpg',
+        num_rows=3,
+        rows_config=[
+            (0, 'walk', [(29, 145), (309, 415), (563, 682), (773, 889), (1038, 1140), (1227, 1345)]),
+            (1, 'idle', [(146, 236), (475, 567), (799, 927), (1123, 1241)]),
+            (2, 'talk', [(147, 269), (476, 614), (805, 935), (1128, 1221)])
+        ],
+        canvas_w=192,
+        canvas_h=256,
+        anchor_x=96,
+        anchor_y=250,
+        actor_name='twinber',
+        out_dir='frontend/public/assets/img/sprites'
+    )
 
 def extract_paco():
-    sheet = Image.open('frontend/public/assets/img/sprite_paco_sheet.jpg').convert('RGB')
-    w, h = sheet.size
-    row_h = h // 2
-    out_dir = 'frontend/public/assets/img/sprites'
-    os.makedirs(out_dir, exist_ok=True)
-    
-    # Fila 0: 4 frames idle
-    idle_boxes = [(66, 266), (362, 561), (660, 834), (956, 1158)]
-    for i, (x1, x2) in enumerate(idle_boxes):
-        crop = sheet.crop((max(0, x1-10), 0, min(w, x2+10), row_h))
-        sprite = flood_remove_bg(crop)
-        sprite.save(f'{out_dir}/paco_idle_{i}.png')
-
-    # Fila 1: 4 frames talk
-    talk_boxes = [(66, 269), (363, 582), (659, 867), (957, 1117)]
-    for i, (x1, x2) in enumerate(talk_boxes):
-        crop = sheet.crop((max(0, x1-10), row_h, min(w, x2+10), h))
-        sprite = flood_remove_bg(crop)
-        sprite.save(f'{out_dir}/paco_talk_{i}.png')
-    print("Paco sprites extracted successfully!")
-
-def extract_items():
-    sheet = Image.open('frontend/public/assets/img/items_inventory_sheet.jpg').convert('RGB')
-    w, h = sheet.size
-    cell_w = w // 4
-    cell_h = h // 2
-    out_dir = 'frontend/public/assets/img/items'
-    os.makedirs(out_dir, exist_ok=True)
-    
-    names = [
-        ["item_monedas", "item_pasaporte", "item_album", "item_gofio"],
-        ["item_comanda", "item_billete", "item_platano", "item_brujula"]
-    ]
-    
-    for r in range(2):
-        for c in range(4):
-            # Recortar celda evitando el texto inferior (últimos 70 px de la celda)
-            x1 = c * cell_w
-            y1 = r * cell_h
-            x2 = (c + 1) * cell_w
-            y2 = (r + 1) * cell_h - 70
-            crop = sheet.crop((x1, y1, x2, y2))
-            sprite = flood_remove_bg(crop, tol=25)
-            # Redimensionar limpiamente a 48x48 o mantener proporción
-            sprite.save(f'{out_dir}/{names[r][c]}.png')
-    print("Item icons extracted successfully!")
+    extract_aligned_actor(
+        sheet_path='frontend/public/assets/img/sprite_paco_sheet.jpg',
+        num_rows=2,
+        rows_config=[
+            (0, 'idle', [(66, 266), (362, 561), (660, 834), (956, 1158)]),
+            (1, 'talk', [(66, 269), (363, 582), (659, 867), (957, 1117)])
+        ],
+        canvas_w=280,
+        canvas_h=400,
+        anchor_x=140,
+        anchor_y=390,
+        actor_name='paco',
+        out_dir='frontend/public/assets/img/sprites'
+    )
 
 if __name__ == '__main__':
     extract_twinber()
     extract_paco()
-    extract_items()
+    print("\n¡Extracción y normalización de todos los actores completada con éxito!")

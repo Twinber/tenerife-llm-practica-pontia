@@ -434,6 +434,26 @@ Para evitar la frustración clásica de las aventuras gráficas:
   * **Estado `TALK` (Hablando en vivo):** Mientras el LLM emite tokens por streaming (`delta.content`), el contenedor del personaje que habla adquiere la clase CSS `.is-talking` (animación de mandíbula y gestos retro).
   * **Retorno a Reposo:** Al detectarse `finish_reason == "stop"`, se retira la clase `.is-talking` y el personaje regresa a `IDLE`.
 
+### 1.17.1. Reglas Canónicas de Extracción, Normalización y Anclaje de Sprites (Zero-Jitter Engine)
+Para evitar los desplazamientos laterales indeseados y el "bamboleo" durante las animaciones (especialmente visible al hablar o cambiar de fotograma), se establecen **4 reglas obligatorias e inmutables** para Twinber, Paco y cualquier personaje futuro:
+
+1. **Lienzo Fijo Uniforme (Uniform Bounding Canvas):**  
+   Todos los frames de un mismo personaje (ciclos de caminata, reposo y diálogo) **deben compartir exactamente la misma resolución de lienzo transparente RGBA**.
+   * *Twinber:* Exactamente `192 x 256 px` en todos sus 14 fotogramas (6 walk, 4 idle, 4 talk).
+   * *Paco el Pescador:* Exactamente `280 x 400 px` en todos sus 8 fotogramas (4 idle, 4 talk).
+   * *Futuros Personajes (Chano, Manolo, Taquillero, Yeray):* Se define un lienzo uniforme que envuelva holgadamente la silueta más ancha y alta de su hoja de sprites.
+2. **Punto de Anclaje de Contacto con el Suelo Invariante (Ground Foot Anchor):**  
+   * **Eje Horizontal (X):** El centro de masa horizontal de los pies (el 15% inferior de la silueta en contacto con los adoquines) se alinea **estrictamente en el centro horizontal del lienzo** ($X_{\text{anchor}} = \text{ancho} // 2$).
+   * **Eje Vertical (Y):** La suela de los zapatos se apoya sobre una **línea de tierra constante** ($Y_{\text{anchor}} = \text{alto} - \text{margen}$).
+   * Al gesticular con las manos o mover la mandíbula al hablar, los pies y el eje de la columna permanecen clavados al milímetro en la misma coordenada, suprimiendo al 100% el temblor o jitter lateral.
+3. **Anclaje CSS y Transformación con `translateX(-50%)`:**  
+   * En CSS (`retro.css`) y en el bucle de renderizado reactivo (`ViewportView.ts`):
+     `transform: translateX(-50%) scaleX(facing);`
+     `transform-origin: bottom center;`
+   * La coordenada `left: xPct%` define con exactitud matemática el centro de los pies del actor en el escenario. Al girar hacia la izquierda (`facing = -1`) o derecha (`facing = 1`), el personaje pivota sobre sus propios talones sin desplazarse de su posición.
+4. **Pipeline Automatizado (`scripts/extract_assets.py`):**  
+   Cualquier nueva hoja de sprites debe procesarse mediante la función canónica `extract_aligned_actor()`, que calcula automáticamente el centroide de los pies mediante flood-fill y compone cada fotograma centrado sobre el lienzo uniforme correspondiente.
+
 * **Bucles Ambientales de Enclave (Capa 1):**
   * *Puerto de la Cruz:* Olas rompiendo en el muelle y gaviotas flotando.
   * *La Orotava:* Aspas giratorias del Molino de Chano (`animation: rotate 6s linear infinite`).
