@@ -133,12 +133,21 @@
 
 ### 1.6. Microeconomía, Franjas Laterales y Matriz Canónica de Objetos
 
-#### 1.6.1. Reubicación Espacial del Inventario: Las Dos Franjas Laterales
-* **Descongestión del Escenario (Cero Intrusión Visual):** Se elimina por completo la rejilla de inventario horizontal del dock inferior flotante de SCUMM. Esto permite compactar el dock central a solo ~440 px (únicamente la barra de frase dinámica y la matriz 3x2 de verbos), despejando al 100% el fondo panorámico (adoquines del muelle, barca «El Mojo», redes y aguas atlánticas).
+#### 1.6.1. Reubicación Espacial del Inventario y Supresión Total de la Rejilla de Verbos
+* **Eliminación Total de la Rejilla de Verbos SCUMM:** Se suprime definitivamente la botonera de verbos (HABLAR, MIRAR, USAR, COMPRAR, VIAJAR, PENSAR). Estorbaban la visión del escenario y resultaban redundantes.
+* **Cursor Inteligente y Acciones Contextuales Automáticas:**
+  * **Al pasar el ratón por un personaje (NPC):** Se activa automáticamente la acción contextual `"Hablar con [Nombre]"` (ej. `"Hablar con Paco el Pescador"`). Al pulsar sobre el personaje, Twinber se aproxima e inicia la conversación.
+  * **Al pasar el ratón por elementos del escenario (Hotspots):** Se activa automáticamente `"Mirar [Elemento]"` (ej. `"Mirar Faro y Fortín de San Telmo"`). Al pulsar, Twinber examina el lugar y activa la inspección/desbloqueo fotográfico.
+  * **Al pulsar en el suelo:** Twinber camina hacia las coordenadas indicadas (`"Caminar hacia el muelle..."`).
+  * **Objetos como Llaves Pasivas:** Se descarta el verbo `USAR`. Los objetos funcionan como llaves de progresión (*keys*): si el jugador posee el objeto en su inventario, la ruta o acción se valida de forma transparente. Pulsar sobre un objeto en la franja lateral ejecuta su inspección *in-character* o abre su modal (Pasaporte, Álbum).
+  * **Viaje Directo vía Mapa:** Pulsar sobre el *Mapa de Tenerife* en la barra lateral activa directamente la acción de viaje insular.
+  * **Comprar Integrado en Diálogo:** Descartado el verbo independiente de compra; en aquellos personajes que tengan artículos a la venta (Chano, Manolo, Taquilla, Frutero), la adquisición se realiza mediante una opción específica dentro de su menú de diálogo.
+  * **Suspensión Temporal de 'PENSAR':** No se implementa de momento como verbo ni botón; si más adelante la aventura requiere soporte de pistas ante atascos, se incorporará como un icono sutil de ayuda.
+* **Descongestión Absoluta del Escenario:** La barra inferior (`#action-dock`) se reduce a una única línea flotante ultra-compacta (`.sentence-bar`), dejando al 100% visible todo el fondo panorámico. Solo se expande verticalmente al interactuar con un NPC para mostrar las opciones de conversación.
 * **Aprovechamiento de las Franjas Negras Laterales (*Pillarboxing*):** Las pantallas panorámicas y monitores de sobremesa generan márgenes negros laterales al proyectar la escena 16:9. Se aprovechan estas dos franjas para alojar dos barras verticales temáticas de inventario con estética retro SCUMM (`#sidebar-left` y `#sidebar-right`):
-  * **Franja Lateral Izquierda (Equipo Básico Permanente — 4 ranuras):** Objetos de partida inmutables que acompañan a Twinber desde el inicio.
-  * **Franja Lateral Derecha (Objetos Adquiribles a NPCs — 4 ranuras):** Artículos que se van adquiriendo conforme se interactúa comercialmente con lugareños. **Permanecen completamente ocultos e invisibles hasta su adquisición efectiva en el juego**; la barra inicializa con ranuras vacías sutiles (`.empty-slot`). Los *hints*, *tooltips* (`title`) y textos reflejados en la barra de frase muestran **estrictamente el nombre limpio del objeto** (ej. `"Saco de Gofio"`, `"Plátano de Canarias"`), sin desvelar precios, procedencia, vendedores ni notas de metajuego.
-* **Iconografía Vectorial SVG Artesanal:** Se descartan las imágenes rasterizadas recortadas de baja resolución y se implementan **8 iconos vectoriales SVG artesanales en 64x64**, con degradados, paletas retro de 256 colores, ribetes oscuros de alto contraste y escalado perfecto e idéntico en cualquier densidad de pantalla.
+  * **Franja Lateral Izquierda (Equipo Básico Permanente — 4 ranuras):** Monedas, Pasaporte, Álbum y Mapa.
+  * **Franja Lateral Derecha (Objetos Adquiribles a NPCs — 4 ranuras):** Gofio, Comanda, Billete y Plátanos. Permanecen completamente ocultos e invisibles hasta su adquisición efectiva.
+* **Iconografía Vectorial SVG Artesanal:** 8 iconos vectoriales SVG artesanales en 64x64 con degradados, paletas retro de 256 colores y ribetes oscuros de alto contraste.
 
 #### 1.6.2. Matriz Canónica de Objetos del Juego
 A continuación se define la matriz oficial e inmutable de objetos, su cometido en la aventura, su coste económico y su ubicación en la interfaz:
@@ -146,13 +155,13 @@ A continuación se define la matriz oficial e inmutable de objetos, su cometido 
 | # | Objeto | Icono | Cometido en la Aventura | Precio | Ubicación en UI | Proveedor / Enclave | Utilidad Práctica |
 |---|--------|-------|--------------------------|--------|-----------------|---------------------|-------------------|
 | **01** | **Bolsa de Monedas de Oro** | `item_monedas.svg` | Fondo de maniobra económico de Twinber. Permite sufragar compras, provisiones y billetes de viaje. | **15 💰 (Saldo Inicial)** | Franja Izquierda (Ranura 1) | Inicial (Riñonera de Twinber) | Esencial (Economía del juego) |
-| **02** | **Pasaporte de Explorador** | `item_pasaporte.svg` | Cuaderno de 10 visados comarcales. Se abre a doble página (5 pliegos) para inspeccionar sellos oficiales con `MIRAR` o doble clic. | **Gratuito (0 💰)** | Franja Izquierda (Ranura 2) | Inicial (Oficial del Cabildo) | **Clave de Progresión Primaria** (10 sellos obligatorios) |
-| **03** | **Álbum de Fotos de Tenerife** | `item_album.svg` | Álbum coleccionable de recuerdos fotográficos (28 fotos reales de `TENERIFE.pdf`). Se abre en visor paginado modal. | **Gratuito (0 💰)** | Franja Izquierda (Ranura 3) | Inicial (Cámara 35mm al cuello) | Coleccionable Multimodal RAG (100% completionist) |
-| **04** | **Mapa de Tenerife** *(Sustituto de la Brújula)* | `item_mapa.svg` | Mapa cartográfico de carreteras insulares con el Teide y rosa náutica. **Pulsar sobre él es equivalente a activar la acción [VIAJAR]**. | **Gratuito (0 💰)** | Franja Izquierda (Ranura 4) | Inicial (Guía de bolsillo) | Navegación e Interfaz de Viaje (*Fast Travel*) |
-| **05** | **Saco de Gofio** | `item_gofio.svg` | Harina tradicional de trigo y millo tostado. Aporta la energía calórica requerida para internarse en las cumbres del norte. | **3 💰** | Franja Derecha (Ranura 1) | Chano el Molinero (Molino de La Orotava) | **Desbloqueo de Enclave:** Permite el ascenso hacia las cumbres |
-| **06** | **Comanda del Guachinche** | `item_comanda.svg` | Factura doblada de taberna con mancha circular de vino tinto. Contiene notas manuscritas que revelan la ruta entre el mar de nubes. | **4 💰** | Franja Derecha (Ranura 2) | Manolo el Tabernero (Guachinche en Santa Úrsula) | **Desbloqueo de Ruta:** Permite cruzar el mar de nubes de la TF-24 |
-| **07** | **Billete del Teleférico** | `item_billete.svg` | Ticket troquelado y numerado para subir en la cabina del teleférico desde la base (2.356 m) hasta La Rambleta (3.555 m). | **5 💰** | Franja Derecha (Ranura 3) | Taquilla Oficial (Las Cañadas del Teide) | **Clímax Final:** Acceso al pico para la contemplación Starlight |
-| **08** | **Plátanos de Canarias (x3)** | `item_platano.svg` | **Elemento humorístico / coleccionable alimenticio.** Plátano dulce con motitas (IGP). Se pueden adquirir hasta 3 unidades (1 💰 c/u). En el universo del juego, Twinber lo trata con total naturalidad *in-character* como un delicioso plátano para reponer fuerzas (sin romper la cuarta pared ni denominarlo "meme" en interfaz, diálogos o pistas). No resuelve acertijos ni abre puertas mecánicas, pero genera réplicas cómicas al intentar usarlo. | **1 💰 c/u (Total 3 💰)** | Franja Derecha (Ranura 4, contador `🍌 xN`) | Frutero ambulante canario (Puesto callejero) | Humor *in-character* / Diálogos clásicos de aventura gráfica |
+| **02** | **Pasaporte de Explorador** | `item_pasaporte.svg` | Cuaderno de 10 visados comarcales. Se abre a doble página (5 pliegos) para inspeccionar sellos oficiales con un clic. | **Gratuito (0 💰)** | Franja Izquierda (Ranura 2) | Inicial (Oficial del Cabildo) | **Clave de Progresión Primaria** (10 sellos obligatorios) |
+| **03** | **Álbum de Fotos de Tenerife** | `item_album.svg` | Álbum coleccionable de recuerdos fotográficos (28 fotos reales de `TENERIFE.pdf`). Se abre en visor paginado modal con un clic. | **Gratuito (0 💰)** | Franja Izquierda (Ranura 3) | Inicial (Cámara 35mm al cuello) | Coleccionable Multimodal RAG (100% completionist) |
+| **04** | **Mapa de Tenerife** *(Sustituto de la Brújula)* | `item_mapa.svg` | Mapa cartográfico de carreteras insulares con el Teide y rosa náutica. **Pulsar sobre él activa directamente el viaje insular**. | **Gratuito (0 💰)** | Franja Izquierda (Ranura 4) | Inicial (Guía de bolsillo) | Navegación e Interfaz de Viaje (*Fast Travel*) |
+| **05** | **Saco de Gofio** | `item_gofio.svg` | Harina tradicional de trigo y millo tostado. Aporta la energía calórica requerida para internarse en las cumbres del norte. | **3 💰** | Franja Derecha (Ranura 1) | Chano el Molinero (Molino de La Orotava) | **Llave de Enclave:** Permite el ascenso hacia las cumbres |
+| **06** | **Comanda del Guachinche** | `item_comanda.svg` | Factura doblada de taberna con mancha circular de vino tinto. Contiene notas manuscritas que revelan la ruta entre el mar de nubes. | **4 💰** | Franja Derecha (Ranura 2) | Manolo el Tabernero (Guachinche en Santa Úrsula) | **Llave de Ruta:** Permite cruzar el mar de nubes de la TF-24 |
+| **07** | **Billete del Teleférico** | `item_billete.svg` | Ticket troquelado y numerado para subir en la cabina del teleférico desde la base (2.356 m) hasta La Rambleta (3.555 m). | **5 💰** | Franja Derecha (Ranura 3) | Taquilla Oficial (Las Cañadas del Teide) | **Llave de Clímax Final:** Acceso al pico para contemplación Starlight |
+| **08** | **Plátanos de Canarias (x3)** | `item_platano.svg` | **Elemento humorístico / coleccionable alimenticio.** Plátano dulce con motitas (IGP). Se pueden adquirir hasta 3 unidades (1 💰 c/u). En el universo del juego, Twinber lo trata con total naturalidad *in-character* como un delicioso plátano para reponer fuerzas (sin romper la cuarta pared ni denominarlo "meme" en interfaz, diálogos o pistas). No resuelve acertijos ni abre puertas mecánicas, pero genera réplicas cómicas al examinarlo. | **1 💰 c/u (Total 3 💰)** | Franja Derecha (Ranura 4, contador `🍌 xN`) | Frutero ambulante canario (Puesto callejero) | Humor *in-character* / Diálogos clásicos de aventura gráfica |
 
 #### 1.6.3. Balance Económico Perfecto (Economía Cerrada de 15 Monedas)
 La economía de la aventura es matemáticamente exacta:
@@ -168,37 +177,37 @@ $$-3\text{ 💰 (3 Plátanos de Canarias a 1 💰 cada uno)} \longrightarrow 0\t
 ### 1.7. Sistema Adaptativo de Pistas (*Adaptive Hinting* ante Atascos)
 Para evitar la frustración clásica de las aventuras gráficas:
 1. **Pistas Orgánicas Progresivas:**  
-   Si el jugador intenta realizar una acción bloqueada, el Narrador no responde con un frío error, sino con pistas de dificultad adaptativa:
-   * *Nivel 1 (Sutil):* *"El frío de la cumbre te hiela los huesos... Si tan solo tuvieras algo de alimento tradicional canario que diera calor al cuerpo..."*
-   * *Nivel 2 (Directa, tras insistir):* *"Recuerdas que en La Orotava viste el cartel del Molino de Chano en la Calle de la Carrera. Quizás deberías pasar por allí."*
-2. **Acción `[ 💡 PENSAR / REFLEXIONAR ]`:**  
-   Un botón en la interfaz donde Twinber "piensa en voz alta". El LLM analiza el estado actual (`sellos pendientes`, `monedas`, `inventario`) y emite un monólogo interior sugiriendo el siguiente paso lógico.
+   Si el jugador intenta realizar una acción bloqueada, el Narrador no responde con un frío error, sino con pistas de dificultad adaptativa en boca de Twinber o de los lugareños.
+2. **Acción de Reflexión / Ayuda (Opcional Futura):**  
+   Pospuesta de momento para evitar saturación visual; si el testeo demuestra necesidad de apoyo extra, se incorporará un icono sutil de pista.
 
 ### 1.8. Catálogo de NPCs y Arquitectura Híbrida (Python Determinista + LLM Libre)
 * **¿Son NPCs Deterministas? (Arquitectura Híbrida):**
   * **La Lógica es 100% Determinista (Python):** Las precondiciones, el saldo de monedas y el inventario están blindados en código Python (`src/domain/state.py`). El LLM no puede "alucinar" compras sin llamar a la tool correspondiente.
   * **El Diálogo es 100% Libre (LLM):** La conversación, el humor, las anécdotas y las bromas en dialecto canario se generan en tiempo real sin árboles de diálogo rígidos ni frases enlatadas.
 * **Catálogo Oficial de NPCs:**
-  1. **Chano el Molinero (La Orotava):** Anciano sabio y orgulloso de la tradición del gofio y las alfombras del Teide. Vende la bolsa de gofio (3 monedas).
-  2. **Manolo el Tabernero (Santa Úrsula):** Hospitalario, socarrón y dicharachero (*"chacho, fleje, mi niño"*). Vende la comanda del guachinche (4 monedas) y entrega la nota de ruta.
-  3. **Operario del Teleférico (El Teide):** Técnico, precavido, obsesionado con la velocidad del viento y la seguridad de la cumbre. Vende el billete (5 monedas).
-  4. **Paco el Pescador (Puerto de la Cruz):** Marinero curtido y nostálgico. Da pistas sobre el mar y las playas salvajes.
+  1. **Chano el Molinero (La Orotava):** Anciano sabio y orgulloso de la tradición del gofio y las alfombras del Teide. Vende la bolsa de gofio (3 monedas) mediante opción de diálogo.
+  2. **Manolo el Tabernero (Santa Úrsula):** Hospitalario, socarrón y dicharachero (*"chacho, fleje, mi niño"*). Vende la comanda del guachinche (4 monedas) y entrega la nota de ruta mediante diálogo.
+  3. **Operario del Teleférico (El Teide):** Técnico, precavido, obsesionado con la velocidad del viento y la seguridad de la cumbre. Vende el billete (5 monedas) mediante diálogo.
+  4. **Paco el Pescador (Puerto de la Cruz):** Marinero curtido y nostálgico. Da pistas sobre el mar, sella el pasaporte y aporta anécdotas del muelle.
   5. **Yeray el Conductor de Guagua (TITSA):** Pragmático y simpático. Revisa los sellos del pasaporte antes de abrir las rutas entre zonas.
 
 ### 1.8.1. Arquitectura del Sistema de Diálogo Ramificado con NPCs (Estilo LucasArts)
-* **Filosofía de Conversación:** Se evita sobrecargar al jugador con listas extensas de preguntas prefabricadas que exigirían conocer previamente el contenido de `TENERIFE.pdf`. La conversación sigue una estructura limpia y ágil de **3 opciones operativas + 1 de despedida**:
+* **Filosofía de Conversación:** Se evita sobrecargar al jugador con listas extensas de preguntas prefabricadas que exigirían conocer previamente el contenido de `TENERIFE.pdf`. La conversación sigue una estructura limpia y ágil de **3 a 4 opciones operativas + 1 de despedida**:
   1. **Opción 1 (Mecánica sin RAG) — `"¿Puede sellarme el pasaporte?"`:**
      * Interacción funcional directa: el habitante o autoridad de la zona estampa el sello correspondiente en el Pasaporte de Explorador (`1/10` sellos comarcales).
      * Si ya está sellado, el NPC informa amablemente de que esa zona ya está validada y orienta hacia los siguientes enclaves.
   2. **Opción 2 (Consulta RAG Genérica de Zona) — `"¿Qué me puede contar de esta zona?"`:**
      * Actúa como prompt de consulta semántica genérico para el enclave actual (ej. Puerto de la Cruz $\rightarrow$ San Telmo, muelle y Lago Martiánez de César Manrique).
      * El Retriever devuelve la información cultural relevante sin exigir que el jugador conozca los secretos de antemano y **desbloquea la fotografía coleccionable asociada en el Álbum** (ej. Foto #02).
-  3. **Opción 3 (Prompt Abierto al LLM) — `⌨️ [ Input libre del usuario ]`:**
+  3. **Opción Mercante (Si el NPC tiene productos en venta) — `"Comprar [Artículo] ([Precio] 💰)"`:**
+     * Despliega la transacción económica directamente en la conversación, sin necesidad de un verbo externo.
+  4. **Opción Abierta (Prompt Abierto al LLM) — `⌨️ [ Input libre del usuario ]`:**
      * Un campo de texto interactivo con estética retro en el dock donde el jugador puede escribir cualquier pregunta o inquietud libre al NPC (gastronomía, historia, clima, leyendas locales).
      * Twinber vocaliza la pregunta formulada por el jugador y el NPC responde en tiempo real con su personalidad canaria y contexto geocercado.
      * Toda consulta queda registrada en la consola de telemetría bajo el tag `[PROMPT ABIERTO AL LLM]`.
-  4. **Opción 4 (Despedida) — `"Tengo que marcharme. ¡Hasta luego!"` o `[ESC]`:**
-     * Cierra el modo diálogo y restaura la botonera SCUMM normal (los 6 verbos e inventario).
+  5. **Opción de Despedida — `"Tengo que marcharme. ¡Hasta luego!"` o `[ESC]`:**
+     * Cierra el modo diálogo y restaura la barra de acción contextual normal de una sola línea.
 * **Control Manual de Progresión de Subtítulos (Sin Temporizadores Automáticos):**
   * **Pausa Indefinida:** Se eliminan los temporizadores de desvanecimiento automático (`waitTimer`). El texto permanece visible en pantalla hasta que el usuario decida avanzar, garantizando una lectura cómoda a su propio ritmo.
   * **Botón Interactivo `[ ▶ CONTINUAR [ESPACIO] ]`:** Se muestra un indicador parpadeante en el bocadillo de diálogo.

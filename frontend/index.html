@@ -62,41 +62,32 @@
         <img id="paco-actor" class="sprite-actor" src="/assets/img/sprites/paco_idle_0.png" alt="Paco el Pescador">
       </section>
 
-      <!-- 2. DOCK FLOTANTE SCUMM (Ultra-compacto y centrado: solo Verbos, no tapa el muelle) -->
-      <footer class="scumm-floating-dock">
-        <!-- Línea de Frase Dinámica -->
+      <!-- 2. BARRA DE ACCIÓN CONTEXTUAL Y DIÁLOGOS (Sin verbos invasivos: máxima visibilidad del escenario) -->
+      <footer class="scumm-floating-dock" id="action-dock">
+        <!-- Línea de Acción Dinámica (Contextual: Hablar con..., Mirar..., etc.) -->
         <div class="sentence-bar">
           <span class="sentence-action" id="sentence-action">Caminar hacia el muelle...</span>
         </div>
 
-        <!-- Contenido del Dock: Verbos Exclusivamente en formato 3x2 -->
-        <div class="dock-content" id="dock-verbs-inventory">
-          <nav class="verb-matrix">
-            <button class="verb-btn active" data-verb="HABLAR">HABLAR</button>
-            <button class="verb-btn" data-verb="MIRAR">MIRAR</button>
-            <button class="verb-btn" data-verb="USAR">USAR</button>
-            <button class="verb-btn" data-verb="COMPRAR">COMPRAR</button>
-            <button class="verb-btn" data-verb="VIAJAR">VIAJAR</button>
-            <button class="verb-btn" data-verb="PENSAR">💡 PENSAR</button>
-          </nav>
-        </div>
-
-        <!-- Modo Diálogo Ramificado (Oculto inicialmente) -->
+        <!-- Menú de Diálogo con NPCs (Visible únicamente durante la conversación) -->
         <div class="dock-dialogue hidden" id="dock-dialogue">
-          <div class="dialogue-choices-list">
+          <div class="dialogue-choices-list" id="dialogue-choices-list">
             <button class="dialogue-choice-btn" data-choice="passport">
               <span class="choice-num">1.</span> "¿Puede sellarme el pasaporte?"
             </button>
             <button class="dialogue-choice-btn" data-choice="lore">
               <span class="choice-num">2.</span> "¿Qué me puede contar de esta zona?"
             </button>
+            <button class="dialogue-choice-btn hidden" id="dialogue-choice-buy" data-choice="buy">
+              <span class="choice-num">3.</span> <span id="dialogue-buy-text">"¿Tiene algo a la venta?"</span>
+            </button>
             <form class="dialogue-free-form" id="dialogue-free-form">
-              <span class="choice-num">3.</span>
+              <span class="choice-num" id="dialogue-input-num">3.</span>
               <input type="text" id="dialogue-free-input" class="dialogue-free-input" placeholder="Escribe tu propia pregunta a Paco..." maxlength="100" autocomplete="off" />
               <button type="submit" class="dialogue-free-submit" id="dialogue-free-submit">PREGUNTAR ↵</button>
             </form>
             <button class="dialogue-choice-btn choice-exit" data-choice="exit">
-              <span class="choice-num">4.</span> "Tengo que marcharme. ¡Hasta luego!"
+              <span class="choice-num" id="dialogue-exit-num">4.</span> "Tengo que marcharme. ¡Hasta luego!"
             </button>
           </div>
         </div>

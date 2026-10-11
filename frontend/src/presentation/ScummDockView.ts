@@ -1,7 +1,6 @@
 // ==============================================================================
-// PRESENTATION: ScummDockView (Dock Flotante: Línea de Frase, Verbos, Inventario y Diálogos)
+// PRESENTATION: ScummDockView (Barra de Acción Contextual, Inventario y Diálogos)
 // ==============================================================================
-import { VerbType } from '../domain/types';
 import { ActionDispatcher } from '../application/ActionDispatcher';
 import { AudioService } from '../infrastructure/AudioService';
 
@@ -10,7 +9,6 @@ export class ScummDockView {
   private actionDispatcher: ActionDispatcher;
   private audioService: AudioService;
 
-  private dockVerbsInventory: HTMLElement;
   private dockDialogue: HTMLElement;
   private dialogueFreeForm: HTMLFormElement;
   private dialogueFreeInput: HTMLInputElement;
@@ -19,7 +17,6 @@ export class ScummDockView {
     this.actionDispatcher = actionDispatcher;
     this.audioService = audioService;
     this.sentenceActionElem = document.getElementById('sentence-action')!;
-    this.dockVerbsInventory = document.getElementById('dock-verbs-inventory')!;
     this.dockDialogue = document.getElementById('dock-dialogue')!;
     this.dialogueFreeForm = document.getElementById('dialogue-free-form') as HTMLFormElement;
     this.dialogueFreeInput = document.getElementById('dialogue-free-input') as HTMLInputElement;
@@ -50,12 +47,10 @@ export class ScummDockView {
 
     this.actionDispatcher.onDialogueModeChange = (active: boolean) => {
       if (active) {
-        this.dockVerbsInventory.classList.add('hidden');
         this.dockDialogue.classList.remove('hidden', 'dialogue-speaking');
         if (this.dialogueFreeInput) this.dialogueFreeInput.value = '';
       } else {
         this.dockDialogue.classList.add('hidden');
-        this.dockVerbsInventory.classList.remove('hidden');
       }
     };
 
@@ -98,63 +93,13 @@ export class ScummDockView {
       if (slot.classList.contains('empty-slot')) return;
       const item = slot.dataset.item;
       if (!item) return;
-
-      // 1. Mapa de Tenerife -> Activar modo VIAJAR
-      if (item === 'Mapa de Tenerife') {
-        this.audioService.playClick();
-        this.actionDispatcher.setVerb('VIAJAR');
-        document.querySelectorAll<HTMLButtonElement>('.verb-btn').forEach(b => {
-          b.classList.toggle('active', b.dataset.verb === 'VIAJAR');
-        });
-        return;
-      }
-
-      // 2. Álbum de Fotos -> Abrir modal
-      if (item === 'Álbum de Fotos') {
-        if (this.actionDispatcher.photoAlbumModal) {
-          this.actionDispatcher.photoAlbumModal.open();
-          return;
-        }
-      }
-
-      // 3. Pasaporte de Explorador -> Abrir modal
-      if (item === 'Pasaporte de Explorador') {
-        if (this.actionDispatcher.passportModal) {
-          this.actionDispatcher.passportModal.open();
-          return;
-        }
-      }
-
-      // Si el verbo activo es MIRAR, inspeccionar objeto
-      if (this.actionDispatcher.activeVerb === 'MIRAR') {
-        this.actionDispatcher.selectItem(item);
-        return;
-      }
-
-      // Limpiar selección previa o alternar para otros verbos (USAR, etc.)
-      const isSelected = slot.classList.contains('selected');
-      document.querySelectorAll('.inventory-slot').forEach(s => s.classList.remove('selected'));
-
-      if (!isSelected) {
-        slot.classList.add('selected');
-        this.actionDispatcher.selectItem(item);
-        this.audioService.playClick();
-        document.querySelectorAll<HTMLButtonElement>('.verb-btn').forEach(b => {
-          b.classList.toggle('active', b.dataset.verb === 'USAR');
-        });
-      } else {
-        this.actionDispatcher.selectItem(item);
-        this.audioService.playClick();
-        document.querySelectorAll<HTMLButtonElement>('.verb-btn').forEach(b => {
-          b.classList.toggle('active', b.dataset.verb === this.actionDispatcher.activeVerb);
-        });
-      }
+      this.actionDispatcher.selectItem(item);
     };
 
     slot.onmouseenter = () => {
       if (slot.classList.contains('empty-slot')) return;
       const item = slot.dataset.item;
-      if (item) this.actionDispatcher.setHoverTarget(item);
+      if (item) this.actionDispatcher.setHoverTarget(item, 'item');
     };
 
     slot.onmouseleave = () => {
@@ -163,32 +108,12 @@ export class ScummDockView {
 
     slot.ondblclick = () => {
       if (slot.classList.contains('empty-slot')) return;
-      if (slot.dataset.item === 'Álbum de Fotos' && this.actionDispatcher.photoAlbumModal) {
-        this.actionDispatcher.photoAlbumModal.open();
-      }
-      if (slot.dataset.item === 'Pasaporte de Explorador' && this.actionDispatcher.passportModal) {
-        this.actionDispatcher.passportModal.open();
-      }
-      if (slot.dataset.item === 'Mapa de Tenerife') {
-        this.actionDispatcher.setVerb('VIAJAR');
-        document.querySelectorAll<HTMLButtonElement>('.verb-btn').forEach(b => {
-          b.classList.toggle('active', b.dataset.verb === 'VIAJAR');
-        });
-      }
+      const item = slot.dataset.item;
+      if (item) this.actionDispatcher.selectItem(item);
     };
   }
 
   private bindEvents(): void {
-    // Botones de Verbos
-    document.querySelectorAll<HTMLButtonElement>('.verb-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.verb-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const verb = btn.dataset.verb as VerbType;
-        this.actionDispatcher.setVerb(verb);
-      });
-    });
-
     // Vincular slots de inventario existentes (Franja Izquierda y Ranuras Iniciales)
     document.querySelectorAll<HTMLElement>('.inventory-slot').forEach(slot => {
       this.bindSlotClick(slot);
@@ -197,7 +122,7 @@ export class ScummDockView {
     // Botones de Opciones de Diálogo
     document.querySelectorAll<HTMLButtonElement>('.dialogue-choice-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const choice = btn.dataset.choice as 'passport' | 'lore' | 'exit';
+        const choice = btn.dataset.choice as 'passport' | 'lore' | 'buy' | 'exit';
         if (choice) {
           this.audioService.playClick();
           this.actionDispatcher.selectDialogueChoice(choice);
