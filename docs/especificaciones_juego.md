@@ -75,21 +75,24 @@
 ### 1.1. El Objetivo del Juego: El Pasaporte de Explorador
 * **La Misión de Twinber:** Twinber desembarca en Tenerife con un **Pasaporte de Explorador** que debe ir sellando visitando cada rincón de la isla.
 * **El Gran Final (Clímax):** El ascenso a las cumbres del Teide y la contemplación de un cielo estrellado inolvidable desde el Parque Nacional, con las tools `get_weather` y `get_starlight_conditions`.
-* **Las 10+1 Pantallas Visibles con Fondos Pixel-Art Representativos:**
-  * **Zona Norte (5 sellos obligatorios):**
-    1. *Santa Cruz de Tenerife* (Avenida Marítima, Plaza de España, Auditorio).
-    2. *San Cristóbal de La Laguna* (Casco colonial, Plaza de la Concepción).
-    3. *Parque Rural de Anaga* (Mirador Pico del Inglés y Playa salvaje de Benijo).
-    4. *La Orotava* (Balcones de madera, Molino de Chano y gofio).
-    5. *Puerto de la Cruz* (Muelle pesquero, San Telmo y Lago Martiánez).
-  * **Zona Sur (5 sellos obligatorios):**
-    6. *Costa Adeje* (Playas de Troya/Torviscas, Siam Park).
-    7. *Los Gigantes* (Acantilados volcánicos y avistamiento de cetáceos).
-    8. *Masca* (Caserío y sendero del barranco).
-    9. *El Médano & La Tejita* (Montaña Roja y playas de viento).
-    10. *Los Cristianos* (Puerto marinero y Playa de Las Vistas).
-  * **Zona Centro (Clímax Final):**
-    11. *El Teide* (Parador de las Cañadas, Roques de García, Teleférico y Cielo Starlight nocturno).
+* **Los 13 Enclaves Oficiales con Fondos Pixel-Art Panorámicos (16:9 - 1280x720 px):**
+  * **Comarca Norte (5 enclaves):**
+    1. *Puerto de la Cruz:* Muelle pesquero tradicional, espigón, faro y fortín de San Telmo.
+    2. *La Orotava:* Casco histórico señorial, balcones de tea, alfombras florales y Molino de Gofio de Chano.
+    3. *Santa Úrsula:* Guachinche tradicional rústico, parras, barricas y gastronomía autóctona.
+    4. *Icod de los Vinos:* Drago Milenario, Plaza de San Marcos e historia botánica insular.
+    5. *Garachico:* Piscinas naturales de lava de El Caletón y Castillo de San Miguel (erupción de 1706).
+  * **Comarca Metropolitana y Anaga (3 enclaves):**
+    6. *San Cristóbal de La Laguna:* Trazado urbano colonial en cuadrícula de 1496 (Patrimonio de la Humanidad UNESCO).
+    7. *Santa Cruz de Tenerife:* Plaza de España, dársena portuaria y vanguardia del Auditorio de Tenerife.
+    8. *Parque Rural de Anaga:* Reserva de la Biosfera, bosque reliquia de laurisilva terciaria y brumas de los alisios.
+  * **Comarca Sur (3 enclaves):**
+    9. *Costa Adeje:* Playa de Troya, paseo marítimo, deportes acuáticos y vistas abiertas a La Gomera.
+    10. *Barranco de Masca:* Caserío tradicional guanche colgado entre crestas y verticalidad de 600m en los acantilados.
+    11. *El Médano:* Montaña Roja, dunas fósiles, bahía natural y referente mundial de deportes de viento.
+  * **Comarca Cumbres y Teide (2 enclaves - Clímax Final):**
+    12. *Las Cañadas del Teide (2.356 m):* Parque Nacional, Roques de García, Llano de Ucanca y Estación Base del Teleférico.
+    13. *Pico del Teide (3.718 m):* Cráter somital, La Rambleta, vista sobre el archipiélago y Reserva Starlight (Cielo Nocturno).
 
 * **Diseño y Visualización en UI (Cuaderno a Doble Página Abierta — 5 Pliegos):**
   * **Estructura Real de Pasaporte Oficial:** Cuadernillo con cubierta de piel azul marino (`#0b1532`), ribete dorado y lomo central con efecto 3D y pespunte cosido (`#b89758`).
@@ -116,10 +119,15 @@
   * **Pie de Foto Conciso:** Al pie de la fotografía aparece el texto oficial de `TENERIFE.pdf` y la página de procedencia.
   * **Cero Pistas / Spoilers:** Las fotos no desbloqueadas se muestran como ranuras vacías bloqueadas con el texto `[ 📷 FOTO #XX - BLOQUEADA ]`, sin desvelar nombres ni pistas que arruinen la exploración.
 
-### 1.3. Reglas de Gating Deterministas (Progresión por Zonas en Python)
-* **El Estado manda (Cero Alucinaciones):** El pasaporte se modela como un objeto Pydantic determinista (`PasaporteTenerife`).
-* **Barrera Norte $\rightarrow$ Sur:** Se deben visitar y sellar **las 5 ubicaciones del Norte** para desbloquear las guaguas hacia el Sur. Si el jugador intenta saltar al Sur antes de tiempo, los conductores de TITSA o los NPCs le cortan el paso con humor canario.
-* **Barrera Sur $\rightarrow$ El Teide:** Se deben tener **los 5 sellos del Sur** para que los guardas forestales permitan el ascenso a las Cañadas del Teide por la TF-24.
+### 1.3. Reglas de Gating Deterministas (Progresión por Zonas e Insular - `TravelRules.ts`)
+* **El Estado manda (Cero Alucinaciones):** El pasaporte y las reglas de viaje se modelan en el dominio determinista (`TravelRules.ts` / `PasaporteTenerife`). El avance no depende de arbitrariedades del LLM sino de validaciones estrictas de estado:
+  1. **Punto de Partida (Puerto de la Cruz - Muelle Pesquero):** Twinber desembarca en el muelle. Para poder abordar las guaguas de enlace a otros pueblos del norte, debe interactuar con **Paco el Pescador** y conseguir el **primer sello oficial** (`1 sello`).
+  2. **Comarca Norte Abierta:** Con el sello de Paco, los enclaves de la comarca norte (La Orotava, Santa Úrsula, Icod de los Vinos, Garachico) quedan abiertos a la exploración.
+  3. **Comarca Metropolitana (La Laguna y Santa Cruz):** El conductor de TITSA por la autopista TF-5 exige haber reunido al menos **2 sellos** insulares en el pasaporte.
+  4. **Parque Rural de Anaga (Reserva de la Biosfera):** El acceso por las curvas de la TF-12 requiere haber explorado y sellado previamente la zona metropolitana (**La Laguna o Santa Cruz** con $\ge 2$ sellos, o disponer de $\ge 3$ sellos en la isla).
+  5. **Comarca Sur (Costa Adeje, Masca, El Médano):** La línea interurbana de la autopista TF-1 exige al menos **3 sellos** en el pasaporte para cruzar hacia el sur de la isla.
+  6. **Las Cañadas del Teide (Estación Base 2.356 m):** Los guardas forestales de la TF-21 exigen haber explorado la isla y disponer de al menos **4 sellos** en el pasaporte.
+  7. **Pico del Teide (Cumbre Somital 3.718 m - Clímax Final):** Requiere partir obligatoriamente desde la estación base de Las Cañadas del Teide y disponer en el inventario del **"Billete del Teleférico"** (adquirido al Operario en Las Cañadas por 5 monedas).
 
 ### 1.4. RAG Geocercado (*Spatial Context Filter* & Contención con Humor)
 * **Consulta Local Libre:** En cada enclave, el jugador puede preguntar lo que quiera sobre *esa* ubicación. La información se extrae del RAG de `TENERIFE.pdf` con metadatos filtrados por lugar (`where={"lugar": current_location}`).
@@ -185,12 +193,20 @@ Para evitar la frustración clásica de las aventuras gráficas:
 * **¿Son NPCs Deterministas? (Arquitectura Híbrida):**
   * **La Lógica es 100% Determinista (Python):** Las precondiciones, el saldo de monedas y el inventario están blindados en código Python (`src/domain/state.py`). El LLM no puede "alucinar" compras sin llamar a la tool correspondiente.
   * **El Diálogo es 100% Libre (LLM):** La conversación, el humor, las anécdotas y las bromas en dialecto canario se generan en tiempo real sin árboles de diálogo rígidos ni frases enlatadas.
-* **Catálogo Oficial de NPCs:**
-  1. **Chano el Molinero (La Orotava):** Anciano sabio y orgulloso de la tradición del gofio y las alfombras del Teide. Vende la bolsa de gofio (3 monedas) mediante opción de diálogo.
-  2. **Manolo el Tabernero (Santa Úrsula):** Hospitalario, socarrón y dicharachero (*"chacho, fleje, mi niño"*). Vende la comanda del guachinche (4 monedas) y entrega la nota de ruta mediante diálogo.
-  3. **Operario del Teleférico (El Teide):** Técnico, precavido, obsesionado con la velocidad del viento y la seguridad de la cumbre. Vende el billete (5 monedas) mediante diálogo.
-  4. **Paco el Pescador (Puerto de la Cruz):** Marinero curtido y nostálgico. Da pistas sobre el mar, sella el pasaporte y aporta anécdotas del muelle.
-  5. **Yeray el Conductor de Guagua (TITSA):** Pragmático y simpático. Revisa los sellos del pasaporte antes de abrir las rutas entre zonas.
+* **Catálogo Oficial de los 13 NPCs Insulares (+ Twinber Protagonista = 14 Actores):**
+  1. **Paco el Pescador (Puerto de la Cruz - Muelle Pesquero):** Patrón de pesca curtido y veterano de pelo blanco y boina. Otorga el primer sello del pasaporte indispensable para viajar, ofrece consejos de navegación y vende plátano de avituallamiento. Desbloquea la Foto #02 (Lago Martiánez de César Manrique) vía RAG al indagar sobre la zona.
+  2. **Chano el Molinero (La Orotava - Molino de Gofio):** Maestro molinero tradicional cubierto de harina fina de millo tostado. Vende el *Saco de Gofio* (3 monedas) mediante opción de diálogo y relata la historia de los molinos de agua y las alfombras de flores del Corpus Christi.
+  3. **Manolo el Tabernero (Santa Úrsula - Guachinche Tradicional):** Tabernero jovial, barrigudo y dicharachero (*"¡chacho, fleje, mi niño!"*) con delantal a cuadros y jarra de barro de vino del país. Vende la *Comanda del Guachinche* (4 monedas) con las notas de ruta manuscritas para orientarse en la TF-24 y el mar de nubes.
+  4. **Don Cándido (Icod de los Vinos - Drago Milenario):** Ilustre botánico y cronista local con guayabera de lino, sombrero de paja y bastón de madroño. Desvela la savia mística del drago sagrado y la botánica autóctona insular.
+  5. **Doña Nieves la Caladora (Garachico - El Caletón):** Entrañable anciana canaria artesana con gafas redondas, refajo tradicional y labor de calado canario entre las manos. Relata la erupción volcánica del Volcán Negro de 1706 que sepultó el floreciente puerto comercial.
+  6. **Profesora Herminia (San Cristóbal de La Laguna - Casco Histórico):** Catedrática de historia de la Universidad de La Laguna con cartera de cuero y gafas de carey. Explica el trazado en cuadrícula de 1496 (modelo de las ciudades coloniales de América y Patrimonio Mundial UNESCO).
+  7. **Oficial Morales (Santa Cruz de Tenerife - Puerto y Auditorio):** Comandante naval de la capitanía marítima con uniforme de gala, galones dorados y prismáticos de horizonte. Rememora la victoria insular de 1797 frente a la escuadra del Almirante Nelson y la vanguardia cultural del Auditorio de Calatrava.
+  8. **Yeray el Guarda Forestal (Parque Rural de Anaga - Laurisilva):** Guardián ambiental de la Reserva de la Biosfera con vara tradicional de acebiño y botas de monte. Guía a través de los bosques relictos del Terciario, helechos gigantes y el fenómeno de la lluvia horizontal por los alisios.
+  9. **Ayoze el Socorrista (Costa Adeje - Playa de Troya):** Atlético socorrista de costa dorada con torpedo de rescate y señal de shaka. Informa sobre la seguridad de las corrientes en el litoral sur, avistamiento de cetáceos y panorámicas de la isla de La Gomera.
+  10. **Tanausú el Guía de Montaña (Masca - Garganta del Barranco):** Robusto guía de alta montaña con barba poblada, bastones de trekking y mochila técnica. Advierte sobre la vertiginosa garganta del barranco, los acantilados basálticos de 600m y leyendas de antiguos piratas.
+  11. **El Frutero Canario (El Médano - Montaña Roja):** Alegre vendedor ambulante con visera de paja y cesta de mimbre colmada de plátanos con motitas. Vende plátanos dulces (1 moneda c/u) y ensalza la fuerza de los vientos alisios que atraen a windsurfistas de todo el planeta.
+  12. **Operario del Teleférico (Las Cañadas del Teide - Estación Base 2.356 m):** Técnico de alta montaña con anorak térmico reflectante, gorro de lana y walkie-talkie. Valida la velocidad del viento y las condiciones de cumbre antes de vender el *Billete del Teleférico* (5 monedas).
+  13. **El Guardián del Teide (Pico del Teide - Cumbre 3.718 m):** Místico sabio y astrónomo de cumbre con capa canaria de lana tradicional, larga barba blanca y catalejo astronómico de latón. Protagonista del clímax final, la leyenda guanche de Guayota encerrado por Achamán, la validación de las 3 preguntas del viaje y la contemplación del cielo Starlight.
 
 ### 1.8.1. Arquitectura del Sistema de Diálogo Ramificado con NPCs (Estilo LucasArts)
 * **Filosofía de Conversación:** Se evita sobrecargar al jugador con listas extensas de preguntas prefabricadas que exigirían conocer previamente el contenido de `TENERIFE.pdf`. La conversación sigue una estructura limpia y ágil de **3 a 4 opciones operativas + 1 de despedida**:
@@ -406,7 +422,7 @@ Para evitar la frustración clásica de las aventuras gráficas:
   ```
 
 * **Esquema Formal del Hotspot (`SceneHotspot`):**
-  Cada uno de los 10+1 enclaves define un conjunto de puntos de interés interactuables mediante coordenadas relativas (%) para garantizar compatibilidad responsive:
+  Cada uno de los 13 enclaves define un conjunto de puntos de interés interactuables mediante coordenadas relativas (%) para garantizar compatibilidad responsive:
   ```python
   from typing import Literal, Optional
   from pydantic import BaseModel, Field
@@ -633,13 +649,13 @@ Para evitar los desplazamientos laterales indeseados y el "bamboleo" durante las
 
 | Tipo de Asset | Dimensiones Nativas (Píxeles) | Proporción | Formato | Uso en el Juego |
 | :--- | :---: | :---: | :---: | :--- |
-| **Fondos de Escenario (10+1 enclaves)** | **$640 \times 240$ px** | $8:3$ (~2.67:1) | `.png` / `.webp` | Fondo panorámico de la escena visible. |
-| **Sprite de Twinber (Protagonista)** | **$48 \times 96$ px** | $1:2$ | `.png` transparente | Altura equivalente al 40% del escenario. |
-| **Sprites de NPCs** | **$48 \times 96$ px** (o $64 \times 96$) | $\sim 1:2$ | `.png` transparente | Chano, Manolo, Operario, Paco, Yeray. |
-| **Iconos de Inventario** | **$36 \times 36$ px** (o $48 \times 48$) | $1:1$ | `.png` transparente | Bolsa de monedas, gofio, nota, billete. |
-| **Sellos del Pasaporte** | **$40 \times 40$ px** | $1:1$ | `.png` transparente | Estampas de tinta roja/azul. |
-| **Postales del Álbum RAG (Miniatura)** | **$80 \times 60$ px** | $4:3$ | `.png` / `.webp` | Casilla del álbum en cuadrícula. |
-| **Postales del Álbum RAG (Zoom Modal)**| **$480 \times 320$ px** | $3:2$ | `.png` / `.webp` | Visor a pantalla completa al pulsar `[MIRAR]`. |
+| **Fondos de Escenario (13 enclaves)** | **$1280 \times 720$ px** (base retro VGA escalada) | $16:9$ | `.jpg` / `.png` | Fondo panorámico de la escena visible. |
+| **Sprite de Twinber (Protagonista)** | **$192 \times 256$ px** (lienzo normalizado) | $\sim 3:4$ | `.png` transparente | Altura en proporción áurea en escenario. |
+| **Sprites de los 13 NPCs** | **$280 \times 400$ px** / **$360 \times 460$ px** | $\sim 7:10$ | `.png` transparente | 13 NPCs insulares con 4 frames IDLE y 4 TALK. |
+| **Iconos de Inventario (8 ítems)** | **$64 \times 64$ px** | $1:1$ | `.svg` vectorial | Monedas, Pasaporte, Álbum, Mapa, Gofio, etc. |
+| **Sellos del Pasaporte (10 sellos)** | **$140 \times 140$ px** | $1:1$ | `.svg` / `.png` | Estampas aduaneras vectoriales con firma y fecha. |
+| **Postales del Álbum RAG (28 fotos)** | **$1280 \times 720$ px** | $16:9$ / $4:3$ | `.png` / `.webp` | Fotografías reales extraídas de `TENERIFE.pdf`. |
+| **Carta Náutica / Mapa Insular** | **$1280 \times 720$ px** | $16:9$ | `.jpg` | Mapa pergamino de expedición estilo Indiana Jones. |
 
 * **Concept Mockup Visual:**
   * Archivo de referencia: `![Mockup SCUMM](/home/twinber/.gemini/antigravity-cli/brain/e6405918-3600-4f05-97bf-cd0127944c72/scumm_adventure_mockup_1791664109790.jpg)`
