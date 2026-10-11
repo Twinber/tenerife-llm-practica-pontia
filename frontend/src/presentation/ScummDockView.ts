@@ -32,12 +32,20 @@ export class ScummDockView {
 
     this.actionDispatcher.onStateUpdate = (updates) => {
       if (updates.photos) {
-        const albumSlot = document.querySelector<HTMLElement>('[data-item="Álbum de Fotos"] .slot-badge');
-        if (albumSlot) albumSlot.innerText = updates.photos;
+        const albumBadge = document.getElementById('sidebar-album-badge');
+        if (albumBadge) albumBadge.innerText = updates.photos;
       }
       if (updates.passport) {
-        const passportSlot = document.querySelector<HTMLElement>('[data-item="Pasaporte de Explorador"] .slot-badge');
-        if (passportSlot) passportSlot.innerText = updates.passport;
+        const passportBadge = document.getElementById('sidebar-passport-badge');
+        if (passportBadge) passportBadge.innerText = updates.passport;
+      }
+      if (updates.coins !== undefined) {
+        const coinBadge = document.querySelector<HTMLElement>('[data-item="Bolsa de Monedas de Oro"] .slot-badge');
+        if (coinBadge) coinBadge.innerText = `${updates.coins} 💰`;
+      }
+      if (updates.bananas !== undefined) {
+        const bananaBadge = document.getElementById('sidebar-banana-badge');
+        if (bananaBadge) bananaBadge.innerText = `${updates.bananas}/3 🍌`;
       }
     };
 
@@ -75,11 +83,21 @@ export class ScummDockView {
       });
     });
 
-    // Slots de Inventario
+    // Slots de Inventario (Flancos Izquierdo y Derecho)
     document.querySelectorAll<HTMLElement>('.inventory-slot').forEach(slot => {
       slot.addEventListener('click', () => {
         const item = slot.dataset.item;
         if (!item) return;
+
+        // Si clican en Mapa de Tenerife, activar inmediatamente modo VIAJAR (equivalente a botón VIAJAR)
+        if (item === 'Mapa de Tenerife') {
+          this.audioService.playClick();
+          this.actionDispatcher.setVerb('VIAJAR');
+          document.querySelectorAll<HTMLButtonElement>('.verb-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.verb === 'VIAJAR');
+          });
+          return;
+        }
 
         // Si el verbo activo es MIRAR o HABLAR y clican en Álbum o Pasaporte, abrir modal directamente
         if (this.actionDispatcher.activeVerb === 'MIRAR' || this.actionDispatcher.activeVerb === 'HABLAR') {
@@ -91,6 +109,13 @@ export class ScummDockView {
             this.actionDispatcher.passportModal.open();
             return;
           }
+        }
+
+        // Si es un slot bloqueado de compra (Gofio, Comanda, Billete, Plátano), dar feedback de compra
+        if (slot.classList.contains('locked-slot')) {
+          this.audioService.playClick();
+          this.actionDispatcher.inspectLockedItem(item);
+          return;
         }
 
         // Limpiar selección previa o alternar para otros verbos (USAR, etc.)
@@ -126,6 +151,12 @@ export class ScummDockView {
           if (slot.dataset.item === 'Pasaporte de Explorador' && this.actionDispatcher.passportModal) {
             this.actionDispatcher.passportModal.open();
           }
+          if (slot.dataset.item === 'Mapa de Tenerife') {
+            this.actionDispatcher.setVerb('VIAJAR');
+            document.querySelectorAll<HTMLButtonElement>('.verb-btn').forEach(b => {
+              b.classList.toggle('active', b.dataset.verb === 'VIAJAR');
+            });
+          }
         });
       }
 
@@ -136,6 +167,12 @@ export class ScummDockView {
         }
         if (slot.dataset.item === 'Pasaporte de Explorador' && this.actionDispatcher.passportModal) {
           this.actionDispatcher.passportModal.open();
+        }
+        if (slot.dataset.item === 'Mapa de Tenerife') {
+          this.actionDispatcher.setVerb('VIAJAR');
+          document.querySelectorAll<HTMLButtonElement>('.verb-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.verb === 'VIAJAR');
+          });
         }
       });
 

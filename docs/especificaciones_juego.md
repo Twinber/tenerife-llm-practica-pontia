@@ -131,24 +131,39 @@
 * **Línea Roja Discontinua Animada:** Mediante un componente SVG animado con CSS puro (`stroke-dashoffset`), se dibuja en 1.5 a 2 segundos una **línea de puntos rojos** sobre la carretera real (TF-5, TF-1, TF-24) uniendo origen y destino.
 * **Sensación de Viaje:** Un rótulo dinámico anuncia el trayecto (*"Twinber toma la guagua de TITSA por la TF-5 hacia San Cristóbal de La Laguna..."*) antes de dar paso a la nueva postal pixel-art y sus personajes interactivos.
 
-### 1.6. Microeconomía de la Aventura y Bloqueos de Progresión (Gating Económico)
-* **Objetivo de las Monedas:** Resolver puzles tangibles de inventario e interacción comercial, evitando que la aventura sea un simple recorrido pasivo.
-* **Presupuesto Inicial:** Twinber comienza la aventura con **15 monedas locales** en su zurrón.
-* **Los 3 Momentos Clave de Gasto y Bloqueo:**
-  1. *Momento 1: La Orotava — Molino de Chano (3 monedas):*
-     * **El Bloqueo:** El sendero hacia las cumbres exige sustento calórico para resistir el frío y el esfuerzo.
-     * **La Acción:** Comprar la *Bolsa de Gofio recién molido* a Chano el Molinero (3 monedas).
-     * **Efecto:** Desbloquea el paso hacia las cotas altas del norte.
-  2. *Momento 2: Santa Úrsula — Guachinche El Cubano (4 monedas):*
-     * **El Bloqueo:** La carretera TF-24 (La Esperanza) está envuelta en un mar de nubes. Sin las indicaciones locales, es peligroso cruzar.
-     * **La Acción:** Pagar la comanda (carne fiesta y vino) en el guachinche a Manolo el Tabernero (4 monedas).
-     * **Efecto:** Manolo dibuja en una servilleta la *Nota de la Ruta*, revelando la parada en el Mirador de La Tarta por encima de las nubes.
-  3. *Momento 3: Las Cañadas del Teide — Taquilla del Teleférico (5 monedas):*
-     * **El Bloqueo:** Acceso al tramo final del pico (3.718 m).
-     * **La Acción:** Comprar el billete oficial en taquilla (5 monedas).
-     * **Efecto:** Permite subir a la cima para el clímax final Starlight.
-  4. *Colchón de Reserva (3 monedas):* Margen para imprevistos, billetes sueltos de guagua o propinas.
+### 1.6. Microeconomía, Franjas Laterales y Matriz Canónica de Objetos
+
+#### 1.6.1. Reubicación Espacial del Inventario: Las Dos Franjas Laterales
+* **Descongestión del Escenario (Cero Intrusión Visual):** Se elimina por completo la rejilla de inventario horizontal del dock inferior flotante de SCUMM. Esto permite compactar el dock central a solo ~440 px (únicamente la barra de frase dinámica y la matriz 3x2 de verbos), despejando al 100% el fondo panorámico (adoquines del muelle, barca «El Mojo», redes y aguas atlánticas).
+* **Aprovechamiento de las Franjas Negras Laterales (*Pillarboxing*):** Las pantallas panorámicas y monitores de sobremesa generan márgenes negros laterales al proyectar la escena 16:9. Se aprovechan estas dos franjas para alojar dos barras verticales temáticas de inventario con estética retro SCUMM (`#sidebar-left` y `#sidebar-right`):
+  * **Franja Lateral Izquierda (Equipo Básico Permanente — 4 ranuras):** Objetos de partida inmutables que acompañan a Twinber desde el inicio.
+  * **Franja Lateral Derecha (Objetos Adquiribles a NPCs — 4 ranuras):** Artículos que se van adquiriendo conforme se interactúa comercialmente con lugareños. Inicialmente se muestran como ranuras bloqueadas con silueta retro y precio orientativo.
+* **Iconografía Vectorial SVG Artesanal:** Se descartan las imágenes rasterizadas recortadas de baja resolución y se implementan **8 iconos vectoriales SVG artesanales en 64x64**, con degradados, paletas retro de 256 colores, ribetes oscuros de alto contraste y escalado perfecto e idéntico en cualquier densidad de pantalla.
+
+#### 1.6.2. Matriz Canónica de Objetos del Juego
+A continuación se define la matriz oficial e inmutable de objetos, su cometido en la aventura, su coste económico y su ubicación en la interfaz:
+
+| # | Objeto | Icono | Cometido en la Aventura | Precio | Ubicación en UI | Proveedor / Enclave | Utilidad Práctica |
+|---|--------|-------|--------------------------|--------|-----------------|---------------------|-------------------|
+| **01** | **Bolsa de Monedas de Oro** | `item_monedas.svg` | Fondo de maniobra económico de Twinber. Permite sufragar compras, provisiones y billetes de viaje. | **15 💰 (Saldo Inicial)** | Franja Izquierda (Ranura 1) | Inicial (Riñonera de Twinber) | Esencial (Economía del juego) |
+| **02** | **Pasaporte de Explorador** | `item_pasaporte.svg` | Cuaderno de 10 visados comarcales. Se abre a doble página (5 pliegos) para inspeccionar sellos oficiales con `MIRAR` o doble clic. | **Gratuito (0 💰)** | Franja Izquierda (Ranura 2) | Inicial (Oficial del Cabildo) | **Clave de Progresión Primaria** (10 sellos obligatorios) |
+| **03** | **Álbum de Fotos de Tenerife** | `item_album.svg` | Álbum coleccionable de recuerdos fotográficos (28 fotos reales de `TENERIFE.pdf`). Se abre en visor paginado modal. | **Gratuito (0 💰)** | Franja Izquierda (Ranura 3) | Inicial (Cámara 35mm al cuello) | Coleccionable Multimodal RAG (100% completionist) |
+| **04** | **Mapa de Tenerife** *(Sustituto de la Brújula)* | `item_mapa.svg` | Mapa cartográfico de carreteras insulares con el Teide y rosa náutica. **Pulsar sobre él es equivalente a activar la acción [VIAJAR]**. | **Gratuito (0 💰)** | Franja Izquierda (Ranura 4) | Inicial (Guía de bolsillo) | Navegación e Interfaz de Viaje (*Fast Travel*) |
+| **05** | **Saco de Gofio** | `item_gofio.svg` | Harina tradicional de trigo y millo tostado. Aporta la energía calórica requerida para internarse en las cumbres del norte. | **3 💰** | Franja Derecha (Ranura 1) | Chano el Molinero (Molino de La Orotava) | **Desbloqueo de Enclave:** Permite el ascenso hacia las cumbres |
+| **06** | **Comanda del Guachinche** | `item_comanda.svg` | Factura doblada de taberna con mancha circular de vino tinto. Contiene notas manuscritas que revelan la ruta entre el mar de nubes. | **4 💰** | Franja Derecha (Ranura 2) | Manolo el Tabernero (Guachinche en Santa Úrsula) | **Desbloqueo de Ruta:** Permite cruzar el mar de nubes de la TF-24 |
+| **07** | **Billete del Teleférico** | `item_billete.svg` | Ticket troquelado y numerado para subir en la cabina del teleférico desde la base (2.356 m) hasta La Rambleta (3.555 m). | **5 💰** | Franja Derecha (Ranura 3) | Taquilla Oficial (Las Cañadas del Teide) | **Clímax Final:** Acceso al pico para la contemplación Starlight |
+| **08** | **Plátanos de Canarias (x3)** | `item_platano.svg` | **ITEM MEME PURAMENTE CÓMICO.** Plátano dulce con motitas (IGP). Se pueden adquirir hasta 3 unidades (1 💰 c/u). No resuelve ningún acertijo ni abre puertas. | **1 💰 c/u (Total 3 💰)** | Franja Derecha (Ranura 4, contador `0/3 🍌`) | Frutero ambulante canario (Puesto callejero) | **Meme / Humor:** Monólogos cómicos de Twinber sobre el potasio |
+
+#### 1.6.3. Balance Económico Perfecto (Economía Cerrada de 15 Monedas)
+La economía de la aventura es matemáticamente exacta:
+$$\text{Presupuesto Inicial: } 15\text{ 💰}$$
+$$-3\text{ 💰 (Saco de Gofio en La Orotava)} \longrightarrow 12\text{ 💰}$$
+$$-4\text{ 💰 (Comanda del Guachinche en Santa Úrsula)} \longrightarrow 8\text{ 💰}$$
+$$-5\text{ 💰 (Billete del Teleférico en Las Cañadas)} \longrightarrow 3\text{ 💰}$$
+$$-3\text{ 💰 (3 Plátanos de Canarias a 1 💰 cada uno)} \longrightarrow 0\text{ 💰}$$
+* **Cero monedas sobrantes:** Cada una de las 15 monedas iniciales tiene una correspondencia exacta en el diseño del juego.
 * **Mecánica Human-in-the-Loop:** Al gastar monedas (mutación irreversible), el Narrador desglosa la compra y solicita confirmación explícita previa al jugador.
+* **Eliminación Definitiva de la Brújula de Latón:** Descartada por completo del diseño; sus funciones de orientación y viaje quedan consolidadas de forma limpia en el *Mapa de Tenerife*.
 
 ### 1.7. Sistema Adaptativo de Pistas (*Adaptive Hinting* ante Atascos)
 Para evitar la frustración clásica de las aventuras gráficas:

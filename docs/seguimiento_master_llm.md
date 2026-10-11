@@ -64,9 +64,11 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
           - `domain/`: Entidades de negocio puras (`Actor`, interfaces de inventario y estado).
           - `application/`: Casos de uso y orquestación (`GameEngine`, `ActionDispatcher`, `DialogueManager`).
           - `infrastructure/`: Clientes externos (`ApiClient` para REST/SSE, `AudioService` Web Audio API, `AssetLoader`).
-          - `presentation/`: Renderizado visual reactivo (`ViewportView`, `ScummDockView`, `TelemetryView`).
-          - `styles/retro.css`: Diseño 16:9 nativo con muelle SCUMM flotante translúcido y hotkeys de auditoría.
-        * Verificación visual automatizada: Script Playwright headless para capturas de pantalla de alta fidelidad.
+          - `presentation/`: Renderizado visual reactivo (`ViewportView`, `ScummDockView`, `TelemetryView`, `PhotoAlbumModal`, `PassportModal`).
+          - `styles/retro.css`: Diseño 16:9 con aprovechamiento de franjas negras laterales (Pillarboxing) para inventario dual (`#sidebar-left` y `#sidebar-right`), muelle SCUMM ultra-compacto centrado (~440px) y modales de alta fidelidad.
+          - `assets/img/items/`: 8 iconos vectoriales SVG artesanales en 64x64 con paleta retro VGA (Monedas, Pasaporte, Álbum, Mapa, Gofio, Comanda, Billete y Plátano).
+          - Matriz Canónica de Objetos: Eliminación definitiva de la brújula, sustitución por Mapa de Tenerife (acceso interactivo a VIAJAR), economía cerrada de 15 monedas (Gofio 3💰, Comanda 4💰, Billete 5💰, 3 Plátanos Meme a 1💰 c/u).
+        * Verificación visual: Vite Dev Server en puerto 5173 con build de producción impecable (`bun run build`).
     [x] 2.1 Análisis documental de TENERIFE.pdf y Pipeline de Ingesta/Extracción de Assets (Aprobado)
         * Chunking semántico por enclaves (unidades temáticas completas por lugar sin troceo ciego).
         * Almacenamiento dual en Chroma DB: Embeddings (búsqueda) + Documento textual literal (inyección en prompt) + Metadatos (`pagina`, `zona`, `lugar`, `image_path`).

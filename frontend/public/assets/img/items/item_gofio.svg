@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="burlapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e6ca97"/>
+      <stop offset="50%" stop-color="#caa56d"/>
+      <stop offset="100%" stop-color="#9a723e"/>
+    </linearGradient>
+    <linearGradient id="milloGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="60%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#a16207"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sombra base -->
+  <ellipse cx="32" cy="58" rx="20" ry="4" fill="#000000" opacity="0.6"/>
+
+  <!-- Cuerpo del saco de gofio -->
+  <path d="M16 26 C12 36 11 50 16 55 C21 58 43 58 48 55 C53 50 52 36 48 26 C44 28 38 29 32 29 C26 29 20 28 16 26 Z" 
+        fill="url(#burlapGrad)" stroke="#54381e" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Cuello atado y fruncido -->
+  <path d="M22 22 C18 16 22 13 26 14 C29 17 31 16 33 14 C36 12 40 14 42 16 C45 14 46 18 42 22 C38 25 26 25 22 22 Z" 
+        fill="#e1be87" stroke="#54381e" stroke-width="1.8" stroke-linejoin="round"/>
+
+  <!-- Cuerda de cáñamo con nudo -->
+  <ellipse cx="32" cy="24" rx="12" ry="3" fill="none" stroke="#78350f" stroke-width="2"/>
+  <circle cx="32" cy="25" r="2.2" fill="#92400e" stroke="#451a03" stroke-width="1"/>
+  <path d="M32 26 C30 29 27 33 26 36" fill="none" stroke="#78350f" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M32 26 C34 29 37 32 38 35" fill="none" stroke="#78350f" stroke-width="1.6" stroke-linecap="round"/>
+
+  <!-- Sello estampado en el saco: Mazorca de Millo (Maíz tostado) -->
+  <g transform="translate(32, 39)">
+    <!-- Mazorca -->
+    <path d="M-3 -9 C-6 -4 -6 3 -3 8 C-1 9 1 9 3 8 C6 3 6 -4 3 -9 C1 -10 -1 -10 -3 -9 Z" 
+          fill="url(#milloGold)" stroke="#713f12" stroke-width="1"/>
+    <!-- Granos de millo -->
+    <line x1="0" y1="-7" x2="0" y2="7" stroke="#854d0e" stroke-width="0.8"/>
+    <line x1="-3" y1="-3" x2="3" y2="-3" stroke="#854d0e" stroke-width="0.8"/>
+    <line x1="-3" y1="2" x2="3" y2="2" stroke="#854d0e" stroke-width="0.8"/>
+    <!-- Hojas de la chala -->
+    <path d="M-3 6 C-7 4 -8 -1 -7 -4" fill="none" stroke="#15803d" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M3 6 C7 4 8 -1 7 -4" fill="none" stroke="#15803d" stroke-width="1.2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Cartela / Texto GOFIO -->
+  <rect x="20" y="47" width="24" height="6.5" rx="1.5" fill="#fef3c7" stroke="#78350f" stroke-width="1"/>
+  <text x="32" y="52" font-family="'Press Start 2P', monospace, sans-serif" font-size="3.5" font-weight="bold" fill="#78350f" text-anchor="middle">GOFIO</text>
+
+  <!-- Costura inferior del saco -->
+  <line x1="20" y1="55" x2="44" y2="55" stroke="#451a03" stroke-width="1.2" stroke-dasharray="2 2"/>
+</svg>

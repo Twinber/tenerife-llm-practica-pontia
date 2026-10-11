@@ -7,156 +7,178 @@
 </head>
 <body>
 
-  <!-- Contenedor Principal (16:9 Nativo del Background) -->
-  <main class="game-screen">
+  <!-- Contenedor Maestro Retro (Aprovecha las franjas laterales de pantallas panorámicas) -->
+  <div class="game-wrapper">
 
-    <!-- 1. ESCENARIO GRÁFICO AL 100% (TODO EL FONDO VISIBLE) -->
-    <section class="scene-viewport" id="scene-viewport">
-      <img class="scene-background" src="/assets/img/bg_puerto_de_la_cruz.jpg" alt="Puerto de la Cruz, Tenerife">
-
-      <!-- HUD Superior Flotante Minimalista -->
-      <div class="top-hud-bar">
-        <div class="hud-title">🌴 PUERTO DE LA CRUZ // TENERIFE</div>
-        <div class="hud-controls">
-          <button id="btn-audio" class="hud-btn">🔊 AUDIO</button>
-          <button id="btn-console" class="hud-btn">📊 TELEMETRIA [T]</button>
-        </div>
+    <!-- Franja Lateral Izquierda: Equipo Básico Permanente -->
+    <aside class="sidebar-inventory sidebar-left" id="sidebar-left">
+      <div class="sidebar-header">EQUIPO</div>
+      <div class="inventory-slot" data-item="Bolsa de Monedas de Oro" title="Bolsa de Monedas de Oro">
+        <img src="/assets/img/items/item_monedas.svg" alt="Monedas">
+        <span class="slot-badge">15 💰</span>
       </div>
-
-      <!-- Subtítulos de Diálogo (Amarillo Twinber / Cian Paco) -->
-      <div class="dialogue-overlay" id="dialogue-container"></div>
-
-      <!-- Hotspots Interactivos del Muelle (Alineados con la imagen completa 100%) -->
-      <div id="hotspot-faro" class="hotspot" style="left: 2%; top: 40%; width: 14%; height: 22%;" title="Faro y Fortín de San Telmo"></div>
-      <div id="hotspot-barca" class="hotspot" style="left: 33%; bottom: 25%; width: 18%; height: 16%;" title="Barca 'El Mojo'"></div>
-      <div id="hotspot-teide" class="hotspot" style="left: 63%; top: 5%; width: 23%; height: 28%;" title="El Teide"></div>
-      <div id="hotspot-casa" class="hotspot" style="left: 64%; top: 28%; width: 26%; height: 32%;" title="Casa Colonial Balcón de Tea"></div>
-      <div id="hotspot-paco" class="hotspot" style="left: 79%; bottom: 6%; width: 15%; height: 46%;" title="Paco el Pescador"></div>
-
-      <!-- Actores: Sprites Transparentes sobre los Adoquines -->
-      <img id="twinber-actor" class="sprite-actor" src="/assets/img/sprites/twinber_idle_0.png" alt="Twinber">
-      <img id="paco-actor" class="sprite-actor" src="/assets/img/sprites/paco_idle_0.png" alt="Paco el Pescador">
-    </section>
-
-    <!-- 2. DOCK FLOTANTE SCUMM (Compacto, elegante, no tapa el escenario) -->
-    <footer class="scumm-floating-dock">
-      <!-- Línea de Frase Dinámica -->
-      <div class="sentence-bar">
-        <span class="sentence-action" id="sentence-action">Caminar hacia el muelle...</span>
+      <div class="inventory-slot" data-item="Pasaporte de Explorador" title="Pasaporte de Explorador">
+        <img src="/assets/img/items/item_pasaporte.svg" alt="Pasaporte">
+        <span class="slot-badge" id="sidebar-passport-badge">0/10</span>
       </div>
-
-      <!-- Contenido del Dock: Verbos + Inventario en una fila -->
-      <div class="dock-content" id="dock-verbs-inventory">
-        <!-- Matriz de Verbos Compacta (6 Verbos Oficiales) -->
-        <nav class="verb-matrix">
-          <button class="verb-btn active" data-verb="HABLAR">HABLAR</button>
-          <button class="verb-btn" data-verb="MIRAR">MIRAR</button>
-          <button class="verb-btn" data-verb="USAR">USAR</button>
-          <button class="verb-btn" data-verb="COMPRAR">COMPRAR</button>
-          <button class="verb-btn" data-verb="VIAJAR">VIAJAR</button>
-          <button class="verb-btn" data-verb="PENSAR">💡 PENSAR</button>
-        </nav>
-
-        <!-- Inventario Horizontal de Twinber -->
-        <div class="inventory-grid">
-          <div class="inventory-slot" data-item="Bolsa de Monedas de Oro" title="Bolsa de Monedas de Oro">
-            <img src="/assets/img/items/item_monedas.png" alt="Monedas">
-            <span class="slot-badge">15 💰</span>
-          </div>
-          <div class="inventory-slot" data-item="Pasaporte de Explorador" title="Pasaporte de Explorador">
-            <img src="/assets/img/items/item_pasaporte.png" alt="Pasaporte">
-            <span class="slot-badge">0/10</span>
-          </div>
-          <div class="inventory-slot" data-item="Álbum de Fotos" title="Álbum de Fotos">
-            <img src="/assets/img/items/item_album.png" alt="Álbum">
-            <span class="slot-badge">0/28</span>
-          </div>
-          <div class="inventory-slot" data-item="Brújula de Latón" title="Brújula de Latón">
-            <img src="/assets/img/items/item_brujula.png" alt="Brújula">
-          </div>
-        </div>
+      <div class="inventory-slot" data-item="Álbum de Fotos" title="Álbum de Fotos">
+        <img src="/assets/img/items/item_album.svg" alt="Álbum">
+        <span class="slot-badge" id="sidebar-album-badge">0/28</span>
       </div>
-
-      <!-- Modo Diálogo Ramificado (Oculto inicialmente) -->
-      <div class="dock-dialogue hidden" id="dock-dialogue">
-        <div class="dialogue-choices-list">
-          <button class="dialogue-choice-btn" data-choice="passport">
-            <span class="choice-num">1.</span> "¿Puede sellarme el pasaporte?"
-          </button>
-          <button class="dialogue-choice-btn" data-choice="lore">
-            <span class="choice-num">2.</span> "¿Qué me puede contar de esta zona?"
-          </button>
-          <form class="dialogue-free-form" id="dialogue-free-form">
-            <span class="choice-num">3.</span>
-            <input type="text" id="dialogue-free-input" class="dialogue-free-input" placeholder="Escribe tu propia pregunta a Paco..." maxlength="100" autocomplete="off" />
-            <button type="submit" class="dialogue-free-submit" id="dialogue-free-submit">PREGUNTAR ↵</button>
-          </form>
-          <button class="dialogue-choice-btn choice-exit" data-choice="exit">
-            <span class="choice-num">4.</span> "Tengo que marcharme. ¡Hasta luego!"
-          </button>
-        </div>
+      <div class="inventory-slot" data-item="Mapa de Tenerife" title="Mapa de Tenerife (VIAJAR)">
+        <img src="/assets/img/items/item_mapa.svg" alt="Mapa">
+        <span class="slot-badge">ISLA</span>
       </div>
-    </footer>
-
-    <!-- Consola de Auditoría Retro (Tecla 'T') -->
-    <aside class="crt-console" id="crt-console">
-      <div>*** CONSOLA DE AUDITORÍA Y TELEMETRÍA RETRO (TECLA 'T') ***</div>
-      <div>-------------------------------------------------------</div>
     </aside>
 
-    <!-- Modal Retro del Álbum de Fotos (Paginado) -->
-    <div id="photo-album-modal" class="retro-modal-overlay hidden">
-      <div class="retro-album-window">
-        <header class="album-header">
-          <div class="album-title">📸 ÁLBUM DE FOTOS DE TENERIFE (<span id="album-counter">0/28</span>)</div>
-          <button id="btn-close-album" class="modal-close-btn">✕ CERRAR [ESC]</button>
-        </header>
+    <!-- Contenedor Central del Escenario (16:9 Nativo del Background) -->
+    <main class="game-screen">
 
-        <main class="album-page-content" id="album-slots-grid">
-          <!-- 4 ranuras de fotos renderizadas dinámicamente -->
-        </main>
+      <!-- 1. ESCENARIO GRÁFICO AL 100% (TODO EL FONDO VISIBLE) -->
+      <section class="scene-viewport" id="scene-viewport">
+        <img class="scene-background" src="/assets/img/bg_puerto_de_la_cruz.jpg" alt="Puerto de la Cruz, Tenerife">
 
-        <footer class="album-footer">
-          <button id="btn-album-prev" class="album-nav-btn">◀ ANTERIOR</button>
-          <span id="album-page-indicator" class="album-page-indicator">PÁGINA 1 / 7</span>
-          <button id="btn-album-next" class="album-nav-btn">SIGUIENTE ▶</button>
-        </footer>
+        <!-- HUD Superior Flotante Minimalista -->
+        <div class="top-hud-bar">
+          <div class="hud-title">🌴 PUERTO DE LA CRUZ // TENERIFE</div>
+          <div class="hud-controls">
+            <button id="btn-audio" class="hud-btn">🔊 AUDIO</button>
+            <button id="btn-console" class="hud-btn">📊 TELEMETRIA [T]</button>
+          </div>
+        </div>
+
+        <!-- Subtítulos de Diálogo (Amarillo Twinber / Cian Paco) -->
+        <div class="dialogue-overlay" id="dialogue-container"></div>
+
+        <!-- Hotspots Interactivos del Muelle (Alineados con la imagen completa 100%) -->
+        <div id="hotspot-faro" class="hotspot" style="left: 2%; top: 40%; width: 14%; height: 22%;" title="Faro y Fortín de San Telmo"></div>
+        <div id="hotspot-barca" class="hotspot" style="left: 33%; bottom: 25%; width: 18%; height: 16%;" title="Barca 'El Mojo'"></div>
+        <div id="hotspot-teide" class="hotspot" style="left: 63%; top: 5%; width: 23%; height: 28%;" title="El Teide"></div>
+        <div id="hotspot-casa" class="hotspot" style="left: 64%; top: 28%; width: 26%; height: 32%;" title="Casa Colonial Balcón de Tea"></div>
+        <div id="hotspot-paco" class="hotspot" style="left: 79%; bottom: 6%; width: 15%; height: 46%;" title="Paco el Pescador"></div>
+
+        <!-- Actores: Sprites Transparentes sobre los Adoquines -->
+        <img id="twinber-actor" class="sprite-actor" src="/assets/img/sprites/twinber_idle_0.png" alt="Twinber">
+        <img id="paco-actor" class="sprite-actor" src="/assets/img/sprites/paco_idle_0.png" alt="Paco el Pescador">
+      </section>
+
+      <!-- 2. DOCK FLOTANTE SCUMM (Ultra-compacto y centrado: solo Verbos, no tapa el muelle) -->
+      <footer class="scumm-floating-dock">
+        <!-- Línea de Frase Dinámica -->
+        <div class="sentence-bar">
+          <span class="sentence-action" id="sentence-action">Caminar hacia el muelle...</span>
+        </div>
+
+        <!-- Contenido del Dock: Verbos Exclusivamente en formato 3x2 -->
+        <div class="dock-content" id="dock-verbs-inventory">
+          <nav class="verb-matrix">
+            <button class="verb-btn active" data-verb="HABLAR">HABLAR</button>
+            <button class="verb-btn" data-verb="MIRAR">MIRAR</button>
+            <button class="verb-btn" data-verb="USAR">USAR</button>
+            <button class="verb-btn" data-verb="COMPRAR">COMPRAR</button>
+            <button class="verb-btn" data-verb="VIAJAR">VIAJAR</button>
+            <button class="verb-btn" data-verb="PENSAR">💡 PENSAR</button>
+          </nav>
+        </div>
+
+        <!-- Modo Diálogo Ramificado (Oculto inicialmente) -->
+        <div class="dock-dialogue hidden" id="dock-dialogue">
+          <div class="dialogue-choices-list">
+            <button class="dialogue-choice-btn" data-choice="passport">
+              <span class="choice-num">1.</span> "¿Puede sellarme el pasaporte?"
+            </button>
+            <button class="dialogue-choice-btn" data-choice="lore">
+              <span class="choice-num">2.</span> "¿Qué me puede contar de esta zona?"
+            </button>
+            <form class="dialogue-free-form" id="dialogue-free-form">
+              <span class="choice-num">3.</span>
+              <input type="text" id="dialogue-free-input" class="dialogue-free-input" placeholder="Escribe tu propia pregunta a Paco..." maxlength="100" autocomplete="off" />
+              <button type="submit" class="dialogue-free-submit" id="dialogue-free-submit">PREGUNTAR ↵</button>
+            </form>
+            <button class="dialogue-choice-btn choice-exit" data-choice="exit">
+              <span class="choice-num">4.</span> "Tengo que marcharme. ¡Hasta luego!"
+            </button>
+          </div>
+        </div>
+      </footer>
+
+      <!-- Consola de Auditoría Retro (Tecla 'T') -->
+      <aside class="crt-console" id="crt-console">
+        <div>*** CONSOLA DE AUDITORÍA Y TELEMETRÍA RETRO (TECLA 'T') ***</div>
+        <div>-------------------------------------------------------</div>
+      </aside>
+
+      <!-- Modal Retro del Álbum de Fotos (Paginado) -->
+      <div id="photo-album-modal" class="retro-modal-overlay hidden">
+        <div class="retro-album-window">
+          <header class="album-header">
+            <div class="album-title">📸 ÁLBUM DE FOTOS DE TENERIFE (<span id="album-counter">0/28</span>)</div>
+            <button id="btn-close-album" class="modal-close-btn">✕ CERRAR [ESC]</button>
+          </header>
+
+          <main class="album-page-content" id="album-slots-grid">
+            <!-- 4 ranuras de fotos renderizadas dinámicamente -->
+          </main>
+
+          <footer class="album-footer">
+            <button id="btn-album-prev" class="album-nav-btn">◀ ANTERIOR</button>
+            <span id="album-page-indicator" class="album-page-indicator">PÁGINA 1 / 7</span>
+            <button id="btn-album-next" class="album-nav-btn">SIGUIENTE ▶</button>
+          </footer>
+        </div>
       </div>
-    </div>
 
-    <!-- Modal Retro del Pasaporte de Explorador (Apertura a Doble Página - 5 Pliegos) -->
-    <div id="passport-modal" class="retro-modal-overlay hidden">
-      <div class="retro-passport-window">
-        <header class="passport-header">
-          <div class="passport-title">📘 PASAPORTE DE EXPLORADOR DE TENERIFE (<span id="passport-counter">0/10</span> SELLOS)</div>
-          <button id="btn-close-passport" class="modal-close-btn">✕ CERRAR [ESC]</button>
-        </header>
+      <!-- Modal Retro del Pasaporte de Explorador (Apertura a Doble Página - 5 Pliegos) -->
+      <div id="passport-modal" class="retro-modal-overlay hidden">
+        <div class="retro-passport-window">
+          <header class="passport-header">
+            <div class="passport-title">📘 PASAPORTE DE EXPLORADOR DE TENERIFE (<span id="passport-counter">0/10</span> SELLOS)</div>
+            <button id="btn-close-passport" class="modal-close-btn">✕ CERRAR [ESC]</button>
+          </header>
 
-        <!-- Cuaderno de Pasaporte a Doble Página Abierta -->
-        <main class="passport-book-spread" id="passport-book-spread">
-          <!-- Página Izquierda -->
-          <section class="passport-page page-left" id="passport-page-left">
-            <!-- Renderizado dinámicamente -->
-          </section>
+          <!-- Cuaderno de Pasaporte a Doble Página Abierta -->
+          <main class="passport-book-spread" id="passport-book-spread">
+            <section class="passport-page page-left" id="passport-page-left">
+              <!-- Renderizado dinámicamente -->
+            </section>
+            <div class="passport-spine"></div>
+            <section class="passport-page page-right" id="passport-page-right">
+              <!-- Renderizado dinámicamente -->
+            </section>
+          </main>
 
-          <!-- Lomo central / Cosido de seguridad -->
-          <div class="passport-spine"></div>
-
-          <!-- Página Derecha -->
-          <section class="passport-page page-right" id="passport-page-right">
-            <!-- Renderizado dinámicamente -->
-          </section>
-        </main>
-
-        <footer class="passport-footer">
-          <button id="btn-passport-prev" class="passport-nav-btn">◀ PLIEGO ANTERIOR</button>
-          <span id="passport-page-indicator" class="passport-page-indicator">PLIEGO 1 DE 5 (PÁGINAS 1 - 2)</span>
-          <button id="btn-passport-next" class="passport-nav-btn">PLIEGO SIGUIENTE ▶</button>
-        </footer>
+          <footer class="passport-footer">
+            <button id="btn-passport-prev" class="passport-nav-btn">◀ PLIEGO ANTERIOR</button>
+            <span id="passport-page-indicator" class="passport-page-indicator">PLIEGO 1 DE 5 (PÁGINAS 1 - 2)</span>
+            <button id="btn-passport-next" class="passport-nav-btn">PLIEGO SIGUIENTE ▶</button>
+          </footer>
+        </div>
       </div>
-    </div>
 
-  </main>
+    </main>
+
+    <!-- Franja Lateral Derecha: Objetos Adquiribles / Compras a NPCs -->
+    <aside class="sidebar-inventory sidebar-right" id="sidebar-right">
+      <div class="sidebar-header">OBJETOS</div>
+      <div class="inventory-slot locked-slot" data-item="Saco de Gofio" title="Saco de Gofio (3 💰 - Molino La Orotava)">
+        <img src="/assets/img/items/item_gofio.svg" alt="Gofio">
+        <span class="slot-badge">3 💰</span>
+      </div>
+      <div class="inventory-slot locked-slot" data-item="Comanda del Guachinche" title="Comanda del Guachinche (4 💰 - Santa Úrsula)">
+        <img src="/assets/img/items/item_comanda.svg" alt="Comanda">
+        <span class="slot-badge">4 💰</span>
+      </div>
+      <div class="inventory-slot locked-slot" data-item="Billete del Teleférico" title="Billete del Teleférico (5 💰 - El Teide)">
+        <img src="/assets/img/items/item_billete.svg" alt="Billete">
+        <span class="slot-badge">5 💰</span>
+      </div>
+      <div class="inventory-slot locked-slot" data-item="Plátano de Canarias" title="Plátanos de Canarias (1 💰 c/u - Meme Item)">
+        <img src="/assets/img/items/item_platano.svg" alt="Plátano">
+        <span class="slot-badge" id="sidebar-banana-badge">0/3 🍌</span>
+      </div>
+    </aside>
+
+  </div>
 
   <script type="module" src="/src/main.ts"></script>
 </body>

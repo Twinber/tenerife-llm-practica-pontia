@@ -21,8 +21,6 @@ export class ActionDispatcher {
   public passportModal?: PassportModal;
   public onSentenceChange?: (text: string) => void;
   public onLogMessage?: (msg: string) => void;
-  public onStateUpdate?: (updates: { photos?: string; passport?: string; coins?: string }) => void;
-
   public teidePhotoTaken: boolean = false;
   public pacoStampGiven: boolean = false;
   public isInNpcDialogue: boolean = false;
@@ -30,9 +28,12 @@ export class ActionDispatcher {
   public currentDialogueNpc: string | null = null;
   public pendingDialogueExit: boolean = false;
   public stampedZones: Set<string> = new Set();
+  public coins: number = 15;
+  public bananaCount: number = 0;
 
   public onDialogueModeChange?: (active: boolean, npcName?: string) => void;
   public onDialogueSpeechState?: (isSpeaking: boolean) => void;
+  public onStateUpdate?: (updates: { photos?: string; passport?: string; coins?: number; bananas?: number }) => void;
 
   constructor(
     twinber: Actor,
@@ -81,6 +82,19 @@ export class ActionDispatcher {
         ]);
         return;
       }
+      if (itemName === 'Mapa de Tenerife') {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: "Twinber [MAPA DE TENERIFE]: 'Mapa topográfico y de carreteras insulares. Muestra las rutas a La Orotava, Teide y el sur insular.'" },
+          { speaker: 'twinber', text: "Twinber: '¡Haz clic sobre el mapa para activar el modo [VIAJAR] por Tenerife!'" }
+        ]);
+        return;
+      }
+      if (itemName === 'Bolsa de Monedas de Oro') {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: `Twinber [MONEDAS]: 'Tengo ${this.coins} monedas de oro en mi riñonera. Suficientes para comprar provisiones, recuerdos y billetes.'` }
+        ]);
+        return;
+      }
     }
 
     if (this.selectedItemName === itemName) {
@@ -92,6 +106,27 @@ export class ActionDispatcher {
       this.audioService.playCoin();
     }
     this.updateSentence();
+  }
+
+  public inspectLockedItem(itemName: string): void {
+    this.audioService.playHint();
+    if (itemName === 'Saco de Gofio') {
+      this.dialogueManager.enqueue([
+        { speaker: 'twinber', text: "Twinber [SACO DE GOFIO - 3 💰]: 'Harina tostada de trigo y millo tradicional canario. Podré comprar un saco a Chano en el antiguo molino de La Orotava.'" }
+      ]);
+    } else if (itemName === 'Comanda del Guachinche') {
+      this.dialogueManager.enqueue([
+        { speaker: 'twinber', text: "Twinber [COMANDA DE GUACHINCHE - 4 💰]: 'Comanda con anotaciones de papas arrugadas, vino del país y rutas. Manolo la despacha en su tasca de Santa Úrsula.'" }
+      ]);
+    } else if (itemName === 'Billete del Teleférico') {
+      this.dialogueManager.enqueue([
+        { speaker: 'twinber', text: "Twinber [BILLETE DEL TELEFÉRICO - 5 💰]: 'Ticket oficial para ascender a La Rambleta (3.555 m). Se adquiere en la taquilla de Las Cañadas del Teide.'" }
+      ]);
+    } else if (itemName === 'Plátano de Canarias') {
+      this.dialogueManager.enqueue([
+        { speaker: 'twinber', text: `Twinber [🍌 PLÁTANO DE CANARIAS - 1 💰]: '¡El auténtico plátano con motitas! Es un meme puro: no resuelve ningún acertijo, pero qué rico está. Llevo ${this.bananaCount}/3.'` }
+      ]);
+    }
   }
 
   public setHoverTarget(target: string): void {
@@ -301,18 +336,23 @@ export class ActionDispatcher {
           { speaker: 'twinber', text: "Twinber: 'No tiene sentido arrojar mis monedas de oro ahí.'" }
         ]);
       }
-    } else if (this.selectedItemName === 'Brújula de Latón') {
+    } else if (this.selectedItemName === 'Mapa de Tenerife') {
       if (hotspotId === 'hotspot-teide') {
         this.dialogueManager.enqueue([
-          { speaker: 'twinber', text: "Twinber: 'La aguja magnética apunta hacia el Sur-Suroeste, directa a la cumbre volcánica.'" }
+          { speaker: 'twinber', text: "Twinber [MAPA]: 'El mapa traza la carretera TF-21 que sube desde La Orotava directo hasta Las Cañadas del Teide.'" }
         ]);
       } else if (hotspotId === 'hotspot-faro') {
         this.dialogueManager.enqueue([
-          { speaker: 'twinber', text: "Twinber: 'La aguja señala al Noroeste, adentrándose en el Atlántico hacia San Telmo.'" }
+          { speaker: 'twinber', text: "Twinber [MAPA]: 'El Fortín de San Telmo figura como punto de vigía costero en la carta de navegación.'" }
+        ]);
+      } else if (hotspotId === 'hotspot-paco' || hotspotId === 'paco-actor') {
+        this.dialogueManager.enqueue([
+          { speaker: 'twinber', text: "Twinber: 'Le muestro el mapa a Paco.'" },
+          { speaker: 'paco', text: "Paco: '¡Buen mapa, chacho! Primero sella aquí en el Puerto y luego sigue la ruta hacia el Valle.'" }
         ]);
       } else {
         this.dialogueManager.enqueue([
-          { speaker: 'twinber', text: "Twinber: 'La brújula se mantiene firme orientada hacia el Norte magnético.'" }
+          { speaker: 'twinber', text: "Twinber [MAPA]: 'Consulto las carreteras insulares. Usa el verbo [VIAJAR] para desplazarte por la isla.'" }
         ]);
       }
     }

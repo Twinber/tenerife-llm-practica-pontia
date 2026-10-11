@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="albumLeather" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#581c87"/>
+      <stop offset="40%" stop-color="#3b0764"/>
+      <stop offset="100%" stop-color="#1e0438"/>
+    </linearGradient>
+    <linearGradient id="brassCorners" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#ca8a04"/>
+      <stop offset="100%" stop-color="#854d0e"/>
+    </linearGradient>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#bae6fd"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sombra base -->
+  <rect x="9" y="9" width="48" height="48" rx="4" fill="#000000" opacity="0.6"/>
+
+  <!-- Grosor de páginas del álbum -->
+  <rect x="12" y="7" width="46" height="48" rx="3" fill="#f4f4f5" stroke="#71717a" stroke-width="1"/>
+  <line x1="56" y1="10" x2="56" y2="53" stroke="#a1a1aa" stroke-width="1.5" stroke-dasharray="1 2"/>
+
+  <!-- Cubierta de cuero del álbum -->
+  <rect x="8" y="7" width="46" height="48" rx="4" fill="url(#albumLeather)" stroke="#090212" stroke-width="1.8"/>
+
+  <!-- Lomo acolchado con tachuelas -->
+  <rect x="8" y="7" width="8" height="48" rx="2" fill="#2e0854" stroke="#090212" stroke-width="1.2"/>
+  <circle cx="12" cy="14" r="1.5" fill="url(#brassCorners)"/>
+  <circle cx="12" cy="31" r="1.5" fill="url(#brassCorners)"/>
+  <circle cx="12" cy="48" r="1.5" fill="url(#brassCorners)"/>
+
+  <!-- Cantoneras / Protectores de esquina de latón -->
+  <!-- Superior Derecha -->
+  <polygon points="54,7 44,7 54,17" fill="url(#brassCorners)" stroke="#713f12" stroke-width="0.8"/>
+  <circle cx="49" cy="12" r="1" fill="#713f12"/>
+  <!-- Inferior Derecha -->
+  <polygon points="54,55 44,55 54,45" fill="url(#brassCorners)" stroke="#713f12" stroke-width="0.8"/>
+  <circle cx="49" cy="50" r="1" fill="#713f12"/>
+
+  <!-- Marco de gofrado en la tapa -->
+  <rect x="19" y="11" width="31" height="40" rx="2" fill="none" stroke="#a855f7" stroke-width="0.8" opacity="0.5"/>
+
+  <!-- Foto Polaroid sobresaliendo en ángulo -->
+  <g transform="rotate(8 34 31)">
+    <!-- Marco blanco de la foto polaroid -->
+    <rect x="20" y="16" width="26" height="30" rx="1.5" fill="#ffffff" stroke="#3f3f46" stroke-width="1.2" filter="drop-shadow(1px 2px 2px rgba(0,0,0,0.5))"/>
+    
+    <!-- Imagen dentro de la polaroid: El Teide bajo el cielo azul -->
+    <rect x="22" y="18" width="22" height="18" fill="url(#skyGrad)"/>
+    <!-- Sol -->
+    <circle cx="39" cy="22" r="2.5" fill="#fde047"/>
+    <!-- Silueta del Teide -->
+    <polygon points="33,23 42,36 24,36" fill="#78350f"/>
+    <!-- Nieve en la cumbre -->
+    <polygon points="33,23 35.5,27 30.5,27" fill="#ffffff"/>
+    <!-- Mar azul en la base -->
+    <rect x="22" y="34" width="22" height="2" fill="#0284c7"/>
+
+    <!-- Pie de la foto polaroid (espacio blanco para texto) -->
+    <line x1="24" y1="41" x2="38" y2="41" stroke="#94a3b8" stroke-width="1" stroke-linecap="round"/>
+  </g>
+
+  <!-- Pequeño icono de cámara retro en esquina inferior -->
+  <rect x="20" y="44" width="10" height="7" rx="1" fill="#0f172a" stroke="#94a3b8" stroke-width="0.8"/>
+  <circle cx="25" cy="47.5" r="2" fill="#38bdf8" stroke="#0284c7" stroke-width="0.6"/>
+  <rect x="21" y="42.5" width="3" height="1.5" fill="#64748b"/>
+</svg>

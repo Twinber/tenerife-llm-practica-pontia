@@ -30,18 +30,33 @@ html, body {
   justify-content: center;
 }
 
-/* Contenedor del Juego: Mantiene la proporción 16:9 EXACTA del background sin recortar nada */
-.game-screen {
+/* Contenedor Maestro: Alinea las dos franjas laterales y el escenario central */
+.game-wrapper {
   position: relative;
   width: 100vw;
   height: 100vh;
-  max-width: 177.78vh; /* 16:9 aspect ratio */
-  max-height: 56.25vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
+  overflow: hidden;
+  gap: 12px;
+}
+
+/* Contenedor del Juego: Mantiene la proporción 16:9 EXACTA del background sin recortar nada */
+.game-screen {
+  position: relative;
+  height: 100%;
+  max-height: 100vh;
+  aspect-ratio: 16 / 9;
+  max-width: calc(100vw - 184px);
+  max-height: calc((100vw - 184px) * 9 / 16);
   background: #000;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.95);
+  flex-shrink: 0;
 }
 
 /* 1. Viewport / Escenario: 100% DEL TAMAÑO para ver el fondo íntegro */
@@ -219,15 +234,16 @@ html, body {
   50% { opacity: 0.8; transform: scale(0.97); }
 }
 
-/* 2. DOCK FLOTANTE SCUMM (Translúcido, elegante, no tapa el escenario) */
+/* 2. DOCK FLOTANTE SCUMM (Ultra-compacto, elegante, solo Verbos: no tapa el escenario) */
 .scumm-floating-dock {
   position: absolute;
   bottom: 8px;
   left: 50%;
   transform: translateX(-50%);
-  width: 92%;
-  max-width: 940px;
-  background: rgba(4, 8, 38, 0.85);
+  width: 90%;
+  max-width: 440px;
+  min-width: 360px;
+  background: rgba(4, 8, 38, 0.88);
   border: 2px solid #3d4dc6;
   border-radius: 6px;
   box-shadow: 0 6px 25px rgba(0, 0, 0, 0.9);
@@ -241,34 +257,33 @@ html, body {
 /* Línea de Frase Integrada en el Dock */
 .sentence-bar {
   width: 100%;
-  padding: 5px 14px;
-  background: rgba(0, 0, 0, 0.6);
+  padding: 5px 12px;
+  background: rgba(0, 0, 0, 0.65);
   border-bottom: 1px solid #333388;
-  font-size: 10px;
+  font-size: 9px;
   color: var(--sentence-color);
   text-shadow: 1px 1px #000;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: center;
 }
 
-/* Panel Inferior: Verbos + Inventario en una fila compacta */
+/* Panel Inferior: Verbos en formato 3x2 */
 .dock-content {
   display: flex;
-  height: 60px;
-  padding: 4px 8px;
-  gap: 10px;
+  height: 56px;
+  padding: 4px 6px;
+  width: 100%;
 }
 
-/* Matriz de Verbos Compacta */
+/* Matriz de Verbos Compacta (6 Verbos Oficiales) */
 .verb-matrix {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  gap: 2px;
-  width: 42%;
-  border-right: 1px solid #333377;
-  padding-right: 8px;
+  gap: 3px;
+  width: 100%;
 }
 
 .verb-btn {
@@ -276,7 +291,7 @@ html, body {
   color: var(--scumm-verb);
   border: 1px solid transparent;
   font-family: inherit;
-  font-size: 9px;
+  font-size: 8.5px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -296,60 +311,103 @@ html, body {
   border-color: #ffff55;
 }
 
-/* Inventario de Twinber en fila horizontal */
-.inventory-grid {
-  display: flex;
-  gap: 8px;
-  width: 58%;
-  align-items: center;
+.dock-content.hidden {
+  display: none !important;
 }
 
-.inventory-slot {
-  flex: 1;
-  height: 100%;
-  background: rgba(12, 18, 55, 0.7);
+/* ==============================================================================
+   FRANJAS LATERALES DE INVENTARIO (Sidebar Left & Sidebar Right)
+   ============================================================================== */
+.sidebar-inventory {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 76px;
+  padding: 10px 6px;
+  background: rgba(6, 10, 36, 0.92);
+  border: 2px solid #3d4dc6;
+  border-radius: 6px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.95), 0 0 12px rgba(61, 77, 198, 0.25);
+  backdrop-filter: blur(4px);
+  z-index: 25;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  font-size: 7px;
+  color: #ffaa00;
+  text-shadow: 1px 1px #000;
+  text-align: center;
+  width: 100%;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #2e3a8a;
+  letter-spacing: 1px;
+}
+
+.sidebar-inventory .inventory-slot {
+  width: 62px;
+  height: 62px;
+  background: rgba(12, 18, 55, 0.8);
   border: 1px solid #444488;
+  border-radius: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
   cursor: pointer;
-  border-radius: 4px;
-  transition: transform 0.1s, border-color 0.1s;
+  transition: transform 0.1s ease, border-color 0.1s ease, background 0.1s ease;
 }
 
-.inventory-slot:hover {
+.sidebar-inventory .inventory-slot:hover {
   border-color: #ffff55;
-  background: rgba(25, 45, 120, 0.85);
-  transform: scale(1.05);
+  background: rgba(25, 45, 120, 0.9);
+  transform: scale(1.08);
+  box-shadow: 0 0 8px rgba(255, 255, 85, 0.4);
 }
 
-.inventory-slot.selected {
+.sidebar-inventory .inventory-slot.selected {
   border: 2px solid #ffff55;
-  background: rgba(0, 70, 160, 0.9);
-  box-shadow: 0 0 10px rgba(255, 255, 85, 0.5);
-  transform: scale(1.05);
+  background: rgba(0, 70, 160, 0.95);
+  box-shadow: 0 0 12px rgba(255, 255, 85, 0.7);
+  transform: scale(1.08);
 }
 
-.inventory-slot img {
-  max-width: 86%;
-  max-height: 86%;
+.sidebar-inventory .inventory-slot img {
+  max-width: 82%;
+  max-height: 82%;
   object-fit: contain;
-  image-rendering: pixelated;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
 }
 
-.slot-badge {
+.sidebar-inventory .slot-badge {
   position: absolute;
   bottom: 2px;
-  right: 4px;
-  font-size: 7px;
+  right: 3px;
+  font-size: 6.5px;
   color: #ffff55;
-  text-shadow: 1px 1px #000;
+  text-shadow: 1px 1px #000, 0 0 2px #000;
+  pointer-events: auto;
 }
 
-.dock-content.hidden {
-  display: none !important;
+/* Ranuras bloqueadas de objetos en venta */
+.sidebar-inventory .inventory-slot.locked-slot {
+  opacity: 0.52;
+  filter: grayscale(60%);
+  border-color: #333366;
+  background: rgba(8, 12, 35, 0.6);
+}
+
+.sidebar-inventory .inventory-slot.locked-slot:hover {
+  opacity: 0.85;
+  filter: grayscale(20%);
+  border-color: #6677cc;
+}
+
+.sidebar-inventory .inventory-slot.locked-slot .slot-badge {
+  color: #ffa500;
 }
 
 /* Modo Diálogo Ramificado en el Dock (Estilo LucasArts) */

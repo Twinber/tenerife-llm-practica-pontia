@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="paperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="60%" stop-color="#fefce8"/>
+      <stop offset="100%" stop-color="#fef08a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sombra de la comanda -->
+  <rect x="13" y="8" width="40" height="50" rx="2" fill="#000000" opacity="0.6"/>
+
+  <!-- Hoja de comanda de papel doblada -->
+  <polygon points="12,6 48,6 52,10 52,54 12,54" fill="url(#paperGrad)" stroke="#475569" stroke-width="1.8"/>
+
+  <!-- Esquina doblada (dog-ear fold) -->
+  <polygon points="48,6 48,10 52,10" fill="#e2e8f0" stroke="#475569" stroke-width="1.2"/>
+
+  <!-- Borde perforado superior -->
+  <line x1="14" y1="8" x2="46" y2="8" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2 2"/>
+
+  <!-- Encabezado de la taberna: GUACHINCHE -->
+  <rect x="16" y="11" width="32" height="6" fill="#1e293b"/>
+  <text x="32" y="15.5" font-family="'Press Start 2P', monospace, sans-serif" font-size="2.6" font-weight="bold" fill="#f8fafc" text-anchor="middle">GUACHINCHE</text>
+
+  <!-- Mancha circular de vaso de vino tinto (elemento clásico y cómico) -->
+  <circle cx="38" cy="34" r="10" fill="none" stroke="#991b1b" stroke-width="2.5" opacity="0.65"/>
+  <circle cx="39" cy="35" r="9.2" fill="none" stroke="#7f1d1d" stroke-width="1" opacity="0.4"/>
+  <circle cx="43" cy="27" r="1.5" fill="#991b1b" opacity="0.6"/>
+
+  <!-- Líneas de comanda y notas manuscritas de ruta -->
+  <!-- Línea 1: Papas arrugadas -->
+  <line x1="16" y1="21" x2="20" y2="21" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="23" y1="21" x2="44" y2="21" stroke="#334155" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- Línea 2: Carne fiesta -->
+  <line x1="16" y1="26" x2="20" y2="26" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="23" y1="26" x2="40" y2="26" stroke="#334155" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- Línea 3: Vino del país -->
+  <line x1="16" y1="31" x2="20" y2="31" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="23" y1="31" x2="33" y2="31" stroke="#334155" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- Línea 4: Sendero Orotava (pista secreta) -->
+  <line x1="16" y1="37" x2="30" y2="37" stroke="#2563eb" stroke-width="1.2" stroke-dasharray="2 1"/>
+  <line x1="16" y1="41" x2="34" y2="41" stroke="#2563eb" stroke-width="1.2" stroke-dasharray="2 1"/>
+
+  <!-- Sello de PAGADO rojo en diagonal -->
+  <g transform="rotate(-15 32 46)">
+    <rect x="18" y="44" width="28" height="7" rx="1.5" fill="none" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="32" y="49" font-family="'Press Start 2P', monospace, sans-serif" font-size="3" font-weight="bold" fill="#dc2626" text-anchor="middle">PAGADO</text>
+  </g>
+</svg>
