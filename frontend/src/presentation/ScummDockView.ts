@@ -12,6 +12,7 @@ export class ScummDockView {
   private dockDialogue: HTMLElement;
   private dialogueFreeForm: HTMLFormElement;
   private dialogueFreeInput: HTMLInputElement;
+  private currentKeyActions: Record<string, () => void> = {};
 
   constructor(actionDispatcher: ActionDispatcher, audioService: AudioService) {
     this.actionDispatcher = actionDispatcher;
@@ -45,7 +46,12 @@ export class ScummDockView {
       }
     };
 
-    this.actionDispatcher.onDialogueModeChange = (active: boolean, npcName?: string, shopItem?: { name: string; price: number }) => {
+    this.actionDispatcher.onDialogueModeChange = (
+      active: boolean,
+      npcName?: string,
+      shopItem?: { name: string; price: number },
+      twinBrotherName?: string
+    ) => {
       if (active) {
         this.dockDialogue.classList.remove('hidden', 'dialogue-speaking');
         if (this.dialogueFreeInput) {
@@ -53,28 +59,68 @@ export class ScummDockView {
           this.dialogueFreeInput.placeholder = `Escribe tu propia pregunta a ${npcName || 'personaje'}...`;
         }
 
+        const twinBtn = document.getElementById('dialogue-choice-twin');
+        const twinNum = document.getElementById('dialogue-twin-num');
         const buyBtn = document.getElementById('dialogue-choice-buy');
         const buyText = document.getElementById('dialogue-buy-text');
+        const buyNum = document.querySelector<HTMLElement>('#dialogue-choice-buy .choice-num');
         const inputNum = document.getElementById('dialogue-input-num');
         const exitNum = document.getElementById('dialogue-exit-num');
 
-        if (buyBtn && buyText) {
-          if (shopItem) {
-            buyBtn.classList.remove('hidden');
-            buyBtn.style.display = 'flex';
-            buyText.innerText = `"Comprar ${shopItem.name} (${shopItem.price} 💰)"`;
-            if (inputNum) inputNum.innerText = '4.';
-            if (exitNum) exitNum.innerText = '5.';
-          } else {
-            buyBtn.classList.add('hidden');
-            buyBtn.style.display = 'none';
-            buyText.innerText = '';
-            if (inputNum) inputNum.innerText = '3.';
-            if (exitNum) exitNum.innerText = '4.';
-          }
+        this.currentKeyActions = {};
+        let currentNum = 1;
+
+        // Opción 1: Pasaporte
+        this.currentKeyActions[String(currentNum)] = () => this.actionDispatcher.selectDialogueChoice('passport');
+        currentNum++;
+
+        // Opción 2: Lore de la zona
+        this.currentKeyActions[String(currentNum)] = () => this.actionDispatcher.selectDialogueChoice('lore');
+        currentNum++;
+
+        // Opción 3 (Opcional): Hermano Gemelo ("¿Nos conocemos?")
+        if (twinBrotherName && twinBtn) {
+          twinBtn.classList.remove('hidden');
+          twinBtn.style.display = 'flex';
+          if (twinNum) twinNum.innerText = `${currentNum}.`;
+          const key = String(currentNum);
+          this.currentKeyActions[key] = () => this.actionDispatcher.selectDialogueChoice('twin');
+          currentNum++;
+        } else if (twinBtn) {
+          twinBtn.classList.add('hidden');
+          twinBtn.style.display = 'none';
         }
+
+        // Opción 4 (Opcional): Comprar artículo de tienda
+        if (shopItem && buyBtn && buyText) {
+          buyBtn.classList.remove('hidden');
+          buyBtn.style.display = 'flex';
+          buyText.innerText = `"Comprar ${shopItem.name} (${shopItem.price} 💰)"`;
+          if (buyNum) buyNum.innerText = `${currentNum}.`;
+          const key = String(currentNum);
+          this.currentKeyActions[key] = () => this.actionDispatcher.selectDialogueChoice('buy');
+          currentNum++;
+        } else if (buyBtn && buyText) {
+          buyBtn.classList.add('hidden');
+          buyBtn.style.display = 'none';
+          buyText.innerText = '';
+        }
+
+        // Opción abierta: Input de texto
+        if (inputNum) inputNum.innerText = `${currentNum}.`;
+        const inputKey = String(currentNum);
+        this.currentKeyActions[inputKey] = () => {
+          if (this.dialogueFreeInput) this.dialogueFreeInput.focus();
+        };
+        currentNum++;
+
+        // Despedida
+        if (exitNum) exitNum.innerText = `${currentNum}.`;
+        const exitKey = String(currentNum);
+        this.currentKeyActions[exitKey] = () => this.actionDispatcher.selectDialogueChoice('exit');
       } else {
         this.dockDialogue.classList.add('hidden');
+        this.currentKeyActions = {};
       }
     };
 
@@ -146,7 +192,7 @@ export class ScummDockView {
     // Botones de Opciones de Diálogo
     document.querySelectorAll<HTMLButtonElement>('.dialogue-choice-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const choice = btn.dataset.choice as 'passport' | 'lore' | 'buy' | 'exit';
+        const choice = btn.dataset.choice as 'passport' | 'lore' | 'twin' | 'buy' | 'exit';
         if (choice) {
           this.audioService.playClick();
           this.actionDispatcher.selectDialogueChoice(choice);
@@ -166,7 +212,7 @@ export class ScummDockView {
       });
     }
 
-    // Teclas de acceso rápido en modo Diálogo (1, 2, 3, 4, Escape)
+    // Teclas de acceso rápido en modo Diálogo (Mapeo dinámico 1, 2, 3, 4, 5, 6 y Escape)
     window.addEventListener('keydown', (e) => {
       if (!this.actionDispatcher.isInNpcDialogue) return;
       if (this.actionDispatcher.isDialogueSpeaking) return;
@@ -174,33 +220,12 @@ export class ScummDockView {
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
 
-      if (e.key === '1') {
-        this.audioService.playClick();
-        this.actionDispatcher.selectDialogueChoice('passport');
-      } else if (e.key === '2') {
-        this.audioService.playClick();
-        this.actionDispatcher.selectDialogueChoice('lore');
-      } else if (e.key === '3') {
-        const buyBtn = document.getElementById('dialogue-choice-buy');
-        const isBuyVisible = buyBtn && !buyBtn.classList.contains('hidden') && buyBtn.style.display !== 'none';
-        if (isBuyVisible) {
-          this.audioService.playClick();
-          this.actionDispatcher.selectDialogueChoice('buy');
-        } else {
-          if (this.dialogueFreeInput) this.dialogueFreeInput.focus();
-        }
-      } else if (e.key === '4') {
-        const buyBtn = document.getElementById('dialogue-choice-buy');
-        const isBuyVisible = buyBtn && !buyBtn.classList.contains('hidden') && buyBtn.style.display !== 'none';
-        if (isBuyVisible) {
-          if (this.dialogueFreeInput) this.dialogueFreeInput.focus();
-        } else {
-          this.audioService.playClick();
-          this.actionDispatcher.selectDialogueChoice('exit');
-        }
-      } else if (e.key === '5' || e.key === 'Escape') {
+      if (e.key === 'Escape') {
         this.audioService.playClick();
         this.actionDispatcher.selectDialogueChoice('exit');
+      } else if (this.currentKeyActions[e.key]) {
+        this.audioService.playClick();
+        this.currentKeyActions[e.key]();
       }
     });
   }

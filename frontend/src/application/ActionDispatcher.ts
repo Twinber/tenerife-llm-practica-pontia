@@ -39,7 +39,7 @@ export class ActionDispatcher {
   public acquiredItems: Array<{ name: string; icon: string; count?: number }> = [];
   public purchasedFromNpcs: Set<string> = new Set();
 
-  public onDialogueModeChange?: (active: boolean, npcName?: string, shopItem?: { name: string; price: number }) => void;
+  public onDialogueModeChange?: (active: boolean, npcName?: string, shopItem?: { name: string; price: number }, twinBrotherName?: string) => void;
   public onDialogueSpeechState?: (isSpeaking: boolean) => void;
   public onStateUpdate?: (updates: {
     photos?: string;
@@ -369,8 +369,9 @@ export class ActionDispatcher {
     const npc = this.currentLocation.npc;
     const isSoldOut = npc?.id ? this.purchasedFromNpcs.has(npc.id) : false;
     const shopItem = (npc?.hasShop && !isSoldOut) ? npc.shopItem : undefined;
+    const twinBrotherName = npc?.twinBrotherName;
     if (this.onDialogueModeChange) {
-      this.onDialogueModeChange(true, npcName, shopItem);
+      this.onDialogueModeChange(true, npcName, shopItem, twinBrotherName);
     }
     this.updateSentence();
 
@@ -395,7 +396,7 @@ export class ActionDispatcher {
     this.updateSentence();
   }
 
-  public selectDialogueChoice(choice: 'passport' | 'lore' | 'buy' | 'custom' | 'exit', customText?: string): void {
+  public selectDialogueChoice(choice: 'passport' | 'lore' | 'twin' | 'buy' | 'custom' | 'exit', customText?: string): void {
     if (!this.isInNpcDialogue) return;
     this.isDialogueSpeaking = true;
     if (this.onDialogueSpeechState) this.onDialogueSpeechState(true);
@@ -408,6 +409,9 @@ export class ActionDispatcher {
       case 'lore':
         this.handleLoreChoice();
         break;
+      case 'twin':
+        this.handleTwinChoice();
+        break;
       case 'buy':
         this.handleBuyChoice();
         break;
@@ -418,6 +422,21 @@ export class ActionDispatcher {
         this.handleExitChoice();
         break;
     }
+  }
+
+  private handleTwinChoice(): void {
+    const npc = this.currentLocation.npc;
+    const npcName = npc?.name || 'Personaje';
+    const twinName = npc?.twinBrotherName || 'mi otro hermano';
+
+    if (this.onLogMessage) {
+      this.onLogMessage(`[EASTER EGG // HERMANOS GEMELOS] Twinber -> ${npcName}: "¿Nos conocemos?" -> Hermano gemelo: "${twinName}"`);
+    }
+
+    this.dialogueManager.enqueue([
+      { speaker: 'twinber', text: "Twinber: '¿Nos conocemos?'" },
+      { speaker: 'paco', text: `${npcName}: 'No lo creo caballero, tal vez haya conocido a mi hermano gemelo ${twinName}.'` }
+    ]);
   }
 
   private handleBuyChoice(): void {
@@ -467,7 +486,7 @@ export class ActionDispatcher {
         if (npc.id) {
           this.purchasedFromNpcs.add(npc.id);
           if (this.onDialogueModeChange) {
-            this.onDialogueModeChange(true, npcName, undefined);
+            this.onDialogueModeChange(true, npcName, undefined, npc.twinBrotherName);
           }
         }
         this.audioService.playCoin();
@@ -578,7 +597,9 @@ export class ActionDispatcher {
     const lower = userText.toLowerCase();
     let reply = `${npcName}: '¡Chacho, qué buena pregunta! En Tenerife cada rincón guarda una leyenda. ¡Sigue explorando la isla!'`;
 
-    if (lower.includes('gofio') || lower.includes('comer') || lower.includes('molino') || lower.includes('comida') || lower.includes('papas') || lower.includes('mojo')) {
+    if (this.currentLocation.npc?.twinBrotherName && (lower.includes('conocemos') || lower.includes('gemelo') || lower.includes('hermano') || lower.includes('clon') || lower.includes('pareces'))) {
+      reply = `${npcName}: 'No lo creo caballero, tal vez haya conocido a mi hermano gemelo ${this.currentLocation.npc.twinBrotherName}.'`;
+    } else if (lower.includes('gofio') || lower.includes('comer') || lower.includes('molino') || lower.includes('comida') || lower.includes('papas') || lower.includes('mojo')) {
       reply = `${npcName}: '¡Para comer bien pide unas papas arrugadas con mojo y sube a La Orotava al Molino de Chano por buen gofio recién molido!'`;
     } else if (lower.includes('teide') || lower.includes('volcan') || lower.includes('volcán') || lower.includes('cumbre') || lower.includes('subir') || lower.includes('pico')) {
       reply = `${npcName}: 'El padre Teide vigila a 3.718 metros. Toma la guagua a Las Cañadas y luego la cabina del teleférico.'`;

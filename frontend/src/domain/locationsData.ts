@@ -40,6 +40,7 @@ export interface LocationSceneDef {
       price: number;
       dialogueText: string;
     };
+    twinBrotherName?: string; // Nombre del hermano gemelo para el easter egg cómico "¿Nos conocemos?"
   };
   hotspots: HotspotLocationDef[];
 }
@@ -517,7 +518,8 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
       initialX: 74.0,
       lookText: "Tanausú, fornido montañero de barba cerrada con bastón de senderismo y mochila técnica.",
       greeting: "Estás ante la garganta más imponente del archipiélago. Antiguo refugio de piratas y aborígenes guanches.",
-      photoIdOnLore: 19 // Barranco de Masca (Pág. 22)
+      photoIdOnLore: 19, // Barranco de Masca (Pág. 22)
+      twinBrotherName: 'Yeray'
     },
     hotspots: [
       {
@@ -613,7 +615,8 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         name: 'Billete del Teleférico',
         price: 5,
         dialogueText: "Billete troquelado para subir en cabina hasta La Rambleta a 3.555 metros. ¡Buen ascenso!"
-      }
+      },
+      twinBrotherName: 'el Oficial Morales'
     },
     hotspots: [
       {
@@ -654,7 +657,8 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
       role: 'Sabio de la cumbre y astrónomo',
       initialX: 75.0,
       lookText: "El Guardián del Teide, con capa de lana y telescopio astronómico bajo un manto estelar infinito.",
-      greeting: "¡Has coronado el techo de España, viajero! A tus pies se extienden las siete islas y sobre ti el universo entero."
+      greeting: "¡Has coronado el techo de España, viajero! A tus pies se extienden las siete islas y sobre ti el universo entero.",
+      twinBrotherName: 'Don Cándido'
     },
     hotspots: [
       {
