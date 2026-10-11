@@ -422,6 +422,9 @@ export class IslandMapModal {
         }
 
         setTimeout(() => {
+          if (targetPinGroup) {
+            targetPinGroup.classList.remove('arrival-flash');
+          }
           vehicle.style.display = 'none';
           visibleLine.setAttribute('d', '');
           this.close();
