@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Twinber en Tenerife - 1990 Graphic Adventure</title>
-  <link rel="stylesheet" href="css/retro.css">
 </head>
 <body>
 
@@ -13,7 +12,7 @@
 
     <!-- 1. ESCENARIO GRÁFICO AL 100% (TODO EL FONDO VISIBLE) -->
     <section class="scene-viewport" id="scene-viewport">
-      <img class="scene-background" src="assets/img/bg_puerto_de_la_cruz.jpg" alt="Puerto de la Cruz, Tenerife">
+      <img class="scene-background" src="/assets/img/bg_puerto_de_la_cruz.jpg" alt="Puerto de la Cruz, Tenerife">
 
       <!-- HUD Superior Flotante Minimalista -->
       <div class="top-hud-bar">
@@ -35,8 +34,8 @@
       <div id="hotspot-paco" class="hotspot" style="left: 79%; bottom: 6%; width: 15%; height: 46%;" title="Paco el Pescador"></div>
 
       <!-- Actores: Sprites Transparentes sobre los Adoquines -->
-      <img id="twinber-actor" class="sprite-actor" src="assets/img/sprites/twinber_idle_0.png" alt="Twinber">
-      <img id="paco-actor" class="sprite-actor" src="assets/img/sprites/paco_idle_0.png" alt="Paco el Pescador">
+      <img id="twinber-actor" class="sprite-actor" src="/assets/img/sprites/twinber_idle_0.png" alt="Twinber">
+      <img id="paco-actor" class="sprite-actor" src="/assets/img/sprites/paco_idle_0.png" alt="Paco el Pescador">
     </section>
 
     <!-- 2. DOCK FLOTANTE SCUMM (Compacto, elegante, no tapa el escenario) -->
@@ -61,19 +60,19 @@
         <!-- Inventario Horizontal de Twinber -->
         <div class="inventory-grid">
           <div class="inventory-slot" data-item="Bolsa de Monedas de Oro" title="Bolsa de Monedas de Oro">
-            <img src="assets/img/items/item_monedas.png" alt="Monedas">
+            <img src="/assets/img/items/item_monedas.png" alt="Monedas">
             <span class="slot-badge">15 💰</span>
           </div>
           <div class="inventory-slot" data-item="Pasaporte de Explorador" title="Pasaporte de Explorador">
-            <img src="assets/img/items/item_pasaporte.png" alt="Pasaporte">
+            <img src="/assets/img/items/item_pasaporte.png" alt="Pasaporte">
             <span class="slot-badge">0/10</span>
           </div>
           <div class="inventory-slot" data-item="Álbum de Fotos" title="Álbum de Fotos">
-            <img src="assets/img/items/item_album.png" alt="Álbum">
+            <img src="/assets/img/items/item_album.png" alt="Álbum">
             <span class="slot-badge">0/28</span>
           </div>
           <div class="inventory-slot" data-item="Brújula de Latón" title="Brújula de Latón">
-            <img src="assets/img/items/item_brujula.png" alt="Brújula">
+            <img src="/assets/img/items/item_brujula.png" alt="Brújula">
           </div>
         </div>
       </div>
@@ -87,6 +86,6 @@
 
   </main>
 
-  <script src="js/game.js"></script>
+  <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

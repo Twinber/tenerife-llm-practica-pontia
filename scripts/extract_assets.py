@@ -37,10 +37,10 @@ def flood_remove_bg(crop_img, tol=30):
     return im
 
 def extract_twinber():
-    sheet = Image.open('frontend/assets/img/sprite_twinber_sheet.jpg').convert('RGB')
+    sheet = Image.open('frontend/public/assets/img/sprite_twinber_sheet.jpg').convert('RGB')
     w, h = sheet.size
     row_h = h // 3
-    out_dir = 'frontend/assets/img/sprites'
+    out_dir = 'frontend/public/assets/img/sprites'
     os.makedirs(out_dir, exist_ok=True)
     
     # Fila 0: 6 frames walk
@@ -66,10 +66,10 @@ def extract_twinber():
     print("Twinber sprites extracted successfully!")
 
 def extract_paco():
-    sheet = Image.open('frontend/assets/img/sprite_paco_sheet.jpg').convert('RGB')
+    sheet = Image.open('frontend/public/assets/img/sprite_paco_sheet.jpg').convert('RGB')
     w, h = sheet.size
     row_h = h // 2
-    out_dir = 'frontend/assets/img/sprites'
+    out_dir = 'frontend/public/assets/img/sprites'
     os.makedirs(out_dir, exist_ok=True)
     
     # Fila 0: 4 frames idle
@@ -88,11 +88,11 @@ def extract_paco():
     print("Paco sprites extracted successfully!")
 
 def extract_items():
-    sheet = Image.open('frontend/assets/img/items_inventory_sheet.jpg').convert('RGB')
+    sheet = Image.open('frontend/public/assets/img/items_inventory_sheet.jpg').convert('RGB')
     w, h = sheet.size
     cell_w = w // 4
     cell_h = h // 2
-    out_dir = 'frontend/assets/img/items'
+    out_dir = 'frontend/public/assets/img/items'
     os.makedirs(out_dir, exist_ok=True)
     
     names = [
