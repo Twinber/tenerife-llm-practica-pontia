@@ -15,6 +15,7 @@ import { TelemetryView } from './presentation/TelemetryView';
 import { PhotoAlbumModal } from './presentation/PhotoAlbumModal';
 import { PassportModal } from './presentation/PassportModal';
 import { IslandMapModal } from './presentation/IslandMapModal';
+import { AnimationViewerModal } from './presentation/AnimationViewerModal';
 import { LOCATIONS_CATALOG } from './domain/locationsData';
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -73,10 +74,20 @@ window.addEventListener('DOMContentLoaded', () => {
   const photoAlbumModal = new PhotoAlbumModal(audioService);
   const passportModal = new PassportModal(audioService);
   const islandMapModal = new IslandMapModal(audioService, actionDispatcher.currentLocation);
+  const animationViewerModal = new AnimationViewerModal(audioService);
 
   actionDispatcher.photoAlbumModal = photoAlbumModal;
   actionDispatcher.passportModal = passportModal;
   actionDispatcher.islandMapModal = islandMapModal;
+
+  // Botón rápido en la cabecera de la consola de telemetría
+  const btnCrtAnims = document.getElementById('btn-crt-anims');
+  if (btnCrtAnims) {
+    btnCrtAnims.addEventListener('click', () => {
+      animationViewerModal.open();
+      telemetryView.log("Desplegando laboratorio visual de animaciones (SHOW_ANIMS)...");
+    });
+  }
 
   islandMapModal.onTravelConfirmed = (targetLocationId: string) => {
     const loc = LOCATIONS_CATALOG.find(l => l.id === targetLocationId);
@@ -100,6 +111,9 @@ window.addEventListener('DOMContentLoaded', () => {
   // Exponer para automatización y pruebas de Playwright
   (window as any).__actionDispatcher = actionDispatcher;
   (window as any).__dialogueManager = dialogueManager;
+  (window as any).__animationViewerModal = animationViewerModal;
+  (window as any).__showAnims = (filter?: string) => animationViewerModal.open(filter);
+  (window as any).__hideAnims = () => animationViewerModal.close();
 
   // Vincular logs a la consola de telemetría
   actionDispatcher.onLogMessage = (msg) => telemetryView.log(msg);
@@ -109,6 +123,18 @@ window.addEventListener('DOMContentLoaded', () => {
     const parts = rawCmd.trim().split(/\s+/);
     const cmd = parts[0].toUpperCase();
     const arg = parts.slice(1).join(' ').trim();
+
+    if (cmd === 'SHOW_ANIMS' || cmd === 'SHOW_ANIMATIONS' || cmd === 'ANIMS' || cmd === 'ANIMACIONES' || cmd === 'VER_ANIMACIONES') {
+      animationViewerModal.open(arg || undefined);
+      telemetryView.log(`Desplegando laboratorio visual de animaciones (SHOW_ANIMS${arg ? ` [${arg}]` : ''})...`);
+      return;
+    }
+
+    if (cmd === 'HIDE_ANIMS' || cmd === 'CLOSE_ANIMS' || cmd === 'CERRAR_ANIMS') {
+      animationViewerModal.close();
+      telemetryView.log("Visor de animaciones cerrado.");
+      return;
+    }
 
     if (cmd === 'LISTAR_DESTINOS' || cmd === 'DESTINOS' || cmd === 'LIST' || cmd === 'LUGARES') {
       const list = actionDispatcher.listDestinations();
@@ -138,6 +164,7 @@ window.addEventListener('DOMContentLoaded', () => {
       telemetryView.logRaw(`
         <div style="color:#00e5ff; margin:4px 0; line-height: 1.4;">
           <b>[COMANDOS DISPONIBLES EN TELEMETRÍA]</b><br>
+          • <b>SHOW_ANIMS [FILTRO]</b>: Laboratorio visual de animaciones (Twinber + 13 NPCs) para verificar fluidez.<br>
           • <b>MAPA</b>: Abre el mapa de carreteras de Tenerife (o pulsa la tecla 'M').<br>
           • <b>LISTAR_DESTINOS</b>: Muestra todos los 13 enclaves con sus NPCs, tiendas, sellos y fotos.<br>
           • <b>VIAJAR &lt;DESTINO&gt;</b>: Salto inmediato ignorando bloqueos y sellos (Ej: VIAJAR la_orotava ó VIAJAR Masca).<br>
@@ -186,9 +213,9 @@ window.addEventListener('DOMContentLoaded', () => {
   };
 
   telemetryView.log('Twinber Frontend Clean Architecture inicializado (Vite + TypeScript).');
-  telemetryView.log('Consola CLI lista. Escribe LISTAR_DESTINOS o VIAJAR <UBICACION> para depurar.');
+  telemetryView.log('Consola CLI lista. Escribe AYUDA, LISTAR_DESTINOS o SHOW_ANIMS.');
   // Exponer API interna en window para telemetría y depuración
-  (window as any).__twinber = { actionDispatcher, gameEngine, telemetryView };
+  (window as any).__twinber = { actionDispatcher, gameEngine, telemetryView, animationViewerModal };
 
   gameEngine.start();
 });

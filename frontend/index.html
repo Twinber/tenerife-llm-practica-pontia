@@ -96,15 +96,18 @@
       <aside class="crt-console" id="crt-console">
         <div class="crt-header">
           <span>*** CONSOLA DE TELEMETRÍA Y COMANDOS RETRO (TECLA 'T') ***</span>
-          <button id="btn-close-crt" class="crt-close-btn" title="Cerrar consola [ESC]">✕</button>
+          <div class="crt-header-actions">
+            <button type="button" id="btn-crt-anims" class="crt-quick-btn" title="Laboratorio de animaciones (SHOW_ANIMS)">🎬 ANIMS</button>
+            <button type="button" id="btn-close-crt" class="crt-close-btn" title="Cerrar consola [ESC]">✕</button>
+          </div>
         </div>
         <div class="crt-logs" id="crt-logs">
-          <div>[INIT] Consola de telemetría lista. Escribe AYUDA o LISTAR_DESTINOS.</div>
+          <div>[INIT] Consola de telemetría lista. Escribe AYUDA, LISTAR_DESTINOS o SHOW_ANIMS.</div>
           <div>-----------------------------------------------------------------</div>
         </div>
         <form class="crt-cmd-form" id="crt-cmd-form">
           <span class="crt-cmd-prompt">&gt;</span>
-          <input type="text" id="crt-cmd-input" class="crt-cmd-input" placeholder="Comando (ej: LISTAR_DESTINOS, VIAJAR la_orotava, AYUDA)..." autocomplete="off" />
+          <input type="text" id="crt-cmd-input" class="crt-cmd-input" placeholder="Comando (ej: SHOW_ANIMS, LISTAR_DESTINOS, VIAJAR la_orotava, AYUDA)..." autocomplete="off" />
           <button type="submit" class="crt-cmd-submit" id="crt-cmd-submit">EJECUTAR ↵</button>
         </form>
       </aside>
@@ -175,6 +178,50 @@
             <div class="map-route-banner" id="map-route-banner">
               <span class="banner-prompt">🚌 RUTA:</span>
               <span class="banner-text" id="map-banner-text">Haz clic en un enclave desbloqueado para viajar. Usa el Pasaporte para ver tus sellos.</span>
+            </div>
+          </footer>
+        </div>
+      </div>
+
+      <!-- Modal Auxiliar del Visor de Animaciones (SHOW_ANIMS) -->
+      <div id="animation-viewer-modal" class="retro-modal-overlay hidden">
+        <div class="retro-anims-window">
+          <header class="anims-modal-header">
+            <div class="anims-modal-title">
+              <span class="anims-icon">🎬</span> LABORATORIO DE ANIMACIONES // VERIFICADOR DE SPRITES & FLUIDEZ
+              <span class="anims-badge">14 PERSONAJES • 112 FRAMES</span>
+            </div>
+            <div class="anims-header-controls">
+              <button type="button" id="btn-anims-playpause" class="anims-ctrl-btn" title="Pausar / Reanudar animaciones">⏸️ PAUSAR</button>
+              <button type="button" id="btn-anims-speed" class="anims-ctrl-btn" title="Alternar velocidad de animación">⚡ 1.0x (Normal)</button>
+              <button type="button" id="btn-anims-bg" class="anims-ctrl-btn" title="Alternar fondo de inspección">🏁 AJEDREZ</button>
+              <button type="button" id="btn-close-anims" class="modal-close-btn">✕ CERRAR [ESC]</button>
+            </div>
+          </header>
+
+          <div class="anims-toolbar">
+            <span class="anims-toolbar-hint">
+              💡 Inspección simultánea en bucle (REPOSO y HABLA) para validar fluidez, anclaje y siluetas.
+            </span>
+            <div class="anims-filter-group">
+              <button type="button" class="anims-filter-btn active" data-filter="all">TODOS (14)</button>
+              <button type="button" class="anims-filter-btn" data-filter="north">NORTE (5)</button>
+              <button type="button" class="anims-filter-btn" data-filter="metro">METROPOLITANA (3)</button>
+              <button type="button" class="anims-filter-btn" data-filter="south">SUR (3)</button>
+              <button type="button" class="anims-filter-btn" data-filter="teide">TEIDE (2)</button>
+            </div>
+          </div>
+
+          <main class="anims-cards-grid" id="anims-cards-grid">
+            <!-- Renderizado dinámico de tarjetas de personajes -->
+          </main>
+
+          <footer class="anims-modal-footer">
+            <div class="anims-footer-left">
+              <span>Zero-Jitter Engine Activo • Anclaje de pies (Ground Foot Anchor) uniforme por personaje</span>
+            </div>
+            <div class="anims-footer-right">
+              <span>Usa <b>SHOW_ANIMS</b> o <b>HIDE_ANIMS</b> en la consola interactiva (Tecla T)</span>
             </div>
           </footer>
         </div>
