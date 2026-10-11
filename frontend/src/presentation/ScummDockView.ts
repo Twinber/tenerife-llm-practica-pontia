@@ -20,6 +20,17 @@ export class ScummDockView {
     this.actionDispatcher.onSentenceChange = (text: string) => {
       this.sentenceActionElem.innerText = text;
     };
+
+    this.actionDispatcher.onStateUpdate = (updates) => {
+      if (updates.photos) {
+        const albumSlot = document.querySelector<HTMLElement>('[data-item="Álbum de Fotos"] .slot-badge');
+        if (albumSlot) albumSlot.innerText = updates.photos;
+      }
+      if (updates.passport) {
+        const passportSlot = document.querySelector<HTMLElement>('[data-item="Pasaporte de Explorador"] .slot-badge');
+        if (passportSlot) passportSlot.innerText = updates.passport;
+      }
+    };
   }
 
   private bindEvents(): void {
@@ -38,9 +49,29 @@ export class ScummDockView {
       slot.addEventListener('click', () => {
         const item = slot.dataset.item;
         if (!item) return;
-        this.audioService.playCoin();
-        this.actionDispatcher.setHoverTarget(`con ${item}`);
+
+        // Limpiar selección previa o alternar
+        const isSelected = slot.classList.contains('selected');
+        document.querySelectorAll('.inventory-slot').forEach(s => s.classList.remove('selected'));
+
+        if (!isSelected) {
+          slot.classList.add('selected');
+          this.actionDispatcher.selectItem(item);
+          this.audioService.playClick();
+          // Resaltar USAR en la botonera
+          document.querySelectorAll<HTMLButtonElement>('.verb-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.verb === 'USAR');
+          });
+        } else {
+          this.actionDispatcher.selectItem(item); // deselecciona
+          this.audioService.playClick();
+          // Volver al verbo activo
+          document.querySelectorAll<HTMLButtonElement>('.verb-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.verb === this.actionDispatcher.activeVerb);
+          });
+        }
       });
+
       slot.addEventListener('mouseenter', () => {
         const item = slot.dataset.item;
         if (item) this.actionDispatcher.setHoverTarget(item);

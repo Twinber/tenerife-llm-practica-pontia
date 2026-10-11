@@ -55,7 +55,7 @@ export class ViewportView {
     // Paco clic & hover
     this.pacoElem.addEventListener('click', (e) => {
       e.stopPropagation();
-      this.actionDispatcher.talkToPaco();
+      this.actionDispatcher.interactWithHotspot('hotspot-paco', 'Paco el Pescador');
     });
     this.pacoElem.addEventListener('mouseenter', () => {
       this.actionDispatcher.setHoverTarget('Paco el Pescador');
@@ -65,21 +65,21 @@ export class ViewportView {
     });
 
     // Hotspots
-    this.bindHotspot('hotspot-paco', 'Paco el Pescador', () => this.actionDispatcher.talkToPaco());
-    this.bindHotspot('hotspot-barca', 'Barca "El Mojo"', () => this.actionDispatcher.inspectBoat());
-    this.bindHotspot('hotspot-teide', 'El Teide en la cumbre', () => this.actionDispatcher.inspectTeide());
-    this.bindHotspot('hotspot-casa', 'Casa Colonial Canaria', () => this.actionDispatcher.inspectHouse());
-    this.bindHotspot('hotspot-faro', 'Faro y Fortín de San Telmo', () => this.actionDispatcher.inspectLighthouse());
+    this.bindHotspot('hotspot-paco', 'Paco el Pescador');
+    this.bindHotspot('hotspot-barca', 'Barca "El Mojo"');
+    this.bindHotspot('hotspot-teide', 'El Teide en la cumbre');
+    this.bindHotspot('hotspot-casa', 'Casa Colonial Balcón de Tea');
+    this.bindHotspot('hotspot-faro', 'Faro y Fortín de San Telmo');
   }
 
-  private bindHotspot(id: string, name: string, onClick: () => void): void {
+  private bindHotspot(id: string, name: string): void {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('mouseenter', () => this.actionDispatcher.setHoverTarget(name));
     el.addEventListener('mouseleave', () => this.actionDispatcher.setHoverTarget(''));
     el.addEventListener('click', (e) => {
       e.stopPropagation();
-      onClick();
+      this.actionDispatcher.interactWithHotspot(id, name);
     });
   }
 

@@ -2,7 +2,7 @@
 // DOMAIN TYPES: Modelos y contratos de negocio del Frontend de Twinber
 // ==============================================================================
 
-export type VerbType = 'HABLAR' | 'MIRAR' | 'USAR' | 'IR A' | 'CLIMA' | 'PENSAR';
+export type VerbType = 'HABLAR' | 'MIRAR' | 'USAR' | 'COMPRAR' | 'VIAJAR' | 'PENSAR';
 
 export type ActorState = 'IDLE' | 'WALK' | 'TALK';
 

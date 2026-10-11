@@ -280,6 +280,13 @@ html, body {
   transform: scale(1.05);
 }
 
+.inventory-slot.selected {
+  border: 2px solid #ffff55;
+  background: rgba(0, 70, 160, 0.9);
+  box-shadow: 0 0 10px rgba(255, 255, 85, 0.5);
+  transform: scale(1.05);
+}
+
 .inventory-slot img {
   max-width: 86%;
   max-height: 86%;
