@@ -73,36 +73,47 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hotspots: [
       {
         id: 'hotspot-faro',
-        name: 'Faro y Fortín de San Telmo',
-        title: 'Faro y Fortín de San Telmo',
+        name: 'Faro de San Telmo',
+        title: 'Faro de San Telmo',
         type: 'scenery',
-        leftPct: 2,
-        topPct: 40,
-        widthPct: 14,
-        heightPct: 22,
-        lookText: "Batería y faro histórico de San Telmo (1780), erigidos para proteger el muelle pesquero de ataques corsarios.",
+        leftPct: 4.5,
+        topPct: 42,
+        widthPct: 4.5,
+        heightPct: 9,
+        lookText: "Faro histórico de San Telmo que corona el extremo del espigón del puerto pesquero.",
         photoId: 1 // Foto #01 [MIRAR] (Pág. 11)
+      },
+      {
+        id: 'hotspot-fortin-san-telmo',
+        name: 'Fortín y Batería de San Telmo',
+        title: 'Fortín y Batería de San Telmo',
+        type: 'scenery',
+        leftPct: 21,
+        topPct: 40,
+        widthPct: 13,
+        heightPct: 16,
+        lookText: "Batería y fortín defensivo de cantería (1780) erigido para proteger el muelle pesquero de corsarios."
       },
       {
         id: 'hotspot-barca',
         name: 'Barca "El Mojo"',
         title: 'Barca "El Mojo"',
         type: 'scenery',
-        leftPct: 33,
-        bottomPct: 25,
-        widthPct: 18,
-        heightPct: 16,
-        lookText: 'La barca "El Mojo"... Embarcación tradicional de pesca artesanal del Puerto de la Cruz. Huele a madera curada y salitre.'
+        leftPct: 23,
+        topPct: 62,
+        widthPct: 19,
+        heightPct: 15,
+        lookText: 'La barca "El Mojo"... Embarcación tradicional de pesca artesanal amarrada junto al muelle. Huele a madera curada y salitre.'
       },
       {
         id: 'hotspot-casa',
         name: 'Casa Colonial Balcón de Tea',
         title: 'Casa Colonial Balcón de Tea',
         type: 'scenery',
-        leftPct: 64,
-        topPct: 28,
-        widthPct: 26,
-        heightPct: 32,
+        leftPct: 63,
+        topPct: 30,
+        widthPct: 21,
+        heightPct: 33,
         lookText: 'Casona señorial canaria del siglo XVII con mirador y balconada tallada en madera de tea de pino canario.'
       },
       {
@@ -110,10 +121,10 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         name: 'El Teide en la cumbre',
         title: 'El Teide en la cumbre',
         type: 'scenery',
-        leftPct: 63,
+        leftPct: 60,
         topPct: 5,
-        widthPct: 23,
-        heightPct: 28,
+        widthPct: 22,
+        heightPct: 24,
         lookText: 'El volcán Teide se divisa a lo lejos sobre las nubes a 3.718 metros. Para capturar la foto oficial de la cumbre tendré que viajar al Parque Nacional de Las Cañadas.'
       }
     ]
@@ -144,14 +155,14 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hotspots: [
       {
         id: 'hotspot-liceo-taoro',
-        name: 'Liceo de Taoro y Jardines',
-        title: 'Liceo de Taoro y Jardines',
+        name: 'Casa de los Balcones y Balconadas',
+        title: 'Casa de los Balcones y Balconadas',
         type: 'scenery',
-        leftPct: 10,
-        topPct: 25,
-        widthPct: 25,
-        heightPct: 35,
-        lookText: "Jardines escalonados y señorial palacete del siglo XIX presidiendo el Valle de Taoro.",
+        leftPct: 14,
+        topPct: 15,
+        widthPct: 22,
+        heightPct: 45,
+        lookText: "Joya señorial canaria del siglo XVII con primorosas balconadas de tea tallada y patios florecidos.",
         photoId: 3 // Foto #03 [MIRAR] (Pág. 9)
       },
       {
@@ -159,22 +170,33 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         name: 'Molino de Agua de Gofio',
         title: 'Molino de Agua de Gofio',
         type: 'scenery',
-        leftPct: 40,
-        topPct: 30,
-        widthPct: 20,
-        heightPct: 40,
-        lookText: "Antiguo molino hidráulico de la Calle de la Carrera movido por la acequia del valle."
+        leftPct: 71,
+        topPct: 48,
+        widthPct: 14,
+        heightPct: 32,
+        lookText: "Antigua rueda hidráulica de madera movida por el agua de la acequia para triturar el millo tostado."
       },
       {
-        id: 'hotspot-balcones-orotava',
-        name: 'Casa de los Balcones',
-        title: 'Casa de los Balcones',
+        id: 'hotspot-calle-acequia',
+        name: 'Callejón y Acequia del Agua',
+        title: 'Callejón y Acequia del Agua',
         type: 'scenery',
-        leftPct: 65,
-        topPct: 20,
-        widthPct: 25,
-        heightPct: 45,
-        lookText: "Joya de la arquitectura tradicional canaria de 1632 con patios interiores y celosías de tea."
+        leftPct: 38,
+        topPct: 38,
+        widthPct: 18,
+        heightPct: 38,
+        lookText: "Calle empedrada de La Orotava con el canal de piedra que conduce el agua de los manantiales de la cumbre."
+      },
+      {
+        id: 'hotspot-teide-orotava',
+        name: 'Pico del Teide y Palmeras de Taoro',
+        title: 'Pico del Teide y Palmeras de Taoro',
+        type: 'scenery',
+        leftPct: 58,
+        topPct: 8,
+        widthPct: 24,
+        heightPct: 25,
+        lookText: "El volcán Teide coronando el Valle de Taoro sobre las copas de las palmeras canarias."
       }
     ]
   },
@@ -205,22 +227,33 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         name: 'Bodega de Barricas de Roble',
         title: 'Bodega de Barricas de Roble',
         type: 'scenery',
-        leftPct: 15,
-        topPct: 30,
-        widthPct: 22,
-        heightPct: 35,
+        leftPct: 6,
+        topPct: 62,
+        widthPct: 20,
+        heightPct: 32,
         lookText: "Viejos toneles de vino de la comarca Tacoronte-Acentejo con olor a roble curado y uva listán negro."
       },
       {
         id: 'hotspot-mar-nubes-tf24',
-        name: 'Mar de Nubes en la dorsal TF-24',
-        title: 'Mar de Nubes en la dorsal TF-24',
+        name: 'Mar de Nubes en el Valle (TF-24)',
+        title: 'Mar de Nubes en el Valle (TF-24)',
         type: 'scenery',
-        leftPct: 45,
-        topPct: 15,
-        widthPct: 35,
-        heightPct: 30,
-        lookText: "Impresionante alfombra blanca de niebla condensada por los vientos alisios a 1.200 metros."
+        leftPct: 15,
+        topPct: 34,
+        widthPct: 30,
+        heightPct: 28,
+        lookText: "Impresionante alfombra blanca de niebla condensada por los vientos alisios a 1.200 metros sobre el valle."
+      },
+      {
+        id: 'hotspot-guachinche-portal',
+        name: 'Guachinche Elsa y Pizarra de Platos',
+        title: 'Guachinche Elsa y Pizarra de Platos',
+        type: 'scenery',
+        leftPct: 68,
+        topPct: 28,
+        widthPct: 24,
+        heightPct: 48,
+        lookText: "Entrada del guachinche con la pizarra del día: papas arrugadas, mojo picón, queso asado y carne fiesta."
       }
     ]
   },
@@ -247,10 +280,10 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         name: 'Drago Milenario de Icod',
         title: 'Drago Milenario de Icod',
         type: 'scenery',
-        leftPct: 25,
+        leftPct: 16,
         topPct: 10,
-        widthPct: 30,
-        heightPct: 65,
+        widthPct: 38,
+        heightPct: 62,
         lookText: "Monumento natural de más de 800 años y 16 metros de altura, símbolo vegetal sagrado de Canarias.",
         photoId: 6 // Foto #06 [MIRAR] (Pág. 12)
       },
@@ -259,11 +292,22 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         name: 'Iglesia de San Marcos',
         title: 'Iglesia de San Marcos',
         type: 'scenery',
-        leftPct: 60,
-        topPct: 20,
-        widthPct: 22,
-        heightPct: 45,
+        leftPct: 58,
+        topPct: 34,
+        widthPct: 18,
+        heightPct: 30,
         lookText: "Templo del siglo XVI con artesonado mudéjar y cruz monumental de plata mexicana."
+      },
+      {
+        id: 'hotspot-teide-icod',
+        name: 'Pico del Teide Nevado',
+        title: 'Pico del Teide Nevado',
+        type: 'scenery',
+        leftPct: 63,
+        topPct: 12,
+        widthPct: 24,
+        heightPct: 24,
+        lookText: "La silueta nevada del Teide dominando el horizonte sobre los valles del norte."
       }
     ]
   },
@@ -286,39 +330,50 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     },
     hotspots: [
       {
+        id: 'hotspot-castillo-san-miguel',
+        name: 'Castillo de San Miguel (1575)',
+        title: 'Castillo de San Miguel (1575)',
+        type: 'scenery',
+        leftPct: 71,
+        topPct: 22,
+        widthPct: 18,
+        heightPct: 42,
+        lookText: "Torre defensiva cuadrangular de cantería oscura que sobrevivió intacta a la erupción de 1706.",
+        photoId: 7 // Foto #07 [MIRAR] (Pág. 13)
+      },
+      {
         id: 'hotspot-caleton-piscinas',
         name: 'Piscinas Naturales de El Caletón',
         title: 'Piscinas Naturales de El Caletón',
         type: 'scenery',
-        leftPct: 12,
-        bottomPct: 20,
-        widthPct: 30,
-        heightPct: 35,
+        leftPct: 16,
+        topPct: 46,
+        widthPct: 34,
+        heightPct: 28,
         lookText: "Piscinas naturales de agua salada esculpidas caprichosamente por la colada volcánica de 1706.",
         photoId: 9 // Foto #09 [MIRAR] (Pág. 12)
       },
       {
-        id: 'hotspot-castillo-san-miguel',
-        name: 'Castillo de San Miguel',
-        title: 'Castillo de San Miguel',
+        id: 'hotspot-roque-garachico',
+        name: 'Roque de Garachico',
+        title: 'Roque de Garachico',
         type: 'scenery',
-        leftPct: 50,
-        topPct: 25,
-        widthPct: 20,
-        heightPct: 38,
-        lookText: "Torre defensiva cuadrangular de cantería oscura que sobrevivió intacta a la erupción."
+        leftPct: 19,
+        topPct: 27,
+        widthPct: 16,
+        heightPct: 18,
+        lookText: "Monumento natural y roque volcánico que emerge del océano frente a la antigua villa."
       },
       {
         id: 'hotspot-plaza-buenavista',
-        name: 'Casco y Plaza de Buenavista',
-        title: 'Casco y Plaza de Buenavista',
+        name: 'Casco Histórico de Garachico',
+        title: 'Casco Histórico de Garachico',
         type: 'scenery',
-        leftPct: 72,
-        topPct: 20,
+        leftPct: 48,
+        topPct: 30,
         widthPct: 22,
-        heightPct: 40,
-        lookText: "Arquitectura señorial tradicional y dulcerías de repostería típica de la Isla Baja.",
-        photoId: 7 // Foto #07 [MIRAR] (Pág. 13)
+        heightPct: 20,
+        lookText: "Conjunto histórico-artístico de casonas e iglesias renacidas tras la catástrofe volcánica."
       }
     ]
   },
@@ -341,27 +396,38 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     },
     hotspots: [
       {
-        id: 'hotspot-plaza-adelantado',
-        name: 'Plaza del Adelantado',
-        title: 'Plaza del Adelantado',
-        type: 'scenery',
-        leftPct: 15,
-        topPct: 25,
-        widthPct: 28,
-        heightPct: 40,
-        lookText: "Centro cívico e histórico presidido por la fuente de mármol de Génova y el Palacio de Nava.",
-        photoId: 10 // Foto #10 [MIRAR] (Pág. 4)
-      },
-      {
         id: 'hotspot-torre-concepcion',
         name: 'Torre de la Concepción',
         title: 'Torre de la Concepción',
         type: 'scenery',
-        leftPct: 52,
-        topPct: 10,
-        widthPct: 18,
-        heightPct: 55,
+        leftPct: 56,
+        topPct: 7,
+        widthPct: 12,
+        heightPct: 42,
         lookText: "Campanario toscano de piedra vista de finales del siglo XVII que vigila el trazado colonial."
+      },
+      {
+        id: 'hotspot-plaza-adelantado',
+        name: 'Fuente de Mármol de Génova',
+        title: 'Fuente de Mármol de Génova',
+        type: 'scenery',
+        leftPct: 56,
+        topPct: 50,
+        widthPct: 14,
+        heightPct: 28,
+        lookText: "Histórica fuente renacentista de mármol genovés que preside las plazas históricas laguneras.",
+        photoId: 10 // Foto #10 [MIRAR] (Pág. 4)
+      },
+      {
+        id: 'hotspot-palacio-colonial',
+        name: 'Palacio y Balcón de Tea (UNESCO)',
+        title: 'Palacio y Balcón de Tea (UNESCO)',
+        type: 'scenery',
+        leftPct: 18,
+        topPct: 18,
+        widthPct: 22,
+        heightPct: 52,
+        lookText: "Casona señorial del trazado colonial en cuadrícula del siglo XVI protegido por la UNESCO."
       }
     ]
   },
@@ -388,10 +454,10 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         name: 'Auditorio de Tenerife Adán Martín',
         title: 'Auditorio de Tenerife Adán Martín',
         type: 'scenery',
-        leftPct: 8,
+        leftPct: 33,
         topPct: 20,
-        widthPct: 28,
-        heightPct: 45,
+        widthPct: 25,
+        heightPct: 35,
         lookText: "Vanguardista ala de hormigón blanco brillante que parece despegar sobre las olas atlánticas.",
         photoId: 12 // Foto #12 [MIRAR] (Pág. 2)
       },
@@ -400,12 +466,34 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         name: 'Plaza de España y Lago Central',
         title: 'Plaza de España y Lago Central',
         type: 'scenery',
-        leftPct: 42,
-        topPct: 25,
-        widthPct: 30,
-        heightPct: 40,
-        lookText: "Enorme lago de agua marina de los arquitectos Herzog & de Meuron sobre el antiguo castillo de San Cristóbal.",
+        leftPct: 68,
+        topPct: 45,
+        widthPct: 20,
+        heightPct: 18,
+        lookText: "Enorme lago de agua marina de los arquitectos Herzog & de Meuron con sus surtidores centrales.",
         photoId: 13 // Foto #13 [MIRAR] (Pág. 2)
+      },
+      {
+        id: 'hotspot-puerto-cruceros',
+        name: 'Puerto y Dársena de Cruceros',
+        title: 'Puerto y Dársena de Cruceros',
+        type: 'scenery',
+        leftPct: 69,
+        topPct: 28,
+        widthPct: 24,
+        heightPct: 18,
+        lookText: "Gran dársena marítima de Santa Cruz donde atracan ferrys interinsulares y transatlánticos."
+      },
+      {
+        id: 'hotspot-litoral-atlantico',
+        name: 'Litoral Atlántico y Escollera',
+        title: 'Litoral Atlántico y Escollera',
+        type: 'scenery',
+        leftPct: 8,
+        topPct: 36,
+        widthPct: 22,
+        heightPct: 32,
+        lookText: "Paseo marítimo sobre las aguas del Atlántico con noráis de amarre y escolleras de piedra."
       }
     ]
   },
@@ -429,26 +517,37 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hotspots: [
       {
         id: 'hotspot-bosque-laurisilva',
-        name: 'Sendero de Laurisilva de Anaga',
-        title: 'Sendero de Laurisilva de Anaga',
+        name: 'Túnel Verde de Laurisilva',
+        title: 'Túnel Verde de Laurisilva',
         type: 'scenery',
-        leftPct: 15,
-        topPct: 15,
-        widthPct: 32,
-        heightPct: 55,
-        lookText: "Espesa selva nublada de laureles, viñátigos y tilos envuelta en la bruma mágica de los alisios.",
+        leftPct: 53,
+        topPct: 20,
+        widthPct: 24,
+        heightPct: 44,
+        lookText: "Espesa selva nublada donde laureles, viñátigos y musgos forman una bóveda mágica.",
         photoId: 15 // Foto #15 [MIRAR] (Pág. 5)
       },
       {
         id: 'hotspot-pico-ingles',
-        name: 'Pico del Inglés y Túnel Verde',
-        title: 'Pico del Inglés y Túnel Verde',
+        name: 'Mirador y Crestas de Anaga',
+        title: 'Mirador y Crestas de Anaga',
         type: 'scenery',
-        leftPct: 55,
-        topPct: 20,
+        leftPct: 18,
+        topPct: 16,
         widthPct: 25,
         heightPct: 45,
-        lookText: "Angosto pasadizo excavado en roca volcánica donde las copas de los árboles forman una bóveda perfecta."
+        lookText: "Panorámica de los afilados roques y valles volcánicos del macizo de Anaga entre la niebla."
+      },
+      {
+        id: 'hotspot-helechos-relictos',
+        name: 'Helechos Gigantes Terciarios',
+        title: 'Helechos Gigantes Terciarios',
+        type: 'scenery',
+        leftPct: 3,
+        topPct: 58,
+        widthPct: 22,
+        heightPct: 32,
+        lookText: "Frondosos helechos de monteverde que sobrevivieron a las glaciaciones en este refugio atlántico."
       }
     ]
   },
@@ -477,39 +576,50 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     },
     hotspots: [
       {
-        id: 'hotspot-playa-troya',
-        name: 'Playa de Troya',
-        title: 'Playa de Troya',
-        type: 'scenery',
-        leftPct: 8,
-        bottomPct: 20,
-        widthPct: 28,
-        heightPct: 35,
-        lookText: "Ensenada protegida de arena dorada y aguas tranquilas frente al canal de La Gomera.",
-        photoId: 20 // Foto #20 [MIRAR] (Pág. 17)
-      },
-      {
         id: 'hotspot-monkey-beach',
         name: 'Monkey Beach Club',
         title: 'Monkey Beach Club',
         type: 'scenery',
-        leftPct: 40,
-        topPct: 30,
-        widthPct: 22,
-        heightPct: 35,
-        lookText: "Exclusiva terraza costera frente a la rompiente con vistas panorámicas al atardecer sobre La Gomera.",
+        leftPct: 63,
+        topPct: 16,
+        widthPct: 24,
+        heightPct: 48,
+        lookText: "Exclusiva terraza costera frente a la rompiente con su letrero de madera y vistas al atardecer.",
         photoId: 21 // Foto #21 [MIRAR] (Pág. 17)
+      },
+      {
+        id: 'hotspot-playa-troya',
+        name: 'Playa de Troya y Sombrillas',
+        title: 'Playa de Troya y Sombrillas',
+        type: 'scenery',
+        leftPct: 40,
+        topPct: 40,
+        widthPct: 22,
+        heightPct: 26,
+        lookText: "Ensenada protegida de arena dorada con sombrillas y aguas tranquilas frente al canal de La Gomera.",
+        photoId: 20 // Foto #20 [MIRAR] (Pág. 17)
+      },
+      {
+        id: 'hotspot-paseo-maritimo',
+        name: 'Paseo Marítimo de Las Américas',
+        title: 'Paseo Marítimo de Las Américas',
+        type: 'scenery',
+        leftPct: 12,
+        topPct: 42,
+        widthPct: 26,
+        heightPct: 34,
+        lookText: "Avenida costera empedrada con balaustrada blanca y cocoteros tropicales que bordea la bahía."
       },
       {
         id: 'hotspot-siam-park',
         name: 'Siam Park — Templo del Agua',
         title: 'Siam Park — Templo del Agua',
         type: 'scenery',
-        leftPct: 66,
-        topPct: 15,
-        widthPct: 26,
-        heightPct: 50,
-        lookText: "Templo oriental del galardonado mejor parque acuático del mundo, entre vegetación exótica.",
+        leftPct: 80,
+        topPct: 8,
+        widthPct: 18,
+        heightPct: 25,
+        lookText: "El reino tailandés acuático con la mayor ola artificial del mundo y toboganes gigantes.",
         photoId: 24 // Foto #24 [MIRAR] (Pág. 21)
       }
     ]
@@ -535,27 +645,38 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hotspots: [
       {
         id: 'hotspot-caserio-masca',
-        name: 'Caserío de Masca',
-        title: 'Caserío de Masca',
+        name: 'Caserío Tradicional de Masca',
+        title: 'Caserío Tradicional de Masca',
         type: 'scenery',
-        leftPct: 15,
-        topPct: 20,
-        widthPct: 30,
-        heightPct: 45,
+        leftPct: 51,
+        topPct: 39,
+        widthPct: 24,
+        heightPct: 26,
         lookText: "Aldea tradicional canaria colgada inverosímilmente sobre las crestas volcánicas del abismo.",
         photoId: 18 // Foto #18 [MIRAR] (Pág. 22)
       },
       {
         id: 'hotspot-acantilados-gigantes',
-        name: 'Murallas Basálticas de Los Gigantes',
-        title: 'Murallas Basálticas de Los Gigantes',
+        name: 'Barranco de Masca y Acantilados',
+        title: 'Barranco de Masca y Acantilados',
         type: 'scenery',
-        leftPct: 52,
-        topPct: 15,
-        widthPct: 35,
-        heightPct: 55,
-        lookText: "Colosales murallones de lava basáltica cayendo verticalmente 600 metros en caída libre al océano.",
+        leftPct: 18,
+        topPct: 20,
+        widthPct: 28,
+        heightPct: 46,
+        lookText: "Colosales murallones de lava basáltica cayendo verticalmente 600 metros en caída libre hacia el océano.",
         photoId: 19 // Foto #19 [MIRAR] (Pág. 22)
+      },
+      {
+        id: 'hotspot-sendero-piratas',
+        name: 'Senda Empedrada de los Piratas',
+        title: 'Senda Empedrada de los Piratas',
+        type: 'scenery',
+        leftPct: 22,
+        topPct: 66,
+        widthPct: 28,
+        heightPct: 24,
+        lookText: "Antiguo camino de herradura tallado en la roca volcánica que desciende por el cauce del barranco."
       }
     ]
   },
@@ -588,10 +709,10 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         name: 'Cono Volcánico de Montaña Roja',
         title: 'Cono Volcánico de Montaña Roja',
         type: 'scenery',
-        leftPct: 12,
-        topPct: 25,
+        leftPct: 60,
+        topPct: 20,
         widthPct: 30,
-        heightPct: 40,
+        heightPct: 28,
         lookText: "Reserva natural especial formada por un cono de ceniza volcánica rojiza junto a la playa virgen de La Tejita.",
         photoId: 27 // Foto #27 [MIRAR] (Pág. 23)
       },
@@ -600,12 +721,23 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         name: 'Bahía de El Médano y Kitesurf',
         title: 'Bahía de El Médano y Kitesurf',
         type: 'scenery',
-        leftPct: 48,
-        topPct: 30,
-        widthPct: 35,
-        heightPct: 35,
+        leftPct: 16,
+        topPct: 34,
+        widthPct: 38,
+        heightPct: 30,
         lookText: "Meca mundial de windsurf y kitesurf con decenas de cometas de colores surcando los vientos alisios.",
         photoId: 26 // Foto #26 [MIRAR] (Pág. 23)
+      },
+      {
+        id: 'hotspot-dunas-playa',
+        name: 'Playa Natural y Dunas Fósiles',
+        title: 'Playa Natural y Dunas Fósiles',
+        type: 'scenery',
+        leftPct: 46,
+        topPct: 48,
+        widthPct: 36,
+        heightPct: 20,
+        lookText: "Extensa playa natural de arena dorada moldeada constantemente por la brisa marina del sur."
       }
     ]
   },
@@ -634,26 +766,48 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     hotspots: [
       {
         id: 'hotspot-roques-garcia',
-        name: 'Roques de García y El Teide',
-        title: 'Roques de García y El Teide',
+        name: 'Roque Cinchado (Roques de García)',
+        title: 'Roque Cinchado (Roques de García)',
         type: 'scenery',
-        leftPct: 20,
-        topPct: 10,
-        widthPct: 40,
-        heightPct: 65,
-        lookText: "La estampa más célebre de España: el Roque Cinchado con la silueta nevada del Teide dominando el Llano de Ucanca.",
+        leftPct: 35,
+        topPct: 26,
+        widthPct: 9,
+        heightPct: 22,
+        lookText: "El famoso 'Árbol de Piedra' de los Roques de García, célebre silueta volcánica que presidía los billetes de mil pesetas.",
         photoId: 28 // Foto #28 [MIRAR] (Pág. 15)
       },
       {
-        id: 'hotspot-estacion-teleferico',
-        name: 'Estación Base del Teleférico',
-        title: 'Estación Base del Teleférico',
+        id: 'hotspot-teide-cumbre',
+        name: 'Pico del Teide (3.718m)',
+        title: 'Pico del Teide (3.718m)',
         type: 'scenery',
-        leftPct: 65,
-        topPct: 30,
-        widthPct: 25,
-        heightPct: 40,
-        lookText: "Estación de abordaje mecánico con cabinas rojas suspendidas por cables hacia la cumbre volcánica."
+        leftPct: 56,
+        topPct: 14,
+        widthPct: 32,
+        heightPct: 26,
+        lookText: "El colosal estratovolcán Teide elevándose hacia el cielo sobre el altiplano de Las Cañadas."
+      },
+      {
+        id: 'hotspot-tajinastes-rojos',
+        name: 'Tajinastes Rojos de Las Cañadas',
+        title: 'Tajinastes Rojos de Las Cañadas',
+        type: 'scenery',
+        leftPct: 8,
+        topPct: 38,
+        widthPct: 18,
+        heightPct: 48,
+        lookText: "Endemismo botánico espectacular de más de dos metros de altura que tiñe de rojo el paisaje volcánico."
+      },
+      {
+        id: 'hotspot-estacion-teleferico',
+        name: 'Estación Base del Teleférico (2.356m)',
+        title: 'Estación Base del Teleférico (2.356m)',
+        type: 'scenery',
+        leftPct: 64,
+        topPct: 43,
+        widthPct: 14,
+        heightPct: 14,
+        lookText: "Edificio de piedra y punto de partida de las cabinas mecánicas hacia la cumbre del Teide."
       }
     ]
   },
@@ -676,26 +830,48 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     },
     hotspots: [
       {
-        id: 'hotspot-crater-teide',
-        name: 'Cráter Somital del Teide',
-        title: 'Cráter Somital del Teide',
+        id: 'hotspot-telescopio-cumbre',
+        name: 'Telescopio Astronómico en el Risco',
+        title: 'Telescopio Astronómico en el Risco',
         type: 'scenery',
-        leftPct: 20,
-        topPct: 20,
-        widthPct: 35,
-        heightPct: 45,
-        lookText: "El cráter volcánico somital a 3.718 metros emite vapor sulfuroso blanco en el silencio absoluto de la altitud."
+        leftPct: 44,
+        topPct: 28,
+        widthPct: 9,
+        heightPct: 22,
+        lookText: "Catalejo astronómico de latón orientado hacia los confines de la galaxia sobre el mar de nubes."
+      },
+      {
+        id: 'hotspot-crater-teide',
+        name: 'Cráter Somital y Fumarolas de Azufre',
+        title: 'Cráter Somital y Fumarolas de Azufre',
+        type: 'scenery',
+        leftPct: 15,
+        topPct: 42,
+        widthPct: 28,
+        heightPct: 34,
+        lookText: "El cráter volcánico somital emite vapor sulfuroso blanco en el silencio absoluto de los 3.718 metros."
       },
       {
         id: 'hotspot-cielo-starlight',
-        name: 'Bóveda Celeste Starlight',
-        title: 'Bóveda Celeste Starlight',
+        name: 'Bóveda Celeste Starlight (Vía Láctea)',
+        title: 'Bóveda Celeste Starlight (Vía Láctea)',
         type: 'scenery',
-        leftPct: 45,
+        leftPct: 54,
         topPct: 5,
-        widthPct: 45,
-        heightPct: 35,
+        widthPct: 36,
+        heightPct: 38,
         lookText: "Uno de los cielos más puros del planeta para la observación astronómica: la Vía Láctea brilla con nitidez sobrecogedora."
+      },
+      {
+        id: 'hotspot-mar-nubes-cumbre',
+        name: 'Mar de Nubes Bajo la Cumbre',
+        title: 'Mar de Nubes Bajo la Cumbre',
+        type: 'scenery',
+        leftPct: 55,
+        topPct: 46,
+        widthPct: 36,
+        heightPct: 18,
+        lookText: "Un denso océano blanco de nubes bajas que cubre Tenerife y aísla la cumbre bajo el cosmos."
       }
     ]
   }
