@@ -25,7 +25,7 @@ export class PhotoAlbumModal {
   private audioService: AudioService;
   private photos: PhotoEntry[] = photosData;
   private unlockedIds: Set<number> = new Set<number>();
-  private currentPhotoIndex: number = 0; // 0 a 27 (28 fotos)
+  private currentPhotoIndex: number = 0; // 0 a 36 (37 fotos)
 
   public onPhotoUnlocked?: (unlockedCount: number, total: number) => void;
 

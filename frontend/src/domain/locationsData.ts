@@ -68,7 +68,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         price: 1,
         dialogueText: "¡Toma un buen plátano que me traje en la barca para la faena, chacho! No hay mareo que se le resista."
       },
-      photoIdOnLore: 2 // Lago Martiánez (Pág. 12)
+      photoIdOnLore: 18 // Puerto de la Cruz (Pág. 11)
     },
     hotspots: [
       {
@@ -81,7 +81,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         widthPct: 4.5,
         heightPct: 9,
         lookText: "Faro histórico de San Telmo que corona el extremo del espigón del puerto pesquero.",
-        photoId: 1 // Foto #01 [MIRAR] (Pág. 11)
+        photoId: 18 // Foto #18 [MIRAR] (Pág. 11)
       },
       {
         id: 'hotspot-fortin-san-telmo',
@@ -150,7 +150,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         price: 3,
         dialogueText: "Aquí tienes un buen saco de gofio tradicional de trigo y millo tostado. Te dará fuerzas para la cumbre."
       },
-      photoIdOnLore: 4 // Playa de Los Patos (Pág. 10)
+      photoIdOnLore: 16 // Playa de Los Patos (Pág. 10)
     },
     hotspots: [
       {
@@ -163,7 +163,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         widthPct: 22,
         heightPct: 45,
         lookText: "Joya señorial canaria del siglo XVII con primorosas balconadas de tea tallada y patios florecidos.",
-        photoId: 3 // Foto #03 [MIRAR] (Pág. 9)
+        photoId: 14 // Foto #14 [MIRAR] La Orotava (Pág. 8)
       },
       {
         id: 'hotspot-molino-chano',
@@ -285,7 +285,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         widthPct: 38,
         heightPct: 62,
         lookText: "Monumento natural de más de 800 años y 16 metros de altura, símbolo vegetal sagrado de Canarias.",
-        photoId: 6 // Foto #06 [MIRAR] (Pág. 12)
+        photoId: 19 // Foto #19 [MIRAR] Drago Milenario (Pág. 12)
       },
       {
         id: 'hotspot-iglesia-san-marcos',
@@ -326,7 +326,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
       initialX: 74.0,
       lookText: "Doña Nieves, vecina de la villa de Garachico tejiendo calados tradicionales de lino.",
       greeting: "El volcán de Trevejo sepultó nuestro puerto en 1706, pero de la roca negra renació esta joya.",
-      photoIdOnLore: 8 // Faro de Punta de Teno (Pág. 14)
+      photoIdOnLore: 22 // Faro de Punta de Teno (Pág. 14)
     },
     hotspots: [
       {
@@ -339,7 +339,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         widthPct: 18,
         heightPct: 42,
         lookText: "Torre defensiva cuadrangular de cantería oscura que sobrevivió intacta a la erupción de 1706.",
-        photoId: 7 // Foto #07 [MIRAR] (Pág. 13)
+        photoId: 21 // Foto #21 [MIRAR] Buenavista (Pág. 14)
       },
       {
         id: 'hotspot-caleton-piscinas',
@@ -351,7 +351,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         widthPct: 34,
         heightPct: 28,
         lookText: "Piscinas naturales de agua salada esculpidas caprichosamente por la colada volcánica de 1706.",
-        photoId: 9 // Foto #09 [MIRAR] (Pág. 12)
+        photoId: 20 // Foto #20 [MIRAR] Garachico (Pág. 13)
       },
       {
         id: 'hotspot-roque-garachico',
@@ -392,7 +392,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
       initialX: 75.0,
       lookText: "Herminia, profesora de historia de la Universidad ataviada con bufanda y cartera de cuero.",
       greeting: "La Laguna fue trazada sin murallas según la Carta Celeste de Platón en 1496. ¡Respira historia viva!",
-      photoIdOnLore: 11 // Calles Coloniales (Pág. 4)
+      photoIdOnLore: 7 // Foto #07 [HABLAR] Centro Histórico Colonial (Pág. 4)
     },
     hotspots: [
       {
@@ -404,7 +404,8 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         topPct: 7,
         widthPct: 12,
         heightPct: 42,
-        lookText: "Campanario toscano de piedra vista de finales del siglo XVII que vigila el trazado colonial."
+        lookText: "Campanario toscano de piedra vista de finales del siglo XVII que vigila el trazado colonial.",
+        photoId: 6 // Foto #06 [MIRAR] Plaza e Iglesia de la Concepción (Pág. 4)
       },
       {
         id: 'hotspot-plaza-adelantado',
@@ -415,8 +416,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         topPct: 50,
         widthPct: 14,
         heightPct: 28,
-        lookText: "Histórica fuente renacentista de mármol genovés que preside las plazas históricas laguneras.",
-        photoId: 10 // Foto #10 [MIRAR] (Pág. 4)
+        lookText: "Histórica fuente renacentista de mármol genovés que preside las plazas históricas laguneras."
       },
       {
         id: 'hotspot-palacio-colonial',
@@ -446,7 +446,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
       initialX: 76.0,
       lookText: "Oficial Morales, uniforme naval de gala con galones y prismáticos de vigía marítimo.",
       greeting: "Bienvenido a la capital de la provincia. Por esta dársena entran las mercancías de tres continentes.",
-      photoIdOnLore: 14 // Playa de Las Teresitas (Pág. 3)
+      photoIdOnLore: 5 // Playa de Las Teresitas (Pág. 3)
     },
     hotspots: [
       {
@@ -459,7 +459,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         widthPct: 25,
         heightPct: 35,
         lookText: "Vanguardista ala de hormigón blanco brillante que parece despegar sobre las olas atlánticas.",
-        photoId: 12 // Foto #12 [MIRAR] (Pág. 2)
+        photoId: 2 // Foto #02 [MIRAR] Auditorio (Pág. 2)
       },
       {
         id: 'hotspot-plaza-espana-lago',
@@ -471,7 +471,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         widthPct: 20,
         heightPct: 18,
         lookText: "Enorme lago de agua marina de los arquitectos Herzog & de Meuron con sus surtidores centrales.",
-        photoId: 13 // Foto #13 [MIRAR] (Pág. 2)
+        photoId: 3 // Foto #03 [MIRAR] Plaza de España (Pág. 2)
       },
       {
         id: 'hotspot-puerto-cruceros',
@@ -512,7 +512,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
       initialX: 74.0,
       lookText: "Yeray, guarda forestal de verde monte con vara de acebiño y botas de montaña embarradas.",
       greeting: "Caminas por un fósil viviente de la era terciaria. Camina con sigilo entre los líquenes y helechos.",
-      photoIdOnLore: 17 // Playa de Benijo (Pág. 8)
+      photoIdOnLore: 13 // Foto #13 [HABLAR] Playa de Benijo (Pág. 8)
     },
     hotspots: [
       {
@@ -525,7 +525,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         widthPct: 24,
         heightPct: 44,
         lookText: "Espesa selva nublada donde laureles, viñátigos y musgos forman una bóveda mágica.",
-        photoId: 15 // Foto #15 [MIRAR] (Pág. 5)
+        photoId: 8 // Foto #08 [MIRAR] Parque Rural de Anaga (Pág. 5)
       },
       {
         id: 'hotspot-pico-ingles',
@@ -572,7 +572,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         price: 1,
         dialogueText: "¡Aquí tienes, forastero! Un plátano con bien de potasio para que no te dé una rampa nadando hacia La Gomera."
       },
-      photoIdOnLore: 22 // Papagayo Beach Club (Pág. 18)
+      photoIdOnLore: 29 // Foto #29 [HABLAR] Papagayo Beach Club Noche (Pág. 19)
     },
     hotspots: [
       {
@@ -585,7 +585,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         widthPct: 24,
         heightPct: 48,
         lookText: "Exclusiva terraza costera frente a la rompiente con su letrero de madera y vistas al atardecer.",
-        photoId: 21 // Foto #21 [MIRAR] (Pág. 17)
+        photoId: 28 // Foto #28 [MIRAR] Monkey Beach Club (Pág. 18)
       },
       {
         id: 'hotspot-playa-troya',
@@ -597,7 +597,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         widthPct: 22,
         heightPct: 26,
         lookText: "Ensenada protegida de arena dorada con sombrillas y aguas tranquilas frente al canal de La Gomera.",
-        photoId: 20 // Foto #20 [MIRAR] (Pág. 17)
+        photoId: 27 // Foto #27 [MIRAR] Playa de Troya (Pág. 17)
       },
       {
         id: 'hotspot-paseo-maritimo',
@@ -608,7 +608,8 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         topPct: 42,
         widthPct: 26,
         heightPct: 34,
-        lookText: "Avenida costera empedrada con balaustrada blanca y cocoteros tropicales que bordea la bahía."
+        lookText: "Avenida costera empedrada con balaustrada blanca y cocoteros tropicales que bordea la bahía.",
+        photoId: 26 // Foto #26 [MIRAR] Playa de Torviscas (Pág. 17)
       },
       {
         id: 'hotspot-siam-park',
@@ -620,7 +621,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         widthPct: 18,
         heightPct: 25,
         lookText: "El reino tailandés acuático con la mayor ola artificial del mundo y toboganes gigantes.",
-        photoId: 24 // Foto #24 [MIRAR] (Pág. 21)
+        photoId: 33 // Foto #33 [MIRAR] Siam Park (Pág. 21)
       }
     ]
   },
@@ -639,7 +640,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
       initialX: 74.0,
       lookText: "Tanausú, fornido montañero de barba cerrada con bastón de senderismo y mochila técnica.",
       greeting: "Estás ante la garganta más imponente del archipiélago. Antiguo refugio de piratas y aborígenes guanches.",
-      photoIdOnLore: 19, // Barranco de Masca (Pág. 22)
+      photoIdOnLore: 35, // Foto #35 [HABLAR] Caserío y Barranco de Masca (Pág. 22)
       twinBrotherName: 'Yeray'
     },
     hotspots: [
@@ -653,7 +654,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         widthPct: 24,
         heightPct: 26,
         lookText: "Aldea tradicional canaria colgada inverosímilmente sobre las crestas volcánicas del abismo.",
-        photoId: 18 // Foto #18 [MIRAR] (Pág. 22)
+        photoId: 35 // Foto #35 [MIRAR] Caserío Tradicional de Masca (Pág. 22)
       },
       {
         id: 'hotspot-acantilados-gigantes',
@@ -665,7 +666,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         widthPct: 28,
         heightPct: 46,
         lookText: "Colosales murallones de lava basáltica cayendo verticalmente 600 metros en caída libre hacia el océano.",
-        photoId: 19 // Foto #19 [MIRAR] (Pág. 22)
+        photoId: 34 // Foto #34 [MIRAR] Acantilado de los Gigantes (Pág. 22)
       },
       {
         id: 'hotspot-sendero-piratas',
@@ -701,7 +702,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         price: 1,
         dialogueText: "Aquí tienes un plátano de Canarias bien rico y dulce. ¡Oro canario para el camino!"
       },
-      photoIdOnLore: 23 // Playa del Camisón (Pág. 20)
+      photoIdOnLore: 36 // Foto #36 [HABLAR] Montaña Roja y El Médano (Pág. 23)
     },
     hotspots: [
       {
@@ -714,7 +715,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         widthPct: 30,
         heightPct: 28,
         lookText: "Reserva natural especial formada por un cono de ceniza volcánica rojiza junto a la playa virgen de La Tejita.",
-        photoId: 27 // Foto #27 [MIRAR] (Pág. 23)
+        photoId: 36 // Foto #36 [MIRAR] Montaña Roja (Pág. 23)
       },
       {
         id: 'hotspot-ensenada-kitesurf',
@@ -725,8 +726,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         topPct: 34,
         widthPct: 38,
         heightPct: 30,
-        lookText: "Meca mundial de windsurf y kitesurf con decenas de cometas de colores surcando los vientos alisios.",
-        photoId: 26 // Foto #26 [MIRAR] (Pág. 23)
+        lookText: "Meca mundial de windsurf y kitesurf con decenas de cometas de colores surcando los vientos alisios."
       },
       {
         id: 'hotspot-dunas-playa',
@@ -774,7 +774,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         widthPct: 9,
         heightPct: 22,
         lookText: "El famoso 'Árbol de Piedra' de los Roques de García, célebre silueta volcánica que presidía los billetes de mil pesetas.",
-        photoId: 28 // Foto #28 [MIRAR] (Pág. 15)
+        photoId: 24 // Foto #24 [MIRAR] Roques de García / Ruleta (Pág. 15)
       },
       {
         id: 'hotspot-teide-cumbre',
@@ -826,6 +826,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
       initialX: 75.0,
       lookText: "El Guardián del Teide, con capa de lana y telescopio astronómico bajo un manto estelar infinito.",
       greeting: "¡Has coronado el techo de España, viajero! A tus pies se extienden las siete islas y sobre ti el universo entero.",
+      photoIdOnLore: 25, // Foto #25 [HABLAR] Cielo Starlight (Pág. 16)
       twinBrotherName: 'Don Cándido'
     },
     hotspots: [
@@ -860,7 +861,8 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
         topPct: 5,
         widthPct: 36,
         heightPct: 38,
-        lookText: "Uno de los cielos más puros del planeta para la observación astronómica: la Vía Láctea brilla con nitidez sobrecogedora."
+        lookText: "Uno de los cielos más puros del planeta para la observación astronómica: la Vía Láctea brilla con nitidez sobrecogedora.",
+        photoId: 25 // Foto #25 [MIRAR] Cielo Starlight (Pág. 16)
       },
       {
         id: 'hotspot-mar-nubes-cumbre',

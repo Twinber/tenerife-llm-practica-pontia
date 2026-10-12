@@ -2,225 +2,297 @@
   {
     "id": 1,
     "filename": "/assets/img/photos/photo_01.jpg",
-    "title": "Muelle y San Telmo",
-    "enclave": "Puerto de la Cruz",
-    "trigger": "MIRAR",
-    "quote": "Pág. 11: Batería y faro histórico de San Telmo (1780), erigidos para proteger el muelle pesquero."
+    "title": "Parque Marítimo César Manrique",
+    "enclave": "Santa Cruz de Tenerife",
+    "trigger": "RAG",
+    "quote": "Pág. 1: Parque Marítimo César Manrique, obra icónica junto al Atlántico en la capital."
   },
   {
     "id": 2,
     "filename": "/assets/img/photos/photo_02.jpg",
-    "title": "Lago Martiánez",
-    "enclave": "Puerto de la Cruz",
-    "trigger": "HABLAR",
-    "quote": "Pág. 12: Complejo de piscinas de agua marina obra cumbre de César Manrique."
+    "title": "Auditorio de Tenerife Adán Martín",
+    "enclave": "Santa Cruz de Tenerife",
+    "trigger": "MIRAR",
+    "quote": "Pág. 2: Vanguardista ala de hormigón blanco diseñada por Calatrava frente a la dársena marítima."
   },
   {
     "id": 3,
     "filename": "/assets/img/photos/photo_03.jpg",
-    "title": "Liceo de Taoro y Jardines",
-    "enclave": "La Orotava",
+    "title": "Plaza de España y Lago",
+    "enclave": "Santa Cruz de Tenerife",
     "trigger": "MIRAR",
-    "quote": "Pág. 9: Jardines escalonados y señorial palacete del siglo XIX en el valle."
+    "quote": "Pág. 2: Centro cívico e histórico de la capital insular con su gran lago de agua marina de Herzog & de Meuron."
   },
   {
     "id": 4,
     "filename": "/assets/img/photos/photo_04.jpg",
-    "title": "Playa de Los Patos",
-    "enclave": "La Orotava",
-    "trigger": "HABLAR",
-    "quote": "Pág. 10: Espectacular playa salvaje de arena negra bajo imponentes acantilados."
+    "title": "Parque García Sanabria",
+    "enclave": "Santa Cruz de Tenerife",
+    "trigger": "RAG",
+    "quote": "Pág. 3: El pulmón vegetal de Santa Cruz, con su célebre reloj de flores y senderos de vegetación exótica."
   },
   {
     "id": 5,
     "filename": "/assets/img/photos/photo_05.jpg",
-    "title": "Playa del Ancón",
-    "enclave": "La Orotava",
+    "title": "Playa de las Teresitas",
+    "enclave": "Santa Cruz de Tenerife",
     "trigger": "HABLAR",
-    "quote": "Pág. 10: Rincón virgen de fuerte oleaje con panorámica abierta al Atlántico."
+    "quote": "Pág. 3: Emblemática playa de arena dorada sahariana y tranquilas aguas protegidas por rompeolas en San Andrés."
   },
   {
     "id": 6,
     "filename": "/assets/img/photos/photo_06.jpg",
-    "title": "Drago Milenario",
-    "enclave": "Icod de los Vinos",
+    "title": "Plaza e Iglesia de la Concepción",
+    "enclave": "San Cristóbal de La Laguna",
     "trigger": "MIRAR",
-    "quote": "Pág. 12: Monumento natural y símbolo vegetal sagrado de las Islas Canarias."
+    "quote": "Pág. 4: Iglesia matriz con su campanario toscano de piedra, donde el reloj muestra el 'IIII' en números romanos."
   },
   {
     "id": 7,
     "filename": "/assets/img/photos/photo_07.jpg",
-    "title": "Casco y Plaza de Buenavista",
-    "enclave": "Isla Baja",
-    "trigger": "MIRAR",
-    "quote": "Pág. 13: Arquitectura tradicional señorial y dulces típicos en El Aderno."
+    "title": "Centro Histórico Colonial de La Laguna",
+    "enclave": "San Cristóbal de La Laguna",
+    "trigger": "HABLAR",
+    "quote": "Pág. 4: Trazado en cuadrícula de palacetes coloniales, patios de tea y ambiente universitario Patrimonio de la Humanidad."
   },
   {
     "id": 8,
     "filename": "/assets/img/photos/photo_08.jpg",
-    "title": "Faro de Punta de Teno",
-    "enclave": "Isla Baja",
-    "trigger": "HABLAR",
-    "quote": "Pág. 14: Faro emblemático en el extremo más salvaje y aislado de la isla."
+    "title": "Parque Rural de Anaga",
+    "enclave": "Parque Rural de Anaga",
+    "trigger": "MIRAR",
+    "quote": "Pág. 5: Macizo abrupto declarado Reserva de la Biosfera, hogar de bosques de laurisilva relictos del Terciario."
   },
   {
     "id": 9,
     "filename": "/assets/img/photos/photo_09.jpg",
-    "title": "Piscinas de El Caletón",
-    "enclave": "Garachico",
-    "trigger": "MIRAR",
-    "quote": "Pág. 12: Piscinas naturales esculpidas por la erupción volcánica de 1706."
+    "title": "Mirador de La Jardina (Día)",
+    "enclave": "Parque Rural de Anaga",
+    "trigger": "RAG",
+    "quote": "Pág. 6: Entrada panorámica al macizo de Anaga con vistas diurnas sobre la vega de La Laguna y el Teide al fondo."
   },
   {
     "id": 10,
     "filename": "/assets/img/photos/photo_10.jpg",
-    "title": "Plaza del Adelantado",
-    "enclave": "La Laguna",
-    "trigger": "MIRAR",
-    "quote": "Pág. 4: Centro neurálgico de la primera ciudad universitaria de Canarias."
+    "title": "Mirador de La Jardina (Noche)",
+    "enclave": "Parque Rural de Anaga",
+    "trigger": "RAG",
+    "quote": "Pág. 6: Vista nocturna iluminada del valle de La Laguna desde las alturas de la cordillera de Anaga."
   },
   {
     "id": 11,
     "filename": "/assets/img/photos/photo_11.jpg",
-    "title": "Calles Coloniales de La Laguna",
-    "enclave": "La Laguna",
-    "trigger": "HABLAR",
-    "quote": "Pág. 4: Trazado en cuadrícula de casas señoriales de los siglos XVI al XVIII."
+    "title": "Mirador Pico del Inglés",
+    "enclave": "Parque Rural de Anaga",
+    "trigger": "RAG",
+    "quote": "Pág. 7: Una de las vistas más impresionantes de la isla, dominando los valles, roques y el mar de nubes."
   },
   {
     "id": 12,
     "filename": "/assets/img/photos/photo_12.jpg",
-    "title": "Auditorio de Tenerife",
-    "enclave": "Santa Cruz",
-    "trigger": "MIRAR",
-    "quote": "Pág. 2: Vanguardista icono arquitectónico del Atlántico junto al puerto."
+    "title": "Pasillo Frondoso de Anaga",
+    "enclave": "Parque Rural de Anaga",
+    "trigger": "RAG",
+    "quote": "Pág. 7: Mítico camino umbrío excavado en la toba volcánica flanqueado por altos muros cubiertos de musgo y laurisilva."
   },
   {
     "id": 13,
     "filename": "/assets/img/photos/photo_13.jpg",
-    "title": "Plaza de España y Lago",
-    "enclave": "Santa Cruz",
-    "trigger": "MIRAR",
-    "quote": "Pág. 2: Centro cívico de la capital insular frente a la marina."
+    "title": "Playa de Benijo",
+    "enclave": "Parque Rural de Anaga",
+    "trigger": "HABLAR",
+    "quote": "Pág. 8: Espectacular playa salvaje de arena negra frente a los Roques de Anaga con atardeceres mágicos."
   },
   {
     "id": 14,
     "filename": "/assets/img/photos/photo_14.jpg",
-    "title": "Playa de Las Teresitas",
-    "enclave": "Santa Cruz",
-    "trigger": "HABLAR",
-    "quote": "Pág. 3: Célebre playa de arena dorada sahariana y palmeras canarias."
+    "title": "La Orotava y Valle de Taoro",
+    "enclave": "La Orotava",
+    "trigger": "MIRAR",
+    "quote": "Pág. 8: Villa señorial canaria de calles empedradas, casonas solariegas y jardines escalonados frente al Teide."
   },
   {
     "id": 15,
     "filename": "/assets/img/photos/photo_15.jpg",
-    "title": "Bosque de Laurisilva",
-    "enclave": "Anaga",
-    "trigger": "MIRAR",
-    "quote": "Pág. 5: Relicto vegetal del Terciario declarado Reserva de la Biosfera."
+    "title": "Playa del Bollullo",
+    "enclave": "La Orotava",
+    "trigger": "RAG",
+    "quote": "Pág. 9: Caleta virgen de arena volcánica negra bajo acantilados salvajes y plantaciones de plataneras."
   },
   {
     "id": 16,
     "filename": "/assets/img/photos/photo_16.jpg",
-    "title": "Pico del Inglés (Túnel Verde)",
-    "enclave": "Anaga",
+    "title": "Playa de los Patos",
+    "enclave": "La Orotava",
     "trigger": "HABLAR",
-    "quote": "Pág. 6: Pasillo natural esculpido en roca volcánica y ramas entrelazadas."
+    "quote": "Pág. 10: Extensa playa solitaria y virgen de arena fina y fuerte oleaje, paraíso natural entre los acantilados."
   },
   {
     "id": 17,
     "filename": "/assets/img/photos/photo_17.jpg",
-    "title": "Playa de Benijo al Atardecer",
-    "enclave": "Anaga",
-    "trigger": "HABLAR",
-    "quote": "Pág. 8: Atardeceres volcánicos frente a los Roques de Anaga."
+    "title": "Playa del Ancón",
+    "enclave": "La Orotava",
+    "trigger": "RAG",
+    "quote": "Pág. 10: Rincón costero salvaje de arena oscura y aguas cristalinas al final del sendero del litoral norte."
   },
   {
     "id": 18,
     "filename": "/assets/img/photos/photo_18.jpg",
-    "title": "Caserío de Masca",
-    "enclave": "Masca",
+    "title": "Puerto de la Cruz y Muelle",
+    "enclave": "Puerto de la Cruz",
     "trigger": "MIRAR",
-    "quote": "Pág. 22: Aldea tradicional guanche encaramada sobre un abismo vertical."
+    "quote": "Pág. 11: Histórico puerto pesquero, paseo de San Telmo y cuna del turismo ilustrado en el norte de Tenerife."
   },
   {
     "id": 19,
     "filename": "/assets/img/photos/photo_19.jpg",
-    "title": "Barranco de Masca",
-    "enclave": "Masca",
-    "trigger": "HABLAR",
-    "quote": "Pág. 22: Garganta colosal con murallas basálticas de más de 400 metros."
+    "title": "Drago Milenario de Icod",
+    "enclave": "Icod de los Vinos",
+    "trigger": "MIRAR",
+    "quote": "Pág. 12: Ser vivo legendario de más de 800 años de antigüedad, símbolo vegetal sagrado de las Islas Canarias."
   },
   {
     "id": 20,
     "filename": "/assets/img/photos/photo_20.jpg",
-    "title": "Playa de Troya",
-    "enclave": "Costa Adeje",
+    "title": "Garachico y Piscinas de Lava",
+    "enclave": "Garachico",
     "trigger": "MIRAR",
-    "quote": "Pág. 17: Enclave marítimo protegido en el epicentro turístico del sur."
+    "quote": "Pág. 13: Villa histórica renacida de las cenizas volcánicas de 1706 y sus piscinas naturales de El Caletón."
   },
   {
     "id": 21,
     "filename": "/assets/img/photos/photo_21.jpg",
-    "title": "Monkey Beach Club",
-    "enclave": "Costa Adeje",
+    "title": "Casco de Buenavista del Norte",
+    "enclave": "Garachico",
     "trigger": "MIRAR",
-    "quote": "Pág. 17: Famoso club de ocio costero con vistas a La Gomera."
+    "quote": "Pág. 14: Plaza señorial de Buenavista, arquitectura tradicional de la Isla Baja y puerta de entrada a Teno."
   },
   {
     "id": 22,
     "filename": "/assets/img/photos/photo_22.jpg",
-    "title": "Papagayo Beach Club",
-    "enclave": "Las Américas",
+    "title": "Faro de Punta de Teno",
+    "enclave": "Garachico",
     "trigger": "HABLAR",
-    "quote": "Pág. 18: Galardonado club gastronómico y de ocio sobre el litoral."
+    "quote": "Pág. 14: Faro sobre el extremo volcánico occidental más virgen y agreste de la isla, rodaje de Fast & Furious 6."
   },
   {
     "id": 23,
     "filename": "/assets/img/photos/photo_23.jpg",
-    "title": "Playa del Camisón",
-    "enclave": "Los Cristianos",
-    "trigger": "HABLAR",
-    "quote": "Pág. 20: Ensenada resguardada de arena rubia y aguas cristalinas."
+    "title": "Mirador de La Tarta",
+    "enclave": "Las Cañadas del Teide",
+    "trigger": "RAG",
+    "quote": "Pág. 15: Estratos geológicos de piroclastos de colores esculpidos por diversas erupciones volcánicas."
   },
   {
     "id": 24,
     "filename": "/assets/img/photos/photo_24.jpg",
-    "title": "Siam Park (Templo del Agua)",
-    "enclave": "Adeje",
+    "title": "Mirador de la Ruleta y Roques de García",
+    "enclave": "Las Cañadas del Teide",
     "trigger": "MIRAR",
-    "quote": "Pág. 21: El mejor parque acuático del mundo durante cinco años consecutivos."
+    "quote": "Pág. 15: Espectacular panorámica de los Roques de García y el Llano de Ucanca a los pies del volcán Teide."
   },
   {
     "id": 25,
     "filename": "/assets/img/photos/photo_25.jpg",
-    "title": "Piscina de Olas de Siam Park",
-    "enclave": "Adeje",
+    "title": "Cielo Starlight del Teide",
+    "enclave": "Pico del Teide",
     "trigger": "HABLAR",
-    "quote": "Pág. 21: Récord mundial con la mayor ola artificial creada por el hombre."
+    "quote": "Pág. 16: Manto estelar inigualable sobre el mar de nubes a más de 2.000 metros, Reserva Starlight internacional."
   },
   {
     "id": 26,
     "filename": "/assets/img/photos/photo_26.jpg",
-    "title": "El Médano y Deportes de Viento",
-    "enclave": "El Médano",
+    "title": "Playa de Torviscas",
+    "enclave": "Costa Adeje",
     "trigger": "MIRAR",
-    "quote": "Pág. 23: Referente mundial de deportes acuáticos impulsados por los alisios."
+    "quote": "Pág. 17: Extensa playa familiar de aguas tranquilas y arena rubia en el corazón turístico de Costa Adeje."
   },
   {
     "id": 27,
     "filename": "/assets/img/photos/photo_27.jpg",
-    "title": "Montaña Roja y La Tejita",
-    "enclave": "El Médano",
+    "title": "Playa de Troya",
+    "enclave": "Costa Adeje",
     "trigger": "MIRAR",
-    "quote": "Pág. 23: Espacio natural protegido junto a la mayor playa natural de la isla."
+    "quote": "Pág. 17: Célebre caleta protegida por espigones, cuna de los paseos marítimos y terrazas del sur."
   },
   {
     "id": 28,
     "filename": "/assets/img/photos/photo_28.jpg",
-    "title": "Roques de García y El Teide",
-    "enclave": "Las Cañadas",
+    "title": "Monkey Beach Club",
+    "enclave": "Costa Adeje",
     "trigger": "MIRAR",
-    "quote": "Pág. 15: La estampa cumbre de España: volcán Teide y Llano de Ucanca."
+    "quote": "Pág. 18: Legendario beach club sobre la Playa de Troya, epicentro de atardeceres frente a La Gomera."
+  },
+  {
+    "id": 29,
+    "filename": "/assets/img/photos/photo_29.jpg",
+    "title": "Papagayo Beach Club (Noche)",
+    "enclave": "Costa Adeje",
+    "trigger": "HABLAR",
+    "quote": "Pág. 19: Ambiente nocturno, luces y espectáculo frente al océano en uno de los clubes más reconocidos de España."
+  },
+  {
+    "id": 30,
+    "filename": "/assets/img/photos/photo_30.jpg",
+    "title": "Papagayo Beach Club (Día - Aérea)",
+    "enclave": "Costa Adeje",
+    "trigger": "RAG",
+    "quote": "Pág. 20: Vista aérea de la terraza circular y solárium de Papagayo durante el día junto al mar."
+  },
+  {
+    "id": 31,
+    "filename": "/assets/img/photos/photo_31.jpg",
+    "title": "Papagayo Beach Club (Día - Terraza)",
+    "enclave": "Costa Adeje",
+    "trigger": "RAG",
+    "quote": "Pág. 20: Palapas, camas balinesas y gastronomía diurna con vistas panorámicas a la bahía de Las Américas."
+  },
+  {
+    "id": 32,
+    "filename": "/assets/img/photos/photo_32.jpg",
+    "title": "Playa del Camisón",
+    "enclave": "Costa Adeje",
+    "trigger": "RAG",
+    "quote": "Pág. 21: Ensenada resguardada de aguas mansas protegida por espigones, ideal para el descanso familiar."
+  },
+  {
+    "id": 33,
+    "filename": "/assets/img/photos/photo_33.jpg",
+    "title": "Siam Park — Reino Acuático",
+    "enclave": "Costa Adeje",
+    "trigger": "MIRAR",
+    "quote": "Pág. 21: Considerado el mejor parque acuático del mundo, con toboganes colosales y arquitectura tailandesa."
+  },
+  {
+    "id": 34,
+    "filename": "/assets/img/photos/photo_34.jpg",
+    "title": "Acantilados de Los Gigantes",
+    "enclave": "Masca & Los Gigantes",
+    "trigger": "MIRAR",
+    "quote": "Pág. 22: Murallas de basalto volcánico que caen verticalmente hasta 600 metros en picado sobre el Atlántico."
+  },
+  {
+    "id": 35,
+    "filename": "/assets/img/photos/photo_35.jpg",
+    "title": "Caserío y Barranco de Masca",
+    "enclave": "Masca & Los Gigantes",
+    "trigger": "HABLAR",
+    "quote": "Pág. 22: Caserío tradicional guanche encaramado en una arista montañosa de vértigo entre barrancos profundos."
+  },
+  {
+    "id": 36,
+    "filename": "/assets/img/photos/photo_36.jpg",
+    "title": "Montaña Roja y La Tejita",
+    "enclave": "El Médano",
+    "trigger": "MIRAR",
+    "quote": "Pág. 23: Cono volcánico de tonos rojizos y reserva natural junto a las aguas turquesas y arenas de El Médano."
+  },
+  {
+    "id": 37,
+    "filename": "/assets/img/photos/photo_37.jpg",
+    "title": "Playa de las Vistas",
+    "enclave": "Los Cristianos",
+    "trigger": "RAG",
+    "quote": "Pág. 23: Gran bahía de arena dorada y paseo marítimo animado con su característica fuente marina central."
   }
 ]

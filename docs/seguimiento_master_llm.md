@@ -102,7 +102,7 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
 
 [>] FASE 3: Implementación Guiada del Backend Agéntico & RAG
     [x] 3.1 Configuración de entorno (.env, Settings) y modelos Pydantic del Dominio (Completada)
-    [x] 3.2 Extracción e ingesta semántica de TENERIFE.pdf (36 Chunks y 28 Fotos mapeadas) (Completada)
+    [x] 3.2 Extracción e ingesta semántica de TENERIFE.pdf (15 Chunks cohesivos por enclave y 37 Fotos reales mapeadas) (Completada)
     [ ] 3.3 Vector Store persistente (ChromaDB) y Retriever con geocercado y citas
     [ ] 3.4 Herramientas climatológicas Open-Meteo, resiliencia y auditoría en disco
     [ ] 3.5 Gestor de memoria conversacional multiturno híbrida y presupuesto de tokens

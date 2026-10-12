@@ -18,7 +18,8 @@ class DocumentChunk(BaseModel):
     lugar: str = Field(..., description="Enclave al que pertenece (ej: 'Puerto de la Cruz')")
     zona: str = Field(..., description="Comarca geográfica: 'Norte', 'Metropolitana', 'Sur' o 'Cumbre'")
     pagina: int = Field(..., ge=1, le=25, description="Número de página de procedencia en TENERIFE.pdf")
-    foto_id: Optional[int] = Field(None, ge=1, le=28, description="ID de la foto asociada si aplica (1-28)")
+    foto_id: Optional[int] = Field(None, ge=1, le=50, description="ID principal de la foto asociada si aplica")
+    fotos_asociadas: list[int] = Field(default_factory=list, description="Lista de IDs de fotos (1-36) asociadas a este fragmento")
     image_path: Optional[str] = Field(None, description="Ruta relativa a la imagen extraída en assets/img/")
 
 
@@ -48,6 +49,6 @@ class RespuestaCodiceRAG(BaseModel):
     foto_desbloqueada_id: Optional[int] = Field(
         default=None,
         ge=1,
-        le=28,
-        description="ID de la foto del álbum (1-28) desbloqueada por esta consulta, si corresponde"
+        le=50,
+        description="ID de la foto del álbum desbloqueada por esta consulta, si corresponde"
     )

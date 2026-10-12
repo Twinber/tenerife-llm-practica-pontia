@@ -29,6 +29,7 @@ env/
 chroma_db/
 *.log
 game_audit.log
+data/pdf_pages/
 
 # ==============================================================================
 # JUPYTER NOTEBOOKS
