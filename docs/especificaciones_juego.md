@@ -506,9 +506,10 @@ Para evitar los desplazamientos laterales indeseados y el "bamboleo" durante las
     * 📘 `Pasaporte de Explorador`: Registra los 10 sellos comarcales + Teide.
     * 📸 `Álbum de Fotos`: Registra las 28 fotografías extraídas de `TENERIFE.pdf`.
     * 🪙 `Bolsa de Monedas`: Contador visual (15 monedas iniciales).
-  * **Mecánica de Inspección Modal (`[MIRAR]` en Coleccionables):**
-    * Al pulsar `[MIRAR]` en el Pasaporte, se superpone un modal retro tipo libreta mostrando los sellos físicos estampados (tinta roja y azul) en el mapa de las 2 zonas.
-    * Al pulsar `[MIRAR]` en el Álbum de Fotos, se abre una galería retro en cuadrícula/carrusel con las postales a alta resolución desbloqueadas, su página citada en el PDF y el pie de foto.
+  * **Mecánica de Inspección Modal (Clic directo en Barra Lateral):**
+    * Al pulsar sobre el **Pasaporte** en la franja lateral izquierda, se superpone el modal retro del cuaderno abierto a doble página mostrando los sellos físicos estampados.
+    * Al pulsar sobre el **Álbum de Fotos**, se abre el visor modal a pantalla completa con las postales a alta resolución desbloqueadas, su página citada en el PDF y el pie de foto.
+    * Al pulsar sobre el **Mapa de Tenerife**, se despliega directamente la carta náutica insular para iniciar el viaje estilo Indiana Jones.
   * **Objetos de Aventura Adquiridos:**
     * 🌾 `Bolsa de Gofio` (3 monedas, Chano).
     * 📜 `Comanda del Guachinche y Nota TF-24` (4 monedas, Manolo).
@@ -526,7 +527,7 @@ Para evitar los desplazamientos laterales indeseados y el "bamboleo" durante las
       icono: str = Field(..., description="Icono o emoji representativo")
       tipo: Literal["PERMANENTE", "CONSUMIBLE", "CLAVE"]
       cantidad: int = 1
-      inspeccionable: bool = False  # Abre modal al hacer MIRAR
+      inspeccionable: bool = False  # True si al pulsar sobre el ítem en la barra lateral se abre su visor modal (Pasaporte, Álbum, Mapa)
 
   class UIActionState(BaseModel):
       verbo_activo: Optional[str] = None
