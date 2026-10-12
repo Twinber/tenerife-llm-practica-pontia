@@ -100,12 +100,15 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
 
 [x] FASE 2: Diseño y Arquitectura de la Solución - 100% COMPLETADA
 
-[>] FASE 3: Implementación Guiada en el Notebook Principal
-    [ ] 3.1 Configuración de entorno y conexión segura al LLM
-    [ ] 3.2 Pipeline RAG (Indexación, Retriever con metadatos y sistema de citación)
-    [ ] 3.3 Gestor de memoria conversacional multiturno con presupuesto de tokens
-    [ ] 3.4 Herramienta meteorológica, simulador/API real, logging y tolerancia a fallos
-    [ ] 3.5 Bucle conversacional integrado (Game Engine / Assistant Loop)
+[>] FASE 3: Implementación Guiada del Backend Agéntico & RAG
+    [x] 3.1 Configuración de entorno (.env, Settings) y modelos Pydantic del Dominio (Completada)
+    [x] 3.2 Extracción e ingesta semántica de TENERIFE.pdf (36 Chunks y 28 Fotos mapeadas) (Completada)
+    [ ] 3.3 Vector Store persistente (ChromaDB) y Retriever con geocercado y citas
+    [ ] 3.4 Herramientas climatológicas Open-Meteo, resiliencia y auditoría en disco
+    [ ] 3.5 Gestor de memoria conversacional multiturno híbrida y presupuesto de tokens
+    [ ] 3.6 Orquestador agéntico (Supervisor Loop) y Guardrails bouncer
+    [ ] 3.7 Servidor FastAPI (API REST y Server-Sent Events)
+    [ ] 3.8 Cuaderno maestro reproducible de entrega (notebook_principal.ipynb)
 
 [ ] FASE 4: Bonificaciones Técnicas (Web UI, Streaming y Agentes)
     [ ] 4.1 Implementación del streaming de respuesta
@@ -267,32 +270,36 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
     - Selector de fondos de contraste: `🏁 AJEDREZ` (patrón de transparencia), `⬛ OSCURO` (escena nocturna), `⬜ CLARO` (siluetas y contornos) y `🟩 CHROMA` (fondo verde fluorescente de recorte).
     - Filtros temáticos por región (`Todos`, `Norte`, `Metropolitana`, `Sur`, `Teide`).
 
-### Sesión 14: Gestión de Versiones y Repositorio Oficial en GitHub
-* **Estado:** ✅ Sincronizado y al Día
+### Sesión 15: Implementación del Backend (Dominio Pydantic, Configuración y Chunking Semántico)
+* **Estado:** ✅ Completada y Validada 100% con Pruebas Unitarias
 * **Hitos alcanzados:**
-  * Creación y vinculación del repositorio remoto: [`https://github.com/Twinber/tenerife-llm-practica-pontia`](https://github.com/Twinber/tenerife-llm-practica-pontia).
-  * Sincronización continua de la rama `master` con commits atómicos convencionales (`feat`, `fix`, `docs`).
-  * Todos los cambios de código, scripts, assets, documentación y evidencias gráficas respaldados en la nube.
+  1. **Modelos Inmutables de Dominio Pydantic V2 (`src/domain/`):**
+     - `rag_models.py`: `DocumentChunk` y `RespuestaCodiceRAG` (contrato formal con citas explícitas de fuentes `paginas_citadas: list[int]`, `cita_textual_evidencia: str` y `foto_desbloqueada_id: Optional[int]`).
+     - `weather_models.py`: `WeatherResponse`, `StarlightResponse` y `CalimaResponse` con flag de resiliencia `simulated: bool`.
+     - `state_models.py`: `InventoryItem`, `GameState` (13 enclaves, 10 sellos oficiales, 28 fotos, economía cerrada de 15 monedas) y `TurnResult`. Se corrigió la descripción de `inspeccionable` eliminando la referencia al verbo MIRAR en favor del clic directo en la barra lateral.
+     - `audit_models.py`: `AuditEvent` para telemetría técnica (latencia, tokens, tool calls, guardrails).
+  2. **Configuración Segura (`src/infrastructure/config.py`):**
+     - Implementación de `Settings` con `pydantic-settings` cargando variables desde `.env`.
+     - Exposición de hiperparámetros obligatorios (`TEMPERATURE=0.7`, `TOP_P=0.95`, `MAX_TOKENS=600`) y modelos (`gpt-4o-mini`, `text-embedding-3-small`).
+     - Singleton `get_settings()` optimizado con `@lru_cache`.
+  3. **Extractor Documental y Chunking Semántico (`src/infrastructure/pdf_extractor.py`):**
+     - Análisis exhaustivo de las 25 páginas de `data/TENERIFE.pdf` con `pypdf`.
+     - **Decisión de Ingeniería para el Tribunal:** Descarte justificado del troceo por longitud de caracteres (`RecursiveCharacterTextSplitter`) en favor del **Chunking Semántico Estructurado por Enclaves**.
+     - Generación de **36 unidades semánticas (`DocumentChunk`)** que cubren al 100% los **13 enclaves oficiales** de la isla y las **28 fotografías** del Álbum catalogadas en `docs/matriz_fotos_rag.md` con 0 fotos huérfanas o faltantes.
+     - Trazabilidad determinista: cada chunk almacena su página exacta de procedencia, su comarca y el ID de foto correspondiente.
 
 ---
 
-## 5. Próximos Pasos Inmediatos: Entrada en FASE 3 (Backend LLM & RAG)
+## 5. Próximos Pasos Inmediatos: Paso 3.3 (Vector Store ChromaDB & Retriever Geocercado)
 
-Con la capa de presentación y experiencia de usuario (Frontend) 100% implementada y calibrada, la hoja de ruta se enfoca ahora en el núcleo de inteligencia artificial:
+Habiendo validado la extracción semántica y los modelos del dominio:
 
-1. **Configuración del Entorno Backend (`src/`):**
-   - Carga de credenciales y variables de entorno (`.env` con OpenAI API Key y configuración de modelos).
-   - Verificación de dependencias en `requirements.txt` (`fastapi`, `uvicorn`, `openai`, `chromadb`, `pydantic`).
-2. **Pipeline RAG Vectorial (`src/application/rag_service.py`):**
-   - Ingesta semántica estructurada de `data/TENERIFE.pdf` sin fragmentación ciega.
-   - Indexación vectorial en Chroma DB persistente con metadatos de enclaves, páginas y fotografías asociadas.
-   - Retriever con geocercado estricto y citas explícitas de página mediante Pydantic.
-3. **Servicio de Function Calling y Open-Meteo (`src/infrastructure/weather_client.py`):**
-   - Implementación de `get_weather`, `get_starlight_conditions` y `get_calima_alert` con llamadas HTTP reales y fallback resiliente.
-   - Sistema de logging estructurado de auditoría en disco (`game_audit.log`).
-4. **Gestión de Memoria Conversacional Multiturno (`src/application/memory_service.py`):**
-   - Summary Buffer híbrido con control riguroso de ventana de tokens.
-5. **API REST + SSE en FastAPI (`src/api/`):**
-   - Endpoints para conectar el frontend web existente con el motor de IA para el streaming teletipo de respuestas en tiempo real.
-6. **Notebook de Entrega Oficial (`notebook_principal.ipynb`):**
-   - Cuaderno reproducible con la memoria técnica, justificaciones teóricas, batería de pruebas de evaluación, análisis de costes y modo de juego integrado.
+1. **Adaptador de Base Vectorial (`src/infrastructure/chroma_adapter.py`):**
+   - Conexión a Chroma DB persistente local en `./chroma_db`.
+   - Generación de embeddings con `text-embedding-3-small` (1536 dimensiones) usando el SDK oficial de OpenAI.
+   - Indexación de los 36 chunks con metadatos completos (`lugar`, `zona`, `pagina`, `foto_id`).
+2. **Servicio RAG con Geocercado Estricto (`src/application/rag_service.py`):**
+   - Búsqueda semántica por similitud coseno con filtro de contexto espacial (`where={"lugar": current_location}`).
+   - Detección de consultas fuera de zona para contención con humor de aventura gráfica.
+   - Generación de respuestas con citas formales obligatorias validadas con Pydantic (`RespuestaCodiceRAG`).
+
