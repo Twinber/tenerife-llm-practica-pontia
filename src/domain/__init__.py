@@ -7,6 +7,7 @@ from src.domain.rag_models import DocumentChunk, RespuestaCodiceRAG, ResultadoBu
 from src.domain.weather_models import CalimaResponse, StarlightResponse, WeatherResponse
 from src.domain.state_models import GameState, InventoryItem, TurnResult
 from src.domain.audit_models import AuditEvent
+from src.domain.memory_models import ChatMessage, ConversationMemorySnapshot
 
 __all__ = [
     "DocumentChunk",
@@ -19,4 +20,6 @@ __all__ = [
     "GameState",
     "TurnResult",
     "AuditEvent",
+    "ChatMessage",
+    "ConversationMemorySnapshot",
 ]
