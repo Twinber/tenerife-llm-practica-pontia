@@ -103,22 +103,34 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
 [>] FASE 3: Implementación Guiada del Backend Agéntico & RAG
     [x] 3.1 Configuración de entorno (.env, Settings) y modelos Pydantic del Dominio (Completada)
     [x] 3.2 Extracción e ingesta semántica de TENERIFE.pdf (15 Chunks cohesivos por enclave y 37 Fotos reales mapeadas) (Completada)
-    [ ] 3.3 Vector Store persistente (ChromaDB) y Retriever con geocercado y citas
+    [x] 3.3 Vector Store persistente (ChromaDB) y Retriever con geocercado y citas (Completada)
     [ ] 3.4 Herramientas climatológicas Open-Meteo, resiliencia y auditoría en disco
     [ ] 3.5 Gestor de memoria conversacional multiturno híbrida y presupuesto de tokens
     [ ] 3.6 Orquestador agéntico (Supervisor Loop) y Guardrails bouncer
     [ ] 3.7 Servidor FastAPI (API REST y Server-Sent Events)
-    [ ] 3.8 Cuaderno maestro reproducible de entrega (notebook_principal.ipynb)
+    [ ] 3.8 Cuaderno maestro reproducible de entrega (notebook_principal.ipynb):
+        * Celdas ordenadas de extracción, indexación en ChromaDB y pruebas de consulta.
+        * Celda analítica: Benchmark de distribución de distancias y ranking de los 15 chunks (demostración empírica del margen semántico y justificación de similitudes 30%-63%).
+        * Calibración de scores (Min-Max Scaling de relevancia para UX).
 
-[ ] FASE 4: Bonificaciones Técnicas (Web UI, Streaming y Agentes)
-    [ ] 4.1 Implementación del streaming de respuesta
-    [ ] 4.2 Interfaz Web temática (Gradio / Streamlit estilo retro adventure)
-    [ ] 4.3 Multi-herramienta / Multi-agente (si aplica según diseño)
+[ ] FASE 4: Bonificaciones Técnicas (Web UI, Streaming, Multimodalidad VLM y Agentes)
+    [ ] 4.1 Implementación del streaming de respuesta (SSE en FastAPI y receptor en TypeScript)
+    [ ] 4.2 Interfaz Web temática (Vite + TypeScript estilo retro SCUMM, Audio Web API, Modales)
+    [ ] 4.3 Multimodalidad VLM Activa con Tool-Use (GPT-4o Vision + RAG Grounding):
+        * Backend: Orquestador agéntico con soporte de imagen (Base64) + herramientas (`search_guide`, `get_weather`).
+        * Frontend (Escenario): Botón contextual "¿Dónde estoy?" (inspección visual del background pixel-art y deducción de enclave).
+        * Frontend (Álbum): Botón "Examinar con lupa / Describir foto" en PhotoAlbumModal para fotos desbloqueadas (análisis de detalles reales + consulta RAG).
+        * Notebook: Celda y sección reproducible demostrando análisis visual VLM contrastado con el códice RAG.
+    [ ] 4.4 Multi-herramienta / Multi-agente (Patrón Supervisor y Subagentes especializados)
 
 [ ] FASE 5: Evaluación Rigurosa, Documentación e Informe
     [ ] 5.1 Batería de pruebas empíricas (Casos de éxito, casos límite, fallos de herramienta)
-    [ ] 5.2 Análisis crítico de resultados, latencias y costes
-    [ ] 5.3 Redacción del Informe Técnico Final (PDF/Markdown de entrega)
+    [ ] 5.2 Análisis crítico de resultados, latencias y costes:
+        * Análisis geométrico en 1.536 dimensiones: Isotropía en `text-embedding-3-small` vs anisotropía cónica de `ada-002`.
+        * Justificación matemática del gap de discriminación (Top 1 con el doble de similitud frente al ruido de fondo ~22%).
+        * Mapeo y calibración de scores a escala de relevancia [0%, 100%].
+        * Tablas de distribución de distancias insulares integradas en el informe.
+    [ ] 5.3 Redacción del Informe Técnico Final (PDF/Markdown de entrega con análisis crítico profundo del RAG)
     [ ] 5.4 Repositorio, README impecable, requirements y checklist PEP 8
 ```
 
@@ -156,6 +168,7 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
   * Extracción y enlace multimodal de fotografías del PDF (`assets/img/`).
   * Indexación vectorial con Chroma DB y búsqueda semántica con similitud coseno.
   * Reglas de oro de Grounded Prompting y garantía de citas de fuentes y páginas mediante Pydantic.
+  * Comportamiento geométrico en 1.536D: comprensión del rango dinámico real (0.20 ruido a 0.70 alta fidelidad) en `text-embedding-3-small` frente a la anisotropía/cono de `ada-002`, y análisis del gap semántico relativo en rankings insulares.
 
 ### Sesión 04: Function Calling y LLMs con Herramientas
 * **Estado:** ✅ Completada y Asimilada (Aporte del 25% a la evaluación)

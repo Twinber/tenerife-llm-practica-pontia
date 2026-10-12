@@ -19,8 +19,24 @@ class DocumentChunk(BaseModel):
     zona: str = Field(..., description="Comarca geográfica: 'Norte', 'Metropolitana', 'Sur' o 'Cumbre'")
     pagina: int = Field(..., ge=1, le=25, description="Número de página de procedencia en TENERIFE.pdf")
     foto_id: Optional[int] = Field(None, ge=1, le=50, description="ID principal de la foto asociada si aplica")
-    fotos_asociadas: list[int] = Field(default_factory=list, description="Lista de IDs de fotos (1-36) asociadas a este fragmento")
+    fotos_asociadas: list[int] = Field(default_factory=list, description="Lista de IDs de fotos (1-37) asociadas a este fragmento")
     image_path: Optional[str] = Field(None, description="Ruta relativa a la imagen extraída en assets/img/")
+
+
+class ResultadoBusquedaRAG(BaseModel):
+    """
+    Resultado individual devuelto por la búsqueda vectorial en ChromaDB.
+    Combina el texto recuperado, metadatos estructurados y métricas de relevancia semántica.
+    """
+    chunk_id: str = Field(..., description="Identificador único del chunk")
+    contenido: str = Field(..., description="Texto literal del fragmento recuperado")
+    lugar: str = Field(..., description="Enclave al que pertenece")
+    zona: str = Field(..., description="Comarca geográfica ('Norte', 'Sur', etc.)")
+    pagina: int = Field(..., ge=1, le=25, description="Página de origen en TENERIFE.pdf")
+    fotos_asociadas: list[int] = Field(default_factory=list, description="IDs de fotos asociadas")
+    score_similitud: float = Field(..., description="Similitud semántica normalizada (1 - distancia_coseno, de 0.0 a 1.0)")
+    distancia: float = Field(..., description="Distancia matemática devuelta por el índice HNSW (espacio coseno)")
+    image_path: Optional[str] = Field(None, description="Ruta relativa a la imagen principal en assets/img/")
 
 
 class RespuestaCodiceRAG(BaseModel):
