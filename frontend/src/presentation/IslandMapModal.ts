@@ -4,6 +4,7 @@
 import { AudioService } from '../infrastructure/AudioService';
 import { LOCATIONS_CATALOG, LocationSceneDef } from '../domain/locationsData';
 import { TravelRules } from '../domain/TravelRules';
+import { RoadGraph, NodeCoord } from '../domain/RoadGraph';
 
 export class IslandMapModal {
   private modalElem: HTMLElement;
@@ -17,6 +18,9 @@ export class IslandMapModal {
   private stampedZones: Set<string> = new Set<string>();
   private acquiredItems: string[] = [];
 
+  private coordsMap: Record<string, NodeCoord> = {};
+  private locationsMap: Map<string, LocationSceneDef> = new Map();
+
   public isTraveling: boolean = false;
   public onTravelConfirmed?: (targetLocationId: string) => void;
   public onLogMessage?: (msg: string) => void;
@@ -24,6 +28,11 @@ export class IslandMapModal {
   constructor(audioService: AudioService, initialLocation: LocationSceneDef) {
     this.audioService = audioService;
     this.currentLocation = initialLocation;
+
+    LOCATIONS_CATALOG.forEach((loc) => {
+      this.coordsMap[loc.id] = loc.mapCoords;
+      this.locationsMap.set(loc.id, loc);
+    });
 
     this.modalElem = document.getElementById('island-map-modal')!;
     this.svgContainer = document.getElementById('map-svg-container')!;
@@ -353,15 +362,21 @@ export class IslandMapModal {
     this.isTraveling = true;
 
     const origin = this.currentLocation;
-    const pathD = this.calculateCurve(origin.mapCoords, target.mapCoords);
+    const routeNodeIds = RoadGraph.findShortestPath(origin.id, target.id, this.coordsMap);
+    const pathD = RoadGraph.buildRouteSvgPath(routeNodeIds, this.coordsMap) || this.calculateCurve(origin.mapCoords, target.mapCoords);
 
     const guidePath = document.getElementById('travel-guide-path') as unknown as SVGPathElement;
     const visibleLine = document.getElementById('travel-visible-line') as unknown as SVGPathElement;
     const vehicle = document.getElementById('travel-vehicle') as unknown as SVGGElement;
+    const vehicleEmoji = vehicle ? vehicle.querySelector('text') : null;
 
     if (!guidePath || !visibleLine || !vehicle) {
       this.finishTravel(target);
       return;
+    }
+
+    if (vehicleEmoji) {
+      vehicleEmoji.textContent = target.id === 'pico_teide' ? '🚡' : '🚌';
     }
 
     guidePath.setAttribute('d', pathD);
@@ -369,23 +384,33 @@ export class IslandMapModal {
     vehicle.style.display = 'block';
 
     const totalLength = guidePath.getTotalLength();
-    const narration = TravelRules.getTravelNarration(origin, target);
-    this.setBannerText(`🚌 ${narration}`);
+    const intermediateIds = routeNodeIds.slice(1, -1);
+    const intermediateNames = intermediateIds.map((id) => this.locationsMap.get(id)?.name || id);
 
-    if (this.onLogMessage) {
-      this.onLogMessage(`[INDIANA JONES TRAVEL] Salida: ${origin.name} -> Destino: ${target.name} (${target.zone})`);
+    if (intermediateNames.length > 0) {
+      this.setBannerText(`🚌 Ruta en guagua: ${origin.name} ➔ ${target.name} (Vía ${intermediateNames.join(', ')})...`);
+    } else {
+      const narration = TravelRules.getTravelNarration(origin, target);
+      this.setBannerText(`🚌 ${narration}`);
     }
 
-    const durationMs = 1850; // Duración clásica de viaje cinemático (1.85 segundos)
+    const routeDisplayName = routeNodeIds.map((id) => this.locationsMap.get(id)?.name || id).join(' ➔ ');
+    if (this.onLogMessage) {
+      this.onLogMessage(`[INDIANA JONES TRAVEL] Salida: ${origin.name} -> Destino: ${target.name} | Ruta: ${routeDisplayName}`);
+    }
+
+    // Duración cinematográfica proporcional a la longitud real recorrida por carretera
+    const durationMs = Math.round(Math.max(1600, Math.min(3600, 1100 + totalLength * 3.0)));
     const startTime = performance.now();
     let lastTickTime = 0;
+    const visitedIntermediates = new Set<string>();
 
     const animate = (currentTime: number) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(1, elapsed / durationMs);
 
-      // Clic rítmico de traqueteo de carretera / teletipo cada ~115ms
-      if (currentTime - lastTickTime > 115) {
+      // Clic rítmico de traqueteo de carretera / teletipo cada ~110ms
+      if (currentTime - lastTickTime > 110) {
         this.audioService.playTravelTick();
         lastTickTime = currentTime;
       }
@@ -409,12 +434,37 @@ export class IslandMapModal {
       const angle = Math.atan2(tip.y - prevPt.y, tip.x - prevPt.x) * (180 / Math.PI);
       vehicle.setAttribute('transform', `translate(${tip.x.toFixed(1)}, ${tip.y.toFixed(1)}) rotate(${angle.toFixed(1)})`);
 
+      // Detección y feedback en tiempo real al cruzar enclaves intermedios
+      for (const intId of intermediateIds) {
+        if (!visitedIntermediates.has(intId)) {
+          const intCoord = this.coordsMap[intId];
+          if (intCoord && Math.hypot(tip.x - intCoord.x, tip.y - intCoord.y) < 25) {
+            visitedIntermediates.add(intId);
+            const intLoc = this.locationsMap.get(intId);
+            this.setBannerText(`🚌 En tránsito: Cruzando ${intLoc ? intLoc.name : intId}...`);
+            const intPin = document.querySelector(`.map-pin-group[data-location-id="${intId}"]`);
+            if (intPin) {
+              intPin.classList.add('transit-glow');
+            }
+          }
+        }
+      }
+
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
+        // Limpiar efectos de tránsito en pines intermedios
+        document.querySelectorAll('.map-pin-group.transit-glow').forEach((el) => {
+          el.classList.remove('transit-glow');
+        });
+
         // ¡Llegada al destino!
         this.audioService.playTravelArrival();
-        this.setBannerText(`✨ ¡Llegada a ${target.name}! Desembarcando en la parada de TITSA...`);
+        if (target.id === 'pico_teide') {
+          this.setBannerText(`✨ ¡Llegada a ${target.name}! Desembarcando en la estación cumbre...`);
+        } else {
+          this.setBannerText(`✨ ¡Llegada a ${target.name}! Desembarcando en la parada de TITSA...`);
+        }
 
         // Destello de celebración en el pin de destino
         const targetPinGroup = document.querySelector(`.map-pin-group[data-location-id="${target.id}"]`);

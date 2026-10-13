@@ -1720,6 +1720,23 @@ html, body {
   }
 }
 
+/* Efecto visual al transitar por un enclave intermedio en ruta */
+.map-pin-group.transit-glow .pin-ring {
+  stroke: #ffbb00 !important;
+  stroke-width: 3.5px !important;
+  filter: drop-shadow(0 0 10px #ffbb00) !important;
+}
+
+.map-pin-group.transit-glow .pin-core {
+  fill: #ffd700 !important;
+  r: 8px !important;
+}
+
+.map-pin-group.transit-glow .pin-label {
+  fill: #ffd700 !important;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.9), 0 1px 3px #000 !important;
+}
+
 /* Quick Actions en la cabecera de la Consola CRT */
 .crt-header-actions {
   display: flex;
