@@ -16,13 +16,14 @@ export class ApiClient {
     return null;
   }
 
-  public async sendAction(verb: string, targetId?: string, itemId?: string, freeText?: string): Promise<any> {
+  public async sendAction(actionType: string = 'OBSERVAR', targetId?: string, itemId?: string, freeText?: string): Promise<any> {
     try {
       const res = await fetch(`${this.baseUrl}/action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          verbo: verb,
+          tipo_accion: actionType,
+          verbo: actionType,
           target_hotspot_id: targetId,
           item_id: itemId,
           texto_libre: freeText
