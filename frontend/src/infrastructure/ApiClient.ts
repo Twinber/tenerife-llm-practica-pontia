@@ -16,7 +16,14 @@ export class ApiClient {
     return null;
   }
 
-  public async sendAction(actionType: string = 'OBSERVAR', targetId?: string, itemId?: string, freeText?: string): Promise<any> {
+  public async sendAction(
+    actionType: string = 'OBSERVAR',
+    targetId?: string,
+    itemId?: string,
+    freeText?: string,
+    location?: string,
+    imagePath?: string
+  ): Promise<any> {
     try {
       const res = await fetch(`${this.baseUrl}/action`, {
         method: 'POST',
@@ -26,7 +33,9 @@ export class ApiClient {
           verbo: actionType,
           target_hotspot_id: targetId,
           item_id: itemId,
-          texto_libre: freeText
+          texto_libre: freeText,
+          ubicacion: location,
+          image_path: imagePath
         })
       });
       if (res.ok) return await res.json();
@@ -36,24 +45,65 @@ export class ApiClient {
     return null;
   }
 
-  public subscribeToStream(onToken: (token: string) => void, onComplete: () => void): EventSource | null {
+  public async fetchTelemetry(): Promise<any> {
     try {
-      const es = new EventSource(`${this.baseUrl}/stream`);
+      const res = await fetch(`${this.baseUrl}/telemetry`);
+      if (res.ok) return await res.json();
+    } catch {
+      // Modo offline
+    }
+    return null;
+  }
+
+  public async resetGame(): Promise<any> {
+    try {
+      const res = await fetch(`${this.baseUrl}/reset`, { method: 'POST' });
+      if (res.ok) return await res.json();
+    } catch {
+      // Modo offline
+    }
+    return null;
+  }
+
+  public subscribeToStream(
+    text: string,
+    location?: string,
+    imagePath?: string,
+    onToken?: (token: string) => void,
+    onMetadata?: (meta: any) => void,
+    onComplete?: () => void,
+    onError?: () => void
+  ): EventSource | null {
+    try {
+      const params = new URLSearchParams({ texto: text });
+      if (location) params.append('ubicacion', location);
+      if (imagePath) params.append('image_path', imagePath);
+
+      const es = new EventSource(`${this.baseUrl}/stream?${params.toString()}`);
       es.onmessage = (event) => {
         if (event.data === '[DONE]') {
-          onComplete();
+          if (onComplete) onComplete();
           es.close();
+        } else if (event.data.startsWith('[META]')) {
+          try {
+            const meta = JSON.parse(event.data.substring(6));
+            if (onMetadata) onMetadata(meta);
+          } catch (e) {
+            console.warn('[SSE] Error parseando metadata:', e);
+          }
         } else {
-          onToken(event.data);
+          if (onToken) onToken(event.data);
         }
       };
       es.onerror = () => {
         es.close();
-        onComplete();
+        if (onError) onError();
+        else if (onComplete) onComplete();
       };
       return es;
     } catch {
-      onComplete();
+      if (onError) onError();
+      else if (onComplete) onComplete();
       return null;
     }
   }

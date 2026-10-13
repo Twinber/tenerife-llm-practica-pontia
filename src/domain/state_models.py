@@ -4,10 +4,130 @@ Garantiza que la lógica de inventario, economía y sellos resida en código Pyt
 y no en la memoria volátil o sujeta a alucinaciones del LLM.
 """
 
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 from pydantic import BaseModel, Field
 
 from src.domain.rag_models import RespuestaCodiceRAG
+
+
+# Registro oficial de enclaves, NPCs custodios y claves de sellos del pasaporte (10 oficiales)
+OFFICIAL_ENCLAVE_STAMPS: dict[str, dict[str, Any]] = {
+    "puerto_cruz": {
+        "stamp_key": "puerto_cruz",
+        "npc_name": "Paco el Pescador",
+        "authority": "Paco el Pescador (Aduana Marítima)",
+        "zone_title": "Puerto de la Cruz — Muelle Pesquero & San Telmo",
+        "stampable": True,
+    },
+    "la_orotava": {
+        "stamp_key": "la_orotava",
+        "npc_name": "Chano el Molinero",
+        "authority": "Chano el Molinero (Molino de Gofio)",
+        "zone_title": "La Orotava — Valle de Taoro & Molinos de Gofio",
+        "stampable": True,
+    },
+    "santa_ursula": {
+        "stamp_key": None,
+        "npc_name": "Manolo el Tabernero",
+        "authority": "Manolo el Tabernero (Guachinche tradicional)",
+        "zone_title": "Santa Úrsula — Guachinche tradicional",
+        "stampable": False,
+        "refusal_reason": "Santa Úrsula es un guachinche de comida tradicional y vino del país, no un organismo aduanero oficial. Manolo bromea diciendo que aquí solo se sella el buche con buen mojo y escaldón.",
+    },
+    "icod": {
+        "stamp_key": "icod_garachico",
+        "npc_name": "Don Cándido el Bodeguero",
+        "authority": "Don Cándido el Bodeguero (Sabio botánico y guardián del Drago Milenario)",
+        "zone_title": "Icod de los Vinos — Drago Milenario & El Caletón",
+        "stampable": True,
+    },
+    "garachico": {
+        "stamp_key": "icod_garachico",
+        "npc_name": "Doña Nieves",
+        "authority": "Doña Nieves (Artesana y guardiana de El Caletón)",
+        "zone_title": "Garachico — Drago Milenario & El Caletón",
+        "stampable": True,
+    },
+    "la_laguna": {
+        "stamp_key": "la_laguna",
+        "npc_name": "Profesora Herminia",
+        "authority": "Profesora Herminia (Patrimonio UNESCO / Universidad)",
+        "zone_title": "San Cristóbal de La Laguna — Ciudad Patrimonio de la Humanidad",
+        "stampable": True,
+    },
+    "santa_cruz": {
+        "stamp_key": "santa_cruz",
+        "npc_name": "Oficial Morales",
+        "authority": "Oficial Morales (Autoridad Portuaria)",
+        "zone_title": "Santa Cruz de Tenerife — Capital Insular & Auditorio",
+        "stampable": True,
+    },
+    "anaga": {
+        "stamp_key": "anaga",
+        "npc_name": "Guarda Forestal Yeray",
+        "authority": "Yeray (Guarda Rural de Anaga)",
+        "zone_title": "Parque Rural de Anaga — Reserva de la Biosfera & Laurisilva",
+        "stampable": True,
+    },
+    "costa_adeje": {
+        "stamp_key": "costa_adeje",
+        "npc_name": "Ayoze el Socorrista",
+        "authority": "Ayoze el Socorrista (Litoral Turístico del Sur)",
+        "zone_title": "Costa Adeje & Las Américas — Litoral Sur",
+        "stampable": True,
+    },
+    "masca": {
+        "stamp_key": "los_gigantes_masca",
+        "npc_name": "Tanausú el Guía de Montaña",
+        "authority": "Tanausú (Guía de Montaña de Masca)",
+        "zone_title": "Los Gigantes & Masca — Barranco & Acantilados",
+        "stampable": True,
+    },
+    "el_medano": {
+        "stamp_key": "el_medano_cristianos",
+        "npc_name": "El Frutero Canario",
+        "authority": "El Frutero Canario (Bahía de Montaña Roja)",
+        "zone_title": "El Médano & Montaña Roja — Bahía Marina",
+        "stampable": True,
+    },
+    "las_canadas": {
+        "stamp_key": "el_teide",
+        "npc_name": "Operario del Teleférico",
+        "authority": "Operario del Teleférico (Base del Teide)",
+        "zone_title": "Las Cañadas del Teide — Base del Teleférico",
+        "stampable": True,
+    },
+    "pico_teide": {
+        "stamp_key": "el_teide",
+        "npc_name": "Guardián del Teide",
+        "authority": "Guardián del Teide (Cumbre de España, 3.718m)",
+        "zone_title": "Pico del Teide — 3.718m Cumbre de España",
+        "stampable": True,
+    },
+}
+
+
+import unicodedata
+
+
+def is_passport_stamp_request(user_input: str) -> bool:
+    """
+    Detecta de forma determinista y tolerante a conjugaciones/acentos
+    si la intervención del jugador constituye una petición expresa de sellado del pasaporte.
+    """
+    if not user_input:
+        return False
+    norm = unicodedata.normalize('NFKD', user_input).encode('ASCII', 'ignore').decode('utf-8').lower().strip()
+    words = norm.split()
+    has_stamp_action = any(
+        w.startswith(('sell', 'estamp', 'vis', 'cun'))
+        for w in words
+    ) or any(phrase in norm for phrase in ['poner el sello', 'ponme el sello', 'dame el sello', 'marcar pasaporte', 'cuño oficial'])
+    has_passport_ref = any(
+        w.startswith(('pasaport', 'sell', 'cun', 'vis', 'marca', 'explorador'))
+        for w in words
+    )
+    return has_stamp_action and has_passport_ref
 
 
 class InventoryItem(BaseModel):

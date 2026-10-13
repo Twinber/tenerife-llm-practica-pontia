@@ -34,7 +34,7 @@ export class TravelRules {
     }
 
     const stampCount = stampedZones.size;
-    const hasPacoStamp = stampedZones.has('Puerto de la Cruz');
+    const hasPacoStamp = stampedZones.has('Puerto de la Cruz') || stampedZones.has('puerto_cruz');
     const hasCableCarTicket = acquiredItems.includes('Billete del Teleférico');
 
     // 2. Clímax: Pico del Teide — 3.718m
@@ -46,7 +46,7 @@ export class TravelRules {
           badge: 'BILLETE REQUERIDO'
         };
       }
-      if (origin.id !== 'las_canadas' && !stampedZones.has('Las Cañadas del Teide')) {
+      if (origin.id !== 'las_canadas' && !stampedZones.has('Las Cañadas del Teide') && !stampedZones.has('las_canadas') && !stampedZones.has('el_teide')) {
         return {
           allowed: false,
           reason: '🔒 El teleférico parte exclusivamente desde la estación base de Las Cañadas del Teide (2.356m).',
@@ -82,7 +82,7 @@ export class TravelRules {
 
     // 5. Parque Rural de Anaga (Reserva de la Biosfera)
     if (target.id === 'anaga') {
-      const hasMetroGateway = stampedZones.has('San Cristóbal de La Laguna') || stampedZones.has('Santa Cruz de Tenerife');
+      const hasMetroGateway = stampedZones.has('San Cristóbal de La Laguna') || stampedZones.has('la_laguna') || stampedZones.has('Santa Cruz de Tenerife') || stampedZones.has('santa_cruz');
       if (stampCount < 2 || (!hasMetroGateway && stampCount < 3)) {
         return {
           allowed: false,

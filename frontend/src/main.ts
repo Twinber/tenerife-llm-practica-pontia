@@ -80,6 +80,69 @@ window.addEventListener('DOMContentLoaded', () => {
   actionDispatcher.passportModal = passportModal;
   actionDispatcher.islandMapModal = islandMapModal;
 
+  // Inspección multimodal con lupa VLM en el Álbum de Fotos
+  photoAlbumModal.onInspectVlm = async (photo, resultBox, btnInspect) => {
+    btnInspect.disabled = true;
+    btnInspect.innerText = "⏳ ANALIZANDO PÍXELES CON VLM...";
+    resultBox.classList.remove('hidden');
+    resultBox.innerHTML = `<em>Observando la imagen con visión multimodal GPT-4o-mini y buscando correspondencias en el Códice RAG...</em>`;
+
+    const imagePath = `assets/img/photos/photo_${String(photo.id).padStart(2, '0')}.jpg`;
+    const prompt = `Inspecciona visualmente con lupa esta fotografía de '${photo.title}' (${photo.enclave}). Describe sus detalles clave, verifica su autenticidad y cita los datos históricos de la guía.`;
+    const narrative = await actionDispatcher.inspectVisualContext(imagePath, prompt);
+
+    resultBox.innerHTML = `
+      <div style="color:#00ffcc; font-weight:bold; margin-bottom:4px;">🔍 ANÁLISIS MULTIMODAL VLM:</div>
+      <div>${narrative}</div>
+    `;
+    btnInspect.disabled = false;
+    btnInspect.innerText = "🔍 EXAMINAR CON LUPA (VISIÓN VLM)";
+  };
+
+  // Botón contextual del HUD: ¿Dónde estoy? (Deducción visual del escenario mediante VLM)
+  const btnWhereAmI = document.getElementById('btn-whereami') as HTMLButtonElement;
+  if (btnWhereAmI) {
+    btnWhereAmI.addEventListener('click', async () => {
+      if (dialogueManager.isWaitingBackend) return;
+      audioService.playClick();
+      btnWhereAmI.disabled = true;
+      btnWhereAmI.innerText = '📍 DEDUCIENDO... ⏳';
+
+      actionDispatcher.isDialogueSpeaking = true;
+      if (actionDispatcher.onDialogueSpeechState) actionDispatcher.onDialogueSpeechState(true);
+
+      const locName = actionDispatcher.currentLocation.name;
+      const locId = actionDispatcher.currentLocation.id;
+      telemetryView.log(`[VLM DEDUCTION] Analizando visualmente el escenario '${locId}' (${locName})...`);
+
+      // Limpiar cola previa y desplegar inmediatamente la burbuja con el relojito de espera ⏳
+      dialogueManager.clear();
+      dialogueManager.startWaitingBackend(
+        'twinber',
+        "Twinber: 'Examinando relieve, mar y arquitectura con visión multimodal... ⏳'"
+      );
+      dialogueManager.enqueue([
+        { speaker: 'twinber', text: "Twinber: 'Examinando relieve, mar y arquitectura con visión multimodal... ⏳'" }
+      ]);
+
+      try {
+        const prompt = `Inspecciona visualmente el escenario en el que me encuentro. Deduce dónde estoy a partir del relieve, vegetación, mar o arquitectura, y explica qué ves.`;
+        const narrative = await actionDispatcher.inspectVisualContext(actionDispatcher.currentLocation.bgImage, prompt);
+
+        const formatted = narrative.startsWith('Twinber:') ? narrative : `Twinber: '${narrative}'`;
+        dialogueManager.deliverBackendResponse(formatted, 'twinber');
+      } catch (err) {
+        dialogueManager.deliverBackendResponse(`Twinber: 'Parece que la bruma del mar no me deja distinguir los detalles en este momento.'`, 'twinber');
+      } finally {
+        btnWhereAmI.disabled = false;
+        btnWhereAmI.innerText = '📍 ¿DÓNDE ESTOY?';
+      }
+    });
+  }
+
+  // Sincronizar estado inicial con el backend FastAPI
+  actionDispatcher.syncWithBackend();
+
   // Botón rápido en la cabecera de la consola de telemetría
   const btnCrtAnims = document.getElementById('btn-crt-anims');
   if (btnCrtAnims) {
@@ -160,14 +223,66 @@ window.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    if (cmd === 'AUDIT' || cmd === 'TELEMETRIA' || cmd === 'TELEMETRY' || cmd === 'LOGS') {
+      telemetryView.log("Consultando telemetría y auditoría en tiempo real del backend...");
+      actionDispatcher.apiClient.fetchTelemetry().then((data) => {
+        if (!data) {
+          telemetryView.log("[ERROR] No se pudo conectar con el endpoint /api/telemetry");
+          return;
+        }
+        telemetryView.logRaw(`
+          <div style="color:#55ff99; margin:4px 0; font-family: monospace; font-size:10px;">
+            <b>*** AUDITORÍA Y OBSERVABILIDAD DEL MOTOR AGÉNTICO ***</b><br>
+            • Total eventos registrados: <b>${data.total_eventos_registrados}</b><br>
+            • Tokens memoria híbrida: <b>${data.memoria_snapshot.tokens_historial_total} / ${data.memoria_snapshot.presupuesto_max_tokens}</b><br>
+            • Mensajes en ventana reciente: <b>${data.memoria_snapshot.mensajes_recientes.length}</b><br>
+            • Últimos eventos de auditoría:<br>
+            ${data.eventos_recientes.slice(0, 5).map((e: any) => `  - [${e.tipo_evento}] ${e.nombre_operacion} (${e.latencia_ms.toFixed(1)}ms) -> ${e.resultado_resumen}`).join('<br>')}
+          </div>
+        `);
+      });
+      return;
+    }
+
+    if (cmd === 'ESTADO' || cmd === 'STATE') {
+      actionDispatcher.apiClient.fetchState().then((st) => {
+        if (!st) {
+          telemetryView.log("[ERROR] Backend offline.");
+          return;
+        }
+        telemetryView.logRaw(`
+          <div style="color:#00e5ff; font-family: monospace; font-size:10px;">
+            <b>[ESTADO BACKEND]</b> Enclave: ${(st as any).ubicacion_actual} | Monedas: ${(st as any).monedas_oro} | Turnos: ${(st as any).turnos_jugados} | Sellos: ${JSON.stringify((st as any).sellos_obtenidos)}
+          </div>
+        `);
+      });
+      return;
+    }
+
+    if (cmd === 'RESET' || cmd === 'REINICIAR') {
+      telemetryView.log("Reiniciando partida en el backend...");
+      actionDispatcher.apiClient.resetGame().then(() => {
+        telemetryView.log("Partida reseteada. Recargando estado...");
+        actionDispatcher.stampedZones.clear();
+        actionDispatcher.coins = 15;
+        if (actionDispatcher.passportModal) actionDispatcher.passportModal.close();
+        if (actionDispatcher.photoAlbumModal) actionDispatcher.photoAlbumModal.close();
+        actionDispatcher.syncWithBackend();
+      });
+      return;
+    }
+
     if (cmd === 'AYUDA' || cmd === 'HELP' || cmd === '?') {
       telemetryView.logRaw(`
         <div style="color:#00e5ff; margin:4px 0; line-height: 1.4;">
           <b>[COMANDOS DISPONIBLES EN TELEMETRÍA]</b><br>
-          • <b>SHOW_ANIMS [FILTRO]</b>: Laboratorio visual de animaciones (Twinber + 13 NPCs) para verificar fluidez.<br>
+          • <b>AUDIT / TELEMETRIA</b>: Muestra métricas de observabilidad en vivo, latencias y consumo de tokens.<br>
+          • <b>ESTADO</b>: Consulta el GameState determinista activo en FastAPI.<br>
+          • <b>RESET</b>: Reinicia la partida y limpia la memoria conversacional.<br>
+          • <b>SHOW_ANIMS [FILTRO]</b>: Laboratorio visual de animaciones (Twinber + 13 NPCs).<br>
           • <b>MAPA</b>: Abre el mapa de carreteras de Tenerife (o pulsa la tecla 'M').<br>
           • <b>LISTAR_DESTINOS</b>: Muestra todos los 13 enclaves con sus NPCs, tiendas, sellos y fotos.<br>
-          • <b>VIAJAR &lt;DESTINO&gt;</b>: Salto inmediato ignorando bloqueos y sellos (Ej: VIAJAR la_orotava ó VIAJAR Masca).<br>
+          • <b>VIAJAR &lt;DESTINO&gt;</b>: Salto inmediato (Ej: VIAJAR la_orotava ó VIAJAR Masca).<br>
           • <b>LIMPIAR</b>: Limpia el historial de la pantalla.<br>
           • <b>CERRAR</b>: Oculta la consola de telemetría (o pulsa ESC / Tecla T).
         </div>

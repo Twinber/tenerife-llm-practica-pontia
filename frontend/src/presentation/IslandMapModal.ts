@@ -223,6 +223,7 @@ export class IslandMapModal {
       hitArea.setAttribute('cy', '0');
       hitArea.setAttribute('r', '20');
       hitArea.setAttribute('fill', 'transparent');
+      hitArea.setAttribute('pointer-events', 'all');
       hitArea.setAttribute('class', 'pin-hit-area');
       pinGroup.appendChild(hitArea);
 
@@ -427,7 +428,8 @@ export class IslandMapModal {
           }
           vehicle.style.display = 'none';
           visibleLine.setAttribute('d', '');
-          this.close();
+          this.isTraveling = false;
+          this.modalElem.classList.add('hidden');
           this.finishTravel(target);
         }, 500);
       }

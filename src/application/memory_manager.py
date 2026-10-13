@@ -12,7 +12,7 @@ import tiktoken
 from openai import OpenAI
 
 from src.domain.memory_models import ChatMessage, ConversationMemorySnapshot
-from src.domain.state_models import GameState
+from src.domain.state_models import GameState, OFFICIAL_ENCLAVE_STAMPS
 from src.infrastructure.config import Settings, get_settings
 
 logger = logging.getLogger(__name__)
@@ -211,12 +211,31 @@ class ConversationMemoryManager:
         prompt_completo = base_system_prompt.strip()
 
         if game_state:
+            loc = game_state.ubicacion_actual
+            stamp_info = OFFICIAL_ENCLAVE_STAMPS.get(loc, {})
+            npc_name = stamp_info.get("npc_name", "Lugareño")
+            authority = stamp_info.get("authority", npc_name)
+            stamp_key = stamp_info.get("stamp_key")
+            stampable = stamp_info.get("stampable", False)
+
+            if stampable and stamp_key:
+                ya_sellado = stamp_key in game_state.sellos_obtenidos
+                if ya_sellado:
+                    estado_sello_enclave = f"'{stamp_key}' [YA ESTAMPADO en este pasaporte. Si Twinber lo pide de nuevo, recuérdale con humor canario que ya tiene estampado el sello de este enclave]."
+                else:
+                    estado_sello_enclave = f"'{stamp_key}' [PENDIENTE. ¡TÚ ({npc_name}) eres la máxima autoridad y custodio oficial con el cuño en mano! Si Twinber te pide el sello del pasaporte, acéptalo de inmediato con entusiasmo, saca tu tinta y estámpalo ceremonialmente (*¡CLAC!*). ¡NO lo mandes a ningún otro lugar!]."
+            else:
+                refusal = stamp_info.get("refusal_reason", "Enclave gastronómico sin cuño oficial.")
+                estado_sello_enclave = f"SIN SELLO OFICIAL ({refusal})."
+
             estado_str = (
                 f"\n\n=== ESTADO DETERMINISTA DEL EXPLORADOR (INVARIANTE) ===\n"
-                f"- Enclave actual: {game_state.ubicacion_actual}\n"
+                f"- Enclave actual: {loc}\n"
+                f"- Personaje activo frente a Twinber: {npc_name} ({authority})\n"
+                f"- Situación del sello de este enclave: {estado_sello_enclave}\n"
                 f"- Monedas de oro: {game_state.monedas_oro} / 15\n"
-                f"- Sellos visados en pasaporte ({len(game_state.sellos_obtenidos)}/10): {', '.join(game_state.sellos_obtenidos) or 'Ninguno aún'}\n"
-                f"- Fotos desbloqueadas en álbum ({len(game_state.fotos_desbloqueadas)}/37): {game_state.fotos_desbloqueadas}\n"
+                f"- Sellos visados en pasaporte ({len(game_state.sellos_obtenidos)}/10 oficiales): {', '.join(game_state.sellos_obtenidos) or 'Ninguno aún'}\n"
+                f"- Fotos desbloqueadas en álbum ({len(game_state.fotos_desbloqueadas)}/28): {game_state.fotos_desbloqueadas}\n"
                 f"- Turnos jugados: {game_state.turnos_jugados}\n"
                 f"========================================================"
             )

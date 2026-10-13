@@ -195,7 +195,16 @@ async def stream_action(
 
         for palabra in palabras:
             yield f"data: {palabra} \n\n"
-            await asyncio.sleep(0.02)  # Efecto teletipo retro suave (20ms)
+            await asyncio.sleep(0.02)
+        # Evento de metadatos estructurados del turno (sellos, fotos, sfx, estado)
+        meta = {
+            "type": "turn_metadata",
+            "fotos_nuevas": turn_result.fotos_nuevas,
+            "sellos_nuevos": turn_result.sellos_nuevos,
+            "sfx_to_play": turn_result.sfx_to_play,
+            "estado": turn_result.estado.model_dump()
+        }
+        yield f"data: [META]{json.dumps(meta)}\n\n"
 
         # Evento de finalización SSE
         yield "data: [DONE]\n\n"
@@ -241,10 +250,9 @@ frontend_dist = Path("frontend/dist")
 frontend_assets = Path("frontend/public/assets")
 project_assets = Path("assets")
 
-if frontend_assets.exists():
+if frontend_dist.exists() and (frontend_dist / "index.html").exists():
+    app.mount("/", StaticFiles(directory=str(frontend_dist), html=True), name="frontend_app")
+elif frontend_assets.exists():
     app.mount("/assets", StaticFiles(directory=str(frontend_assets)), name="frontend_assets")
 elif project_assets.exists():
     app.mount("/assets", StaticFiles(directory=str(project_assets)), name="project_assets")
-
-if frontend_dist.exists() and (frontend_dist / "index.html").exists():
-    app.mount("/", StaticFiles(directory=str(frontend_dist), html=True), name="frontend_app")

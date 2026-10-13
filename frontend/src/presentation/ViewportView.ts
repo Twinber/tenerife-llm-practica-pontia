@@ -130,6 +130,39 @@ export class ViewportView {
     }
   }
 
+  public async transitionScene(
+    bgImage: string,
+    hudTitle: string,
+    npcName?: string,
+    npcVisible: boolean = true,
+    onSceneReady?: () => void
+  ): Promise<void> {
+    const overlay = document.getElementById('scene-fade-overlay');
+    if (overlay) {
+      overlay.classList.add('active');
+      await new Promise(r => setTimeout(r, 220));
+    }
+
+    // Pre-cargar la imagen en memoria antes de intercambiar el fondo
+    await new Promise<void>((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve();
+      img.onerror = () => resolve();
+      img.src = bgImage;
+    });
+
+    this.updateScene(bgImage, hudTitle, npcName, npcVisible);
+
+    if (onSceneReady) {
+      onSceneReady();
+    }
+
+    await new Promise(r => setTimeout(r, 50));
+    if (overlay) {
+      overlay.classList.remove('active');
+    }
+  }
+
   public updateScene(bgImage: string, hudTitle: string, npcName?: string, npcVisible: boolean = true): void {
     const bgElem = this.viewportElem.querySelector('.scene-background') as HTMLImageElement;
     if (bgElem && bgImage) {
@@ -179,28 +212,52 @@ export class ViewportView {
       this.pacoElem.style.display = 'none';
     }
 
-    // 3. Renderizar Subtítulo con botón interactivo de continuación
+    // 3. Renderizar Subtítulo con DOM estable y botón interactivo
     if (this.dialogueManager.currentLine) {
       const isTyped = this.dialogueManager.isFullyTyped;
       const speaker = this.dialogueManager.currentLine.speaker;
-      this.dialogueContainer.innerHTML = `
-        <div class="dialogue-bubble ${speaker}">
-          <div class="dialogue-body">${this.dialogueManager.displayedText}</div>
-          <button id="btn-dialogue-continue" class="dialogue-continue-btn ${isTyped ? 'ready' : 'typing'}">
-            ${isTyped ? '▶ CONTINUAR [ESPACIO]' : '...'}
-          </button>
-        </div>
-      `;
+      const isWaiting = this.dialogueManager.isWaitingBackend && this.dialogueManager.currentLine.text.includes('⏳');
 
-      const btn = document.getElementById('btn-dialogue-continue');
-      if (btn) {
-        btn.onclick = (e) => {
-          e.stopPropagation();
-          this.dialogueManager.advanceOrSkip();
-        };
+      let bubble = this.dialogueContainer.querySelector('.dialogue-bubble') as HTMLElement;
+      let body = this.dialogueContainer.querySelector('.dialogue-body') as HTMLElement;
+      let btn = document.getElementById('btn-dialogue-continue') as HTMLButtonElement;
+
+      if (!bubble || !body || !btn) {
+        this.dialogueContainer.innerHTML = `
+          <div class="dialogue-bubble ${speaker}">
+            <div class="dialogue-body">${this.dialogueManager.displayedText}</div>
+            <button id="btn-dialogue-continue" class="dialogue-continue-btn ${isWaiting ? 'waiting' : (isTyped ? 'ready' : 'typing')}">
+              ${isWaiting ? '<span class="dialogue-clock-icon">⏳</span> PENSANDO...' : (isTyped ? '▶ CONTINUAR [ESPACIO]' : '...')}
+            </button>
+          </div>
+        `;
+        btn = document.getElementById('btn-dialogue-continue') as HTMLButtonElement;
+        if (btn) {
+          btn.onclick = (e) => {
+            e.stopPropagation();
+            this.dialogueManager.advanceOrSkip();
+          };
+        }
+      } else {
+        bubble.className = `dialogue-bubble ${speaker}`;
+        if (body.textContent !== this.dialogueManager.displayedText) {
+          body.textContent = this.dialogueManager.displayedText;
+        }
+        const targetBtnClass = `dialogue-continue-btn ${isWaiting ? 'waiting' : (isTyped ? 'ready' : 'typing')}`;
+        if (btn.className !== targetBtnClass) {
+          btn.className = targetBtnClass;
+        }
+        const targetBtnHtml = isWaiting 
+          ? '<span class="dialogue-clock-icon">⏳</span> PENSANDO...' 
+          : (isTyped ? '▶ CONTINUAR [ESPACIO]' : '...');
+        if (btn.innerHTML !== targetBtnHtml) {
+          btn.innerHTML = targetBtnHtml;
+        }
       }
     } else {
-      this.dialogueContainer.innerHTML = '';
+      if (this.dialogueContainer.innerHTML !== '') {
+        this.dialogueContainer.innerHTML = '';
+      }
     }
   }
 }

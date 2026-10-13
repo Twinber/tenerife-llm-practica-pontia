@@ -8,10 +8,12 @@ import { AudioService } from '../infrastructure/AudioService';
 import type { PhotoAlbumModal } from '../presentation/PhotoAlbumModal';
 import type { PassportModal } from '../presentation/PassportModal';
 import type { IslandMapModal } from '../presentation/IslandMapModal';
+import { ApiClient } from '../infrastructure/ApiClient';
 import { LOCATIONS_CATALOG, LocationSceneDef, HotspotLocationDef } from '../domain/locationsData';
 import type { ViewportView } from '../presentation/ViewportView';
 
 export class ActionDispatcher {
+  public apiClient: ApiClient = new ApiClient();
   public activeVerb: VerbType = 'HABLAR';
   public selectedItemName: string | null = null;
   public hoverTargetName: string = '';
@@ -22,8 +24,12 @@ export class ActionDispatcher {
 
   private twinber: Actor;
   private paco: Actor;
-  private dialogueManager: DialogueManager;
+  public dialogueManager: DialogueManager;
   private audioService: AudioService;
+
+  public get isWaitingBackend(): boolean {
+    return this.dialogueManager.isWaitingBackend;
+  }
   public photoAlbumModal?: PhotoAlbumModal;
   public passportModal?: PassportModal;
   public islandMapModal?: IslandMapModal;
@@ -65,6 +71,78 @@ export class ActionDispatcher {
     this.dialogueManager.onDialogueFinished = () => {
       this.handleDialogueFinished();
     };
+  }
+
+  public syncFullGameState(state: any): void {
+    if (!state) return;
+    const coins = state.coins !== undefined ? state.coins : state.monedas_oro;
+    if (coins !== undefined) this.coins = coins;
+
+    const stamps = state.passportStamps || state.sellos_obtenidos;
+    if (Array.isArray(stamps)) {
+      this.stampedZones.clear();
+      stamps.forEach((s: string) => {
+        this.stampedZones.add(s);
+        if (this.passportModal) this.passportModal.unlockStamp(s);
+      });
+    }
+
+    const photos = state.photos || state.fotos_desbloqueadas;
+    if (Array.isArray(photos)) {
+      photos.forEach((pid: number) => {
+        if (this.photoAlbumModal) this.photoAlbumModal.unlockPhoto(pid);
+      });
+    }
+
+    if (this.onStateUpdate) {
+      this.onStateUpdate({
+        coins: this.coins,
+        passport: `${this.stampedZones.size}/10`,
+        photos: `${this.photoAlbumModal?.getUnlockedCount() || 0}/28`
+      });
+    }
+  }
+
+  public async syncWithBackend(): Promise<void> {
+    try {
+      const state = await this.apiClient.fetchState();
+      if (state) {
+        if (this.onLogMessage) {
+          this.onLogMessage(`[API SYNC] Conectado con FastAPI. Enclave: ${(state as any).ubicacion_actual || state.currentLocationId}, Monedas: ${state.coins ?? (state as any).monedas_oro}`);
+        }
+        this.syncFullGameState(state);
+      }
+    } catch (err) {
+      console.warn('[ApiClient] No se pudo sincronizar estado inicial con el backend:', err);
+    }
+  }
+
+  public async inspectVisualContext(imagePath: string, promptText?: string): Promise<string> {
+    const locName = this.currentLocation.name;
+    if (this.onLogMessage) {
+      this.onLogMessage(`[VLM VISION] Inspeccionando visualmente '${imagePath}'...`);
+    }
+
+    try {
+      const res = await this.apiClient.sendAction(
+        'OBSERVAR',
+        undefined,
+        undefined,
+        promptText || `Observo atentamente el paisaje a mi alrededor en ${locName}. ¿Qué reconozco visualmente, qué arquitectura o relieve observo y qué enclave de Tenerife es?`,
+        this.currentLocation.id,
+        imagePath
+      );
+
+      if (res && res.narrativa) {
+        if (this.onLogMessage) {
+          this.onLogMessage(`[VLM VISION] Deducción visual completada por el agente.`);
+        }
+        return res.narrativa;
+      }
+    } catch (err) {
+      console.warn('[VLM VISION] Error inspeccionando imagen:', err);
+    }
+    return `Observando con atención el paisaje, reconozco la arquitectura y elementos característicos de ${locName}.`;
   }
 
   public acquireItem(name: string, icon: string, count: number = 1): void {
@@ -206,48 +284,56 @@ export class ActionDispatcher {
     this.triggerTravel();
   }
 
-  public changeLocation(targetLocation: LocationSceneDef, isTeleport: boolean = false): void {
+  public async changeLocation(targetLocation: LocationSceneDef, isTeleport: boolean = false): Promise<void> {
     this.currentLocation = targetLocation;
 
-    // 1. Reposicionar y configurar NPC
-    if (targetLocation.npc) {
-      this.paco.id = targetLocation.npc.id;
-      this.paco.name = targetLocation.npc.name;
-      this.paco.xPct = targetLocation.npc.initialX;
-      this.paco.targetXPct = targetLocation.npc.initialX;
-      this.paco.bottomPct = targetLocation.npc.initialBottom !== undefined ? targetLocation.npc.initialBottom : 8;
-      this.paco.frameIdx = 0;
-      this.paco.state = 'IDLE';
-      this.paco.facing = -1;
+    const setupActors = () => {
+      // 1. Reposicionar y configurar NPC
+      if (targetLocation.npc) {
+        this.paco.id = targetLocation.npc.id;
+        this.paco.name = targetLocation.npc.name;
+        this.paco.xPct = targetLocation.npc.initialX;
+        this.paco.targetXPct = targetLocation.npc.initialX;
+        this.paco.bottomPct = targetLocation.npc.initialBottom !== undefined ? targetLocation.npc.initialBottom : 8;
+        this.paco.frameIdx = 0;
+        this.paco.state = 'IDLE';
+        this.paco.facing = -1;
 
-      // 2. Posicionar a Twinber a distancia coherente del NPC (a su izquierda, mirándole)
-      const npcX = targetLocation.npc.initialX;
-      const twinberX = targetLocation.npc.twinberX !== undefined ? targetLocation.npc.twinberX : Math.max(16, npcX - 11.5);
-      this.twinber.xPct = twinberX;
-      this.twinber.targetXPct = twinberX;
-      this.twinber.bottomPct = targetLocation.npc.twinberBottom !== undefined 
-        ? targetLocation.npc.twinberBottom 
-        : (targetLocation.npc.initialBottom !== undefined ? targetLocation.npc.initialBottom : 8);
-      this.twinber.state = 'IDLE';
-      this.twinber.frameIdx = 0;
-      this.twinber.facing = 1;
-    } else {
-      this.twinber.xPct = 50.0;
-      this.twinber.targetXPct = 50.0;
-      this.twinber.state = 'IDLE';
-      this.twinber.frameIdx = 0;
-      this.twinber.facing = 1;
-    }
+        // 2. Posicionar a Twinber a distancia coherente del NPC (a su izquierda, mirándole)
+        const npcX = targetLocation.npc.initialX;
+        const twinberX = targetLocation.npc.twinberX !== undefined ? targetLocation.npc.twinberX : Math.max(16, npcX - 11.5);
+        this.twinber.xPct = twinberX;
+        this.twinber.targetXPct = twinberX;
+        this.twinber.bottomPct = targetLocation.npc.twinberBottom !== undefined 
+          ? targetLocation.npc.twinberBottom 
+          : (targetLocation.npc.initialBottom !== undefined ? targetLocation.npc.initialBottom : 8);
+        this.twinber.state = 'IDLE';
+        this.twinber.frameIdx = 0;
+        this.twinber.facing = 1;
+      } else {
+        this.twinber.xPct = 50.0;
+        this.twinber.targetXPct = 50.0;
+        this.twinber.state = 'IDLE';
+        this.twinber.frameIdx = 0;
+        this.twinber.facing = 1;
+      }
 
-    // 3. Actualizar Viewport (Background, HUD, NPC visible y Hotspots)
+      if (this.viewportView) {
+        this.viewportView.renderHotspots(targetLocation.hotspots);
+      }
+    };
+
+    // 3. Transición visual suave con precarga para evitar mostrar actores antes del nuevo fondo
     if (this.viewportView) {
-      this.viewportView.updateScene(
+      await this.viewportView.transitionScene(
         targetLocation.bgImage,
         targetLocation.hudTitle,
         targetLocation.npc?.name,
-        !!targetLocation.npc
+        !!targetLocation.npc,
+        setupActors
       );
-      this.viewportView.renderHotspots(targetLocation.hotspots);
+    } else {
+      setupActors();
     }
 
     // 4. Limpiar diálogos en curso
@@ -278,6 +364,9 @@ export class ActionDispatcher {
       }
       this.dialogueManager.enqueue(lines);
     }
+
+    // Sincronizar ubicación con el backend de FastAPI
+    this.apiClient.sendAction('VIAJAR', targetLocation.id, undefined, undefined, targetLocation.id).catch(() => {});
   }
 
   public teleportTo(query: string): { success: boolean; message: string; location?: LocationSceneDef } {
@@ -429,7 +518,7 @@ export class ActionDispatcher {
 
   public selectDialogueChoice(choice: 'passport' | 'lore' | 'twin' | 'buy' | 'custom' | 'exit', customText?: string): void {
     if (!this.isInNpcDialogue) return;
-    if (this.isDialogueSpeaking) return;
+    if (this.isDialogueSpeaking || this.dialogueManager.isWaitingBackend) return;
     this.isDialogueSpeaking = true;
     if (this.onDialogueSpeechState) this.onDialogueSpeechState(true);
     this.updateSentence();
@@ -544,7 +633,7 @@ export class ActionDispatcher {
     }
   }
 
-  private handlePassportChoice(): void {
+  private async handlePassportChoice(): Promise<void> {
     const stampKey = this.currentLocation.stampKey;
     const locName = this.currentLocation.name;
     const npcName = this.currentLocation.npc?.name || 'Guía';
@@ -557,38 +646,137 @@ export class ActionDispatcher {
       return;
     }
 
-    const hasStamp = this.stampedZones.has(locName);
-    if (!hasStamp) {
-      this.stampedZones.add(locName);
+    this.isDialogueSpeaking = true;
+    if (this.onDialogueSpeechState) this.onDialogueSpeechState(true);
+
+    this.dialogueManager.enqueue([
+      { speaker: 'twinber', text: "Twinber: '¿Podría sellarme el pasaporte de explorador oficial de Tenerife?'" }
+    ]);
+
+    // Relojito y bloqueo de interfaz mientras el backend procesa
+    this.dialogueManager.startWaitingBackend(
+      'paco',
+      `${npcName}: 'Comprobando el registro de aduanas y sellando el pasaporte... ⏳'`
+    );
+
+    try {
+      const res = await this.apiClient.sendAction(
+        'CONVERSAR',
+        npcName,
+        undefined,
+        `¿Podría sellarme el pasaporte de explorador oficial de Tenerife en ${locName}?`,
+        this.currentLocation.id
+      );
+
+      if (res && res.narrativa) {
+        if (res.estado) {
+          this.syncFullGameState(res.estado);
+        } else if (stampKey && !this.stampedZones.has(stampKey)) {
+          this.stampedZones.add(stampKey);
+          if (this.passportModal) this.passportModal.unlockStamp(stampKey);
+          const count = this.passportModal ? this.passportModal.getUnlockedCount() : this.stampedZones.size;
+          if (this.onStateUpdate) this.onStateUpdate({ passport: `${count}/10` });
+        }
+        this.audioService.playCoin();
+        if (this.onLogMessage) {
+          const count = this.passportModal ? this.passportModal.getUnlockedCount() : this.stampedZones.size;
+          this.onLogMessage(`[PASAPORTE] Sello oficial estampado: '${locName}' [${stampKey}] (${count}/10 sellos)`);
+        }
+        this.dialogueManager.deliverBackendResponse(
+          `${npcName}: '${res.narrativa}'`,
+          'paco'
+        );
+        return;
+      }
+    } catch {
+      // Fallback offline
+    }
+
+    const hasStamp = stampKey ? this.stampedZones.has(stampKey) : false;
+    if (!hasStamp && stampKey) {
+      this.stampedZones.add(stampKey);
       if (this.passportModal) {
         this.passportModal.unlockStamp(stampKey);
       }
       this.audioService.playCoin();
+      const count = this.passportModal ? this.passportModal.getUnlockedCount() : this.stampedZones.size;
       if (this.onStateUpdate) {
-        this.onStateUpdate({ passport: `${this.stampedZones.size}/10` });
+        this.onStateUpdate({ passport: `${count}/10` });
       }
       if (this.onLogMessage) {
-        this.onLogMessage(`[PASAPORTE] Sello oficial estampado: '${locName}' [${stampKey}] (${this.stampedZones.size}/10 sellos oficiales)`);
+        this.onLogMessage(`[PASAPORTE] Sello oficial estampado: '${locName}' [${stampKey}] (${count}/10 sellos oficiales)`);
       }
-      this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber: '¿Podría sellarme el pasaporte de explorador oficial de Tenerife?'" },
-        { speaker: 'paco', text: `${npcName}: '¡Por supuesto! Estampo el sello de ${locName} en tu pasaporte. ¡Ya sumas ${this.stampedZones.size} de los 10 sellos oficiales de la isla!'` }
-      ]);
+      this.dialogueManager.deliverBackendResponse(
+        `${npcName}: '¡Por supuesto! Estampo el sello de ${locName} en tu pasaporte. ¡Ya sumas ${count} de los 10 sellos oficiales de la isla!'`,
+        'paco'
+      );
     } else {
-      this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: "Twinber: '¿Podría sellarme el pasaporte?'" },
-        { speaker: 'paco', text: `${npcName}: '¡Chacho, si ya tienes estampada la marca oficial de ${locName}! Sigue explorando para completar las 10 páginas.'` }
-      ]);
+      this.dialogueManager.deliverBackendResponse(
+        `${npcName}: '¡Chacho, si ya tienes estampada la marca oficial de ${locName}! Sigue explorando para completar las 10 páginas.'`,
+        'paco'
+      );
     }
   }
 
-  private handleLoreChoice(): void {
+  private async handleLoreChoice(): Promise<void> {
     const npc = this.currentLocation.npc;
     const npcName = npc?.name || 'Lugareño';
     const locName = this.currentLocation.name;
 
     if (this.onLogMessage) {
       this.onLogMessage(`[RAG RETRIEVAL // ZONA] Consulta de lore: '${locName}' -> Contexto: TENERIFE.pdf`);
+    }
+
+    this.isDialogueSpeaking = true;
+    if (this.onDialogueSpeechState) this.onDialogueSpeechState(true);
+
+    this.dialogueManager.enqueue([
+      { speaker: 'twinber', text: `Twinber: '¿Qué me puede contar sobre los secretos e historia de ${locName}?'` }
+    ]);
+
+    // Relojito y bloqueo de interfaz mientras el backend consulta el RAG y orquesta la respuesta
+    this.dialogueManager.startWaitingBackend(
+      'paco',
+      `${npcName}: 'Buscando en las crónicas históricas y recuerdos de la isla... ⏳'`
+    );
+
+    try {
+      const res = await this.apiClient.sendAction(
+        'CONVERSAR',
+        npcName,
+        undefined,
+        `¿Qué me puedes contar sobre los secretos, curiosidades e historia de ${locName}?`,
+        this.currentLocation.id
+      );
+
+      if (res && res.narrativa) {
+        if (res.estado) {
+          this.syncFullGameState(res.estado);
+        }
+        if (Array.isArray(res.sfx_to_play)) {
+          res.sfx_to_play.forEach((sfx: string) => {
+            if (sfx === 'sfx_photo') this.audioService.playHint();
+          });
+        }
+        const nuevasFotos = res.fotos_nuevas || res.fotos_desbloqueadas_nuevas;
+        if (Array.isArray(nuevasFotos)) {
+          nuevasFotos.forEach((pid: number) => {
+            if (this.photoAlbumModal) this.photoAlbumModal.unlockPhoto(pid);
+          });
+        }
+        if (this.onStateUpdate) {
+          this.onStateUpdate({
+            photos: `${this.photoAlbumModal?.getUnlockedCount() || 0}/28`
+          });
+        }
+        this.dialogueManager.deliverBackendResponse(
+          `${npcName}: '${res.narrativa}'`,
+          'paco'
+        );
+        return;
+      }
+    } catch {
+      // Fallback offline
     }
 
     let isNewPhoto = false;
@@ -606,17 +794,16 @@ export class ActionDispatcher {
     }
 
     if (isNewPhoto && photoId) {
-      this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: `Twinber: '¿Qué me puede contar sobre los secretos de ${locName}?'` },
-        { speaker: 'paco', text: `${npcName}: 'Tenerife guarda incontables maravillas. Te he dejado una foto testimonial en tu Álbum de Recuerdos.'` },
-        { speaker: 'twinber', text: `Twinber: '¡Foto #${String(photoId).padStart(2, '0')} guardada en mi Álbum de Recuerdos!'` }
-      ]);
+      this.dialogueManager.deliverBackendResponse(
+        `${npcName}: 'Tenerife guarda incontables maravillas. Te he dejado una foto testimonial en tu Álbum de Recuerdos.'`,
+        'paco'
+      );
     } else {
       const lore = npc?.lookText || `Un rincón emblemático del archipiélago canario lleno de encanto, volcanes y tradición.`;
-      this.dialogueManager.enqueue([
-        { speaker: 'twinber', text: `Twinber: '¿Qué me puede contar sobre la historia de ${locName}?'` },
-        { speaker: 'paco', text: `${npcName}: '${lore}'` }
-      ]);
+      this.dialogueManager.deliverBackendResponse(
+        `${npcName}: '${lore}'`,
+        'paco'
+      );
     }
   }
 
@@ -626,6 +813,109 @@ export class ActionDispatcher {
       this.onLogMessage(`[PROMPT ABIERTO AL LLM] Twinber -> ${npcName}: "${userText}"`);
     }
 
+    this.isDialogueSpeaking = true;
+    if (this.onDialogueSpeechState) this.onDialogueSpeechState(true);
+
+    this.dialogueManager.enqueue([
+      { speaker: 'twinber', text: `Twinber: '${userText}'` }
+    ]);
+
+    // Relojito y bloqueo de interfaz mientras el backend orquesta y genera el primer token
+    this.dialogueManager.startWaitingBackend(
+      'paco',
+      `${npcName}: 'Reflexionando y consultando con los sabios de la isla... ⏳'`
+    );
+
+    let fullResponse = '';
+    let receivedAnyToken = false;
+
+    if (this.onLogMessage) {
+      this.onLogMessage(`[SSE STREAMING] Conectando con Orquestador ReAct en '${this.currentLocation.id}'...`);
+    }
+
+    const eventSource = this.apiClient.subscribeToStream(
+      userText,
+      this.currentLocation.id,
+      undefined,
+      (token: string) => {
+        if (!receivedAnyToken) {
+          receivedAnyToken = true;
+          this.dialogueManager.startStreamingLine('paco', `${npcName}: '`);
+        }
+        fullResponse += token;
+        this.dialogueManager.appendStreamToken(token);
+      },
+      (meta: any) => {
+        // Metadatos estructurados del turno recibidos antes de [DONE]
+        if (meta.estado) {
+          this.syncFullGameState(meta.estado);
+        }
+        if (meta.sfx_to_play && Array.isArray(meta.sfx_to_play)) {
+          meta.sfx_to_play.forEach((sfx: string) => {
+            if (sfx === 'sfx_coin' || sfx === 'sfx_stamp') this.audioService.playCoin();
+            else if (sfx === 'sfx_photo') this.audioService.playHint();
+          });
+        }
+
+        const fotosNuevas = meta.fotos_nuevas || meta.fotos_desbloqueadas_nuevas;
+        if (Array.isArray(fotosNuevas)) {
+          fotosNuevas.forEach((pid: number) => {
+            if (this.photoAlbumModal) this.photoAlbumModal.unlockPhoto(pid);
+          });
+        }
+
+        const sellosNuevos = meta.sellos_nuevos || meta.sellos_obtenidos_nuevos;
+        if (Array.isArray(sellosNuevos)) {
+          sellosNuevos.forEach((s: string) => {
+            this.stampedZones.add(s);
+            if (this.passportModal) this.passportModal.unlockStamp(s);
+          });
+        }
+
+        if (meta.estado && meta.estado.monedas_oro !== undefined) {
+          this.coins = meta.estado.monedas_oro;
+        }
+
+        if (this.onStateUpdate) {
+          this.onStateUpdate({
+            coins: this.coins,
+            passport: `${this.stampedZones.size}/10`,
+            photos: `${this.photoAlbumModal?.getUnlockedCount() || 0}/28`
+          });
+        }
+      },
+      () => {
+        // onComplete
+        if (receivedAnyToken) {
+          this.dialogueManager.appendStreamToken("'");
+          this.dialogueManager.finishStreamingLine();
+          if (this.onLogMessage) {
+            this.onLogMessage(`[SSE STREAMING] Respuesta completada (${fullResponse.length} caracteres).`);
+          }
+        } else {
+          this.fallbackOffline(userText, npcName);
+        }
+      },
+      () => {
+        console.warn('[SSE STREAMING] Error en stream');
+        if (!receivedAnyToken) {
+          if (this.onLogMessage) {
+            this.onLogMessage(`[SSE OFFLINE] Backend no disponible, usando motor heurístico local.`);
+          }
+          this.fallbackOffline(userText, npcName);
+        } else {
+          this.dialogueManager.appendStreamToken("'");
+          this.dialogueManager.finishStreamingLine();
+        }
+      }
+    );
+
+    if (!eventSource) {
+      this.fallbackOffline(userText, npcName);
+    }
+  }
+
+  private fallbackOffline(userText: string, npcName: string): void {
     const lower = userText.toLowerCase();
     let reply = `${npcName}: '¡Chacho, qué buena pregunta! En Tenerife cada rincón guarda una leyenda. ¡Sigue explorando la isla!'`;
 
@@ -643,10 +933,7 @@ export class ActionDispatcher {
       reply = `${npcName}: '¡Muy buenas, muchacho! Siempre da alegría ver viajeros con ganas de conocer nuestra tierra.'`;
     }
 
-    this.dialogueManager.enqueue([
-      { speaker: 'twinber', text: `Twinber: '${userText}'` },
-      { speaker: 'paco', text: reply }
-    ]);
+    this.dialogueManager.deliverBackendResponse(reply, 'paco');
   }
 
   private handleExitChoice(): void {
@@ -663,11 +950,14 @@ export class ActionDispatcher {
       this.endNpcDialogue();
       return;
     }
+    if (this.dialogueManager.isWaitingBackend) {
+      return;
+    }
+    this.isDialogueSpeaking = false;
+    if (this.onDialogueSpeechState) {
+      this.onDialogueSpeechState(false);
+    }
     if (this.isInNpcDialogue) {
-      this.isDialogueSpeaking = false;
-      if (this.onDialogueSpeechState) {
-        this.onDialogueSpeechState(false);
-      }
       this.updateSentence();
     }
   }

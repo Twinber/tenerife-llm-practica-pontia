@@ -16,7 +16,7 @@ from openai import OpenAI
 
 from src.domain.guardrail_models import GuardrailDecision
 from src.domain.rag_models import RespuestaCodiceRAG, ResultadoBusquedaRAG
-from src.domain.state_models import GameState, TurnResult
+from src.domain.state_models import GameState, TurnResult, OFFICIAL_ENCLAVE_STAMPS, is_passport_stamp_request
 from src.infrastructure.audit_logger import AuditLogger
 from src.infrastructure.config import Settings, get_settings
 from src.application.guardrails import BouncerGuardrail
@@ -39,6 +39,33 @@ REGLAS DE ORO DE GROUNDING Y CITAS (OBLIGATORIAS):
 4. Cuando el jugador pregunte sobre la calidad del cielo nocturno o estrellas en el Teide, DEBES invocar 'get_starlight_conditions'.
 5. Cuando el jugador pregunte sobre polvo sahariano, calima o visibilidad, DEBES invocar 'get_calima_alert'.
 6. Si recibes una imagen visual (el escenario pixel-art o una foto del álbum), obsérvala detenidamente, deduce el enclave y utiliza 'search_guide' para enriquecer tu descripción con hechos históricos de la guía.
+
+REGLAS ESPECÍFICAS DE PERSONAJES Y PASAPORTE DE EXPLORADOR (ESTRICTAMENTE OBLIGATORIAS):
+1. AUTORIDAD LOCAL DE CADA ENCLAVE:
+   El personaje (NPC) presente ante Twinber es la máxima autoridad del lugar y el custodio que porta el cuño oficial de su enclave:
+   - Puerto de la Cruz: Paco el Pescador (Aduana Marítima).
+   - La Orotava: Chano el Molinero (Molinos de Gofio).
+   - Santa Úrsula: Manolo el Tabernero (¡Atención! Es un guachinche de comida tradicional, NO tiene cuño aduanero oficial).
+   - Icod de los Vinos: Don Cándido el Bodeguero (Sabio botánico y guardián del Drago Milenario).
+   - Garachico: Doña Nieves (Artesana y guardiana de El Caletón).
+   - San Cristóbal de La Laguna: Profesora Herminia (UNESCO / Universidad).
+   - Santa Cruz de Tenerife: Oficial Morales (Autoridad Portuaria).
+   - Anaga: Yeray el Guarda Forestal (Reserva de la Biosfera).
+   - Costa Adeje: Ayoze el Socorrista (Litoral Sur).
+   - Masca / Los Gigantes: Tanausú el Guía de Montaña (Barranco de Masca).
+   - El Médano: El Frutero Canario (Bahía de Montaña Roja).
+   - Las Cañadas del Teide: Operario del Teleférico (Base del volcán).
+   - Pico del Teide: Guardián del Teide (Cumbre a 3.718m).
+
+2. PROTOCOLO DE SELLADO DEL PASAPORTE:
+   Cuando el jugador pida sellar su pasaporte de explorador (o mencione sellos, cuños o visar pasaporte):
+   - SI EL ENCLAVE ES SELLABLE Y EL SELLO ESTÁ PENDIENTE:
+     El personaje DEBE ACEPTAR DE INMEDIATO con entusiasmo y orgullo isleño. Saca su almohadilla de tinta y cuño oficial, y estampa solemnemente el sello en el pasaporte de Twinber (*¡CLAC! ¡Sello oficial estampado!*).
+     ¡BAJO NINGÚN CONCEPTO envíes al jugador a otro lugar, ni a un centro de visitantes, ni a un museo, ni a una oficina de turismo! El personaje QUE TIENE DELANTE es el custodio oficial y lo estampa en ese mismo instante.
+   - SI EL SELLO YA HABÍA SIDO ESTAMPADO PREVIAMENTE:
+     El personaje examina el pasaporte con simpatía y le recuerda con humor canario que la marca oficial de este enclave ya luce en sus páginas, animándole a viajar a los demás pueblos para reunir los 10 sellos.
+   - SI ESTÁ EN SANTA ÚRSULA (GUACHINCHE):
+     Manolo el Tabernero suelta una carcajada afable y explica que esto es un guachinche de vino del país y carne fiesta, no una oficina del Cabildo. Aclara que allí se sella el apetito y que busque los sellos oficiales en las villas y enclaves patrimoniales.
 """
 
 
@@ -115,6 +142,18 @@ class AgentOrchestrator:
         """Convierte una imagen en disco local a una Data URL Base64 para OpenAI Vision API."""
         p = Path(image_path)
         if not p.exists() or not p.is_file():
+            # Intentar resolver mediante rutas relativas al frontend
+            candidates = [
+                Path("frontend/public") / image_path.lstrip("/"),
+                Path("frontend/public/assets") / image_path.replace("assets/", "").lstrip("/"),
+                Path(image_path.lstrip("/"))
+            ]
+            for cand in candidates:
+                if cand.exists() and cand.is_file():
+                    p = cand
+                    break
+
+        if not p.exists() or not p.is_file():
             logger.warning("Ruta de imagen no encontrada para visión: '%s'", image_path)
             return None
 
@@ -144,7 +183,10 @@ class AgentOrchestrator:
         state = game_state.model_copy(deep=True) if game_state else GameState()
 
         # 1. EVALUACIÓN DE GUARDRAIL BOUNCER
-        guardrail_decision: GuardrailDecision = self.guardrail.evaluate(user_input)
+        guardrail_decision: GuardrailDecision = self.guardrail.evaluate(
+            user_input,
+            has_image=bool(image_path)
+        )
 
         if not guardrail_decision.es_valido:
             # Entrada rechazada por off-topic o prompt injection
@@ -281,12 +323,17 @@ class AgentOrchestrator:
             narrativa_final = "Twinber observa la escena mientras reflexiona sobre el siguiente paso en la isla."
 
         # 4. MUTACIONES DETERMINISTAS DEL ESTADO DE JUEGO (GAMESTATE)
-        # Sello del enclave actual si no lo tiene aún
+        # Sello del enclave actual: ÚNICAMENTE si el jugador solicitó sellar el pasaporte
         loc_actual = state.ubicacion_actual
-        if loc_actual not in state.sellos_obtenidos and loc_actual not in sellos_desbloqueados_en_turno:
-            state.sellos_obtenidos.append(loc_actual)
-            sellos_desbloqueados_en_turno.append(loc_actual)
-            sfx_list.append("sfx_stamp")
+        if is_passport_stamp_request(user_input):
+            stamp_info = OFFICIAL_ENCLAVE_STAMPS.get(loc_actual)
+            if stamp_info and stamp_info.get("stampable"):
+                stamp_key = stamp_info.get("stamp_key")
+                if stamp_key and stamp_key not in state.sellos_obtenidos and stamp_key not in sellos_desbloqueados_en_turno:
+                    state.sellos_obtenidos.append(stamp_key)
+                    sellos_desbloqueados_en_turno.append(stamp_key)
+                    if "sfx_stamp" not in sfx_list:
+                        sfx_list.append("sfx_stamp")
 
         # Fotos recién desbloqueadas
         for f_id in fotos_desbloqueadas_en_turno:

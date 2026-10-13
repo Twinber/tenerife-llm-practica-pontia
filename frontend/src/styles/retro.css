@@ -244,9 +244,53 @@ html, body {
   cursor: default;
 }
 
+.dialogue-continue-btn.waiting {
+  background: #3a2000;
+  border: 1px solid #ffaa00;
+  color: #ffcc00;
+  cursor: wait;
+  pointer-events: none;
+  animation: pulseWaitingBtn 1.2s infinite ease-in-out;
+}
+
+@keyframes pulseWaitingBtn {
+  0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 2px rgba(255, 170, 0, 0.4)); }
+  50% { opacity: 1; filter: drop-shadow(0 0 6px rgba(255, 170, 0, 0.8)); }
+}
+
+.dialogue-clock-icon {
+  display: inline-block;
+  animation: retroClockSpin 1.6s infinite steps(8);
+  margin-right: 4px;
+}
+
+@keyframes retroClockSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Cortinilla de Transición entre Enclaves (LucasArts Scene Transition) */
+.scene-fade-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 45;
+  transition: opacity 0.22s ease-in-out;
+}
+
+.scene-fade-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
 @keyframes blinkContinueBtn {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(0.97); }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
 }
 
 /* 2. BARRA DE ACCIÓN CONTEXTUAL Y DIÁLOGOS (Ultra-limpia: máxima visibilidad del escenario) */

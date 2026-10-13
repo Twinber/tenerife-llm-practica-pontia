@@ -28,6 +28,7 @@ export class PhotoAlbumModal {
   private currentPhotoIndex: number = 0; // 0 a 36 (37 fotos)
 
   public onPhotoUnlocked?: (unlockedCount: number, total: number) => void;
+  public onInspectVlm?: (photo: PhotoEntry, resultBox: HTMLElement, btnInspect: HTMLButtonElement) => void;
 
   constructor(audioService: AudioService) {
     this.audioService = audioService;
@@ -149,8 +150,25 @@ export class PhotoAlbumModal {
             <span class="caption-enclave">📍 ${item.enclave}</span>
           </div>
           <p class="caption-text">${item.quote}</p>
+          <div class="vlm-action-bar" style="margin-top: 8px;">
+            <button type="button" class="btn-inspect-vlm" id="btn-inspect-vlm" style="background:#003366; color:#00e5ff; border:1px solid #00e5ff; font-family:'Press Start 2P', monospace; font-size:9px; padding:6px 10px; cursor:pointer; border-radius:3px;">
+              🔍 EXAMINAR CON LUPA (VISIÓN VLM)
+            </button>
+          </div>
+          <div class="vlm-result-box hidden" id="vlm-result-box" style="margin-top:8px; padding:8px; background:#001122; border:1px dashed #00e5ff; font-size:10px; color:#e0e0e0; line-height:1.4; max-height:100px; overflow-y:auto;"></div>
         </div>
       `;
+
+      const btnInspect = singleContainer.querySelector('#btn-inspect-vlm') as HTMLButtonElement;
+      const resultBox = singleContainer.querySelector('#vlm-result-box') as HTMLElement;
+      if (btnInspect) {
+        btnInspect.addEventListener('click', () => {
+          this.audioService.playClick();
+          if (this.onInspectVlm) {
+            this.onInspectVlm(item, resultBox, btnInspect);
+          }
+        });
+      }
     } else {
       singleContainer.innerHTML = `
         <div class="full-photo-frame locked-full-frame">

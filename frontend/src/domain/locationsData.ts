@@ -747,6 +747,7 @@ export const LOCATIONS_CATALOG: LocationSceneDef[] = [
     zone: 'Cumbre',
     hudTitle: '🌋 LAS CAÑADAS DEL TEIDE // ROQUES DE GARCÍA (2.356m)',
     bgImage: '/assets/img/bg_las_canadas.jpg',
+    stampKey: 'el_teide',
     mapCoords: { x: 470, y: 345 },
     npc: {
       id: 'operario',

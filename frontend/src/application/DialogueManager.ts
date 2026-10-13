@@ -1,7 +1,7 @@
 // ==============================================================================
 // APPLICATION: Gestor de Diálogos, Colas de Subtítulos y Streaming
 // ==============================================================================
-import { DialogueLine } from '../domain/types';
+import { DialogueLine, SpeakerType } from '../domain/types';
 import { AudioService } from '../infrastructure/AudioService';
 
 export class DialogueManager {
@@ -9,6 +9,14 @@ export class DialogueManager {
   public currentLine: DialogueLine | null = null;
   public displayedText: string = '';
   public isFullyTyped: boolean = false;
+  public isStreaming: boolean = false;
+  
+  // Estado de espera del backend ("Relojito / Loading")
+  public isWaitingBackend: boolean = false;
+  public waitingMessage: string = '';
+  public waitingSpeaker: SpeakerType = 'paco';
+  private waitingDotsTimer: number = 0;
+
   private charTimer: number = 0;
   private audioService: AudioService;
   
@@ -17,6 +25,58 @@ export class DialogueManager {
 
   constructor(audioService: AudioService) {
     this.audioService = audioService;
+  }
+
+  public startStreamingLine(speaker: SpeakerType, initialPrefix: string = ''): void {
+    this.isStreaming = true;
+    this.isWaitingBackend = false;
+    this.currentLine = { speaker, text: initialPrefix };
+    this.displayedText = initialPrefix;
+    this.isFullyTyped = false;
+    if (this.onSpeakerChange) this.onSpeakerChange(speaker);
+  }
+
+  public appendStreamToken(token: string): void {
+    if (this.currentLine) {
+      this.currentLine.text += token;
+      this.displayedText = this.currentLine.text;
+      if (Math.random() < 0.35) {
+        this.audioService.playTalk();
+      }
+    }
+  }
+
+  public finishStreamingLine(): void {
+    this.isStreaming = false;
+    this.isFullyTyped = true;
+  }
+
+  public startWaitingBackend(speaker: SpeakerType, message: string): void {
+    this.isWaitingBackend = true;
+    this.waitingSpeaker = speaker;
+    this.waitingMessage = message;
+    this.waitingDotsTimer = 0;
+  }
+
+  public deliverBackendResponse(text: string, speaker: SpeakerType = 'paco'): void {
+    this.isWaitingBackend = false;
+    // Si la línea activa era la de espera ("relojito") o ya no hay línea en pantalla:
+    if (this.currentLine && this.currentLine.speaker === this.waitingSpeaker && this.currentLine.text.includes('⏳')) {
+      this.currentLine = { speaker, text };
+      this.displayedText = '';
+      this.isFullyTyped = false;
+      this.charTimer = 0;
+      if (this.onSpeakerChange) this.onSpeakerChange(speaker);
+    } else if (!this.currentLine) {
+      this.currentLine = { speaker, text };
+      this.displayedText = '';
+      this.isFullyTyped = false;
+      this.charTimer = 0;
+      if (this.onSpeakerChange) this.onSpeakerChange(speaker);
+    } else {
+      // Twinber aún está diciendo su frase: se encola detrás
+      this.queue.push({ speaker, text });
+    }
   }
 
   public enqueue(lines: DialogueLine[]): void {
@@ -28,6 +88,11 @@ export class DialogueManager {
 
   public advanceOrSkip(): void {
     if (!this.currentLine) return;
+    if (this.isStreaming) return; // No interrumpir mientras se reciben tokens de la red
+    if (this.isWaitingBackend && this.currentLine.text.includes('⏳')) {
+      // Si estamos esperando al backend con el relojito, no avanzar hasta recibir respuesta
+      return;
+    }
     if (!this.isFullyTyped) {
       // Si el texto aún se está escribiendo, completarlo de inmediato
       this.displayedText = this.currentLine.text;
@@ -44,11 +109,25 @@ export class DialogueManager {
     this.currentLine = null;
     this.displayedText = '';
     this.isFullyTyped = false;
+    this.isStreaming = false;
+    this.isWaitingBackend = false;
     if (this.onSpeakerChange) this.onSpeakerChange(null);
   }
 
   private playNext(): void {
     if (this.queue.length === 0) {
+      // Si la cola se vació pero el backend aún está procesando, mostrar línea de espera con relojito
+      if (this.isWaitingBackend) {
+        this.currentLine = {
+          speaker: this.waitingSpeaker,
+          text: this.waitingMessage || 'Consultando el códice y analizando la isla... ⏳'
+        };
+        this.displayedText = this.currentLine.text;
+        this.isFullyTyped = false;
+        if (this.onSpeakerChange) this.onSpeakerChange(this.waitingSpeaker);
+        return;
+      }
+
       this.currentLine = null;
       this.displayedText = '';
       this.isFullyTyped = false;
@@ -66,6 +145,17 @@ export class DialogueManager {
 
   public update(): void {
     if (!this.currentLine) return;
+    if (this.isStreaming) return;
+
+    // Animación de puntos del relojito de espera
+    if (this.isWaitingBackend && this.currentLine.text.includes('⏳')) {
+      this.waitingDotsTimer++;
+      const base = this.waitingMessage.replace(/[\.⏳\s]+$/, '');
+      const dots = ['.', '..', '...'][Math.floor(this.waitingDotsTimer / 18) % 3];
+      this.currentLine.text = `${base} ${dots} ⏳`;
+      this.displayedText = this.currentLine.text;
+      return;
+    }
 
     // Efecto teletipo letra por letra
     if (!this.isFullyTyped) {
@@ -81,7 +171,5 @@ export class DialogueManager {
         this.isFullyTyped = true;
       }
     }
-    // NOTA: Se ha eliminado el timer automático. El texto espera indefinidamente
-    // a que el jugador pulse [CONTINUAR], haga clic o pulse Espacio/Enter.
   }
 }

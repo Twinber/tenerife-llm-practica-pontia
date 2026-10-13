@@ -131,7 +131,7 @@ export class ScummDockView {
     };
 
     this.actionDispatcher.onDialogueSpeechState = (isSpeaking: boolean) => {
-      if (isSpeaking) {
+      if (isSpeaking || this.actionDispatcher.isWaitingBackend) {
         this.dockDialogue.classList.add('dialogue-speaking');
       } else {
         if (this.actionDispatcher.isInNpcDialogue) {
@@ -198,7 +198,7 @@ export class ScummDockView {
     // Botones de Opciones de Diálogo
     document.querySelectorAll<HTMLButtonElement>('.dialogue-choice-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        if (this.actionDispatcher.isDialogueSpeaking) return;
+        if (this.actionDispatcher.isDialogueSpeaking || this.actionDispatcher.isWaitingBackend) return;
         const choice = btn.dataset.choice as 'passport' | 'lore' | 'twin' | 'buy' | 'exit';
         if (choice) {
           this.audioService.playClick();
@@ -211,7 +211,7 @@ export class ScummDockView {
     if (this.dialogueFreeForm) {
       this.dialogueFreeForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        if (this.actionDispatcher.isDialogueSpeaking) return;
+        if (this.actionDispatcher.isDialogueSpeaking || this.actionDispatcher.isWaitingBackend) return;
         const text = this.dialogueFreeInput.value.trim();
         if (text) {
           this.audioService.playClick();
@@ -223,7 +223,7 @@ export class ScummDockView {
     // Teclas de acceso rápido en modo Diálogo (Mapeo dinámico 1, 2, 3, 4, 5, 6 y Escape)
     window.addEventListener('keydown', (e) => {
       if (!this.actionDispatcher.isInNpcDialogue) return;
-      if (this.actionDispatcher.isDialogueSpeaking) return;
+      if (this.actionDispatcher.isDialogueSpeaking || this.actionDispatcher.isWaitingBackend) return;
 
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
