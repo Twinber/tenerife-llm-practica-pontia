@@ -235,7 +235,7 @@ class ConversationMemoryManager:
                 f"- Situación del sello de este enclave: {estado_sello_enclave}\n"
                 f"- Monedas de oro: {game_state.monedas_oro} / 15\n"
                 f"- Sellos visados en pasaporte ({len(game_state.sellos_obtenidos)}/10 oficiales): {', '.join(game_state.sellos_obtenidos) or 'Ninguno aún'}\n"
-                f"- Fotos desbloqueadas en álbum ({len(game_state.fotos_desbloqueadas)}/28): {game_state.fotos_desbloqueadas}\n"
+                f"- Fotos desbloqueadas en álbum ({len(game_state.fotos_desbloqueadas)}/37): {game_state.fotos_desbloqueadas}\n"
                 f"- Turnos jugados: {game_state.turnos_jugados}\n"
                 f"========================================================"
             )

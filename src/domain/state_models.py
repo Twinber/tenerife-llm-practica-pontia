@@ -161,7 +161,7 @@ class GameState(BaseModel):
     )
     fotos_desbloqueadas: list[int] = Field(
         default_factory=list,
-        description="Lista de identificadores de fotos coleccionadas en el álbum (1 a 28)"
+        description="Lista de identificadores de fotos coleccionadas en el álbum (1 a 37)"
     )
     inventario: list[InventoryItem] = Field(
         default_factory=list,
@@ -181,6 +181,30 @@ class GameState(BaseModel):
     def tiene_item(self, item_id: str) -> bool:
         """Comprueba si Twinber porta un determinado objeto en su inventario."""
         return any(item.id == item_id for item in self.inventario)
+
+
+class ExecutionStep(BaseModel):
+    """
+    Representa un paso secuencial de la traza de ejecución del agente (ReAct / RAG / Tools).
+    Permite auditar e inspeccionar en la interfaz cada fase del razonamiento del modelo.
+    """
+    id: str = Field(..., description="Identificador único del paso (ej: 'step-1')")
+    tipo: Literal[
+        "GUARDRAIL",
+        "PENSAMIENTO",
+        "TOOL_CALL",
+        "TOOL_RESULT",
+        "RAG_CODICE",
+        "VLM_VISION",
+        "MUTACION_ESTADO",
+        "NARRATIVA_FINAL"
+    ] = Field(..., description="Categoría semántica del paso de ejecución agéntica")
+    titulo: str = Field(..., description="Título visible (ej: 'Invocación Tool: search_guide')")
+    icono: str = Field(default="🔧", description="Emoji distintivo para el frontend")
+    color: str = Field(default="#00e5ff", description="Color temático para la píldora UI")
+    contenido: str = Field(..., description="Descripción o resumen textual del paso")
+    detalles: Optional[dict[str, Any]] = Field(default=None, description="Metadatos estructurados o argumentos JSON")
+    latencia_ms: Optional[float] = Field(default=None, description="Tiempo de cómputo en milisegundos")
 
 
 class TurnResult(BaseModel):
@@ -206,4 +230,8 @@ class TurnResult(BaseModel):
     sfx_to_play: list[str] = Field(
         default_factory=list,
         description="Efectos de sonido retro a reproducir en el cliente (sfx_stamp, sfx_photo, etc.)"
+    )
+    pasos_ejecucion: list[ExecutionStep] = Field(
+        default_factory=list,
+        description="Traza secuencial de pasos de ejecución agéntica (Guardrail, Tools, RAG, GameState)"
     )

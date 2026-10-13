@@ -7,6 +7,7 @@ Cumple con las exigencias de la Sesión 02 (Streaming de Tokens) y Criterio 7.2 
 import asyncio
 import json
 import logging
+import threading
 from pathlib import Path
 from typing import Any, AsyncGenerator, Optional
 
@@ -19,7 +20,7 @@ from pydantic import BaseModel, Field
 from src.application.agent_orchestrator import AgentOrchestrator
 from src.domain.audit_models import AuditEvent
 from src.domain.memory_models import ConversationMemorySnapshot
-from src.domain.state_models import GameState, InventoryItem, TurnResult
+from src.domain.state_models import GameState, InventoryItem, TurnResult, ExecutionStep
 from src.infrastructure.config import get_settings
 
 logger = logging.getLogger(__name__)
@@ -174,37 +175,67 @@ async def stream_action(
 ) -> StreamingResponse:
     """
     Endpoint de streaming en tiempo real mediante Server-Sent Events (SSE).
-    Envía los tokens narrativos progresivamente conforme se generan en el LLM.
+    Envía los eventos agénticos ([STEP]) conforme se ejecutan en el bucle ReAct,
+    seguidos de los tokens de la narrativa final y metadatos de sincronización ([META]).
     """
     if ubicacion and ubicacion != session.state.ubicacion_actual:
         session.state.ubicacion_actual = ubicacion
 
     async def sse_generator() -> AsyncGenerator[str, None]:
-        loop = asyncio.get_event_loop()
-        turn_result = await loop.run_in_executor(
-            None,
-            lambda: session.orchestrator.process_turn(
-                user_input=texto,
-                game_state=session.state,
-                image_path=image_path
-            )
-        )
+        loop = asyncio.get_running_loop()
+        queue: asyncio.Queue[tuple[str, Any]] = asyncio.Queue()
 
-        session.state = turn_result.estado
-        palabras = turn_result.narrativa.split(" ")
+        def on_step_callback(step: ExecutionStep) -> None:
+            loop.call_soon_threadsafe(queue.put_nowait, ("STEP", step))
 
-        for palabra in palabras:
-            yield f"data: {palabra} \n\n"
-            await asyncio.sleep(0.02)
-        # Evento de metadatos estructurados del turno (sellos, fotos, sfx, estado)
-        meta = {
-            "type": "turn_metadata",
-            "fotos_nuevas": turn_result.fotos_nuevas,
-            "sellos_nuevos": turn_result.sellos_nuevos,
-            "sfx_to_play": turn_result.sfx_to_play,
-            "estado": turn_result.estado.model_dump()
-        }
-        yield f"data: [META]{json.dumps(meta)}\n\n"
+        def run_sync_turn() -> None:
+            try:
+                turn_res = session.orchestrator.process_turn(
+                    user_input=texto,
+                    game_state=session.state,
+                    image_path=image_path,
+                    on_step=on_step_callback
+                )
+                loop.call_soon_threadsafe(queue.put_nowait, ("DONE_RESULT", turn_res))
+            except Exception as exc:
+                logger.exception("Error en ejecución agéntica SSE: %s", exc)
+                loop.call_soon_threadsafe(queue.put_nowait, ("ERROR", str(exc)))
+
+        worker_thread = threading.Thread(target=run_sync_turn, daemon=True)
+        worker_thread.start()
+
+        turn_result: Optional[TurnResult] = None
+        while True:
+            evt_type, payload = await queue.get()
+            if evt_type == "STEP":
+                step_obj: ExecutionStep = payload
+                yield f"data: [STEP]{step_obj.model_dump_json()}\n\n"
+            elif evt_type == "DONE_RESULT":
+                turn_result = payload
+                break
+            elif evt_type == "ERROR":
+                yield f"data: [ERROR]{payload}\n\n"
+                yield "data: [DONE]\n\n"
+                return
+
+        if turn_result:
+            session.state = turn_result.estado
+            palabras = turn_result.narrativa.split(" ")
+
+            for palabra in palabras:
+                yield f"data: {palabra} \n\n"
+                await asyncio.sleep(0.018)
+
+            # Evento de metadatos estructurados del turno (sellos, fotos, sfx, estado, pasos_ejecucion)
+            meta = {
+                "type": "turn_metadata",
+                "fotos_nuevas": turn_result.fotos_nuevas,
+                "sellos_nuevos": turn_result.sellos_nuevos,
+                "sfx_to_play": turn_result.sfx_to_play,
+                "pasos_ejecucion": [p.model_dump() for p in turn_result.pasos_ejecucion],
+                "estado": turn_result.estado.model_dump()
+            }
+            yield f"data: [META]{json.dumps(meta)}\n\n"
 
         # Evento de finalización SSE
         yield "data: [DONE]\n\n"

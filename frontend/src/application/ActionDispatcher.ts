@@ -1,7 +1,7 @@
 // ==============================================================================
 // APPLICATION: Orquestador de Acciones SCUMM (Verbos, Hotspots e Inventario)
 // ==============================================================================
-import { VerbType } from '../domain/types';
+import { VerbType, SpeakerType, ExecutionStep } from '../domain/types';
 import { Actor } from '../domain/Actor';
 import { DialogueManager } from './DialogueManager';
 import { AudioService } from '../infrastructure/AudioService';
@@ -98,9 +98,15 @@ export class ActionDispatcher {
       this.onStateUpdate({
         coins: this.coins,
         passport: `${this.stampedZones.size}/10`,
-        photos: `${this.photoAlbumModal?.getUnlockedCount() || 0}/28`
+        photos: this.getPhotosBadgeText()
       });
     }
+  }
+
+  public getPhotosBadgeText(): string {
+    const unlocked = this.photoAlbumModal?.getUnlockedCount() || 0;
+    const total = this.photoAlbumModal?.getTotalCount() || 37;
+    return `${unlocked}/${total}`;
   }
 
   public async syncWithBackend(): Promise<void> {
@@ -117,7 +123,7 @@ export class ActionDispatcher {
     }
   }
 
-  public async inspectVisualContext(imagePath: string, promptText?: string): Promise<string> {
+  public async inspectVisualContextDetail(imagePath: string, promptText?: string): Promise<{ narrativa: string; pasos_ejecucion?: any[] }> {
     const locName = this.currentLocation.name;
     if (this.onLogMessage) {
       this.onLogMessage(`[VLM VISION] Inspeccionando visualmente '${imagePath}'...`);
@@ -137,12 +143,19 @@ export class ActionDispatcher {
         if (this.onLogMessage) {
           this.onLogMessage(`[VLM VISION] Deducción visual completada por el agente.`);
         }
-        return res.narrativa;
+        return { narrativa: res.narrativa, pasos_ejecucion: res.pasos_ejecucion };
       }
     } catch (err) {
       console.warn('[VLM VISION] Error inspeccionando imagen:', err);
     }
-    return `Observando con atención el paisaje, reconozco la arquitectura y elementos característicos de ${locName}.`;
+    return {
+      narrativa: `Observando con atención el paisaje, reconozco la arquitectura y elementos característicos de ${locName}.`
+    };
+  }
+
+  public async inspectVisualContext(imagePath: string, promptText?: string): Promise<string> {
+    const detail = await this.inspectVisualContextDetail(imagePath, promptText);
+    return detail.narrativa;
   }
 
   public acquireItem(name: string, icon: string, count: number = 1): void {
@@ -435,8 +448,7 @@ export class ActionDispatcher {
       unlockedPhoto = this.photoAlbumModal.unlockPhoto(hotspot.photoId);
       if (unlockedPhoto) {
         this.audioService.playHint();
-        const count = this.photoAlbumModal.getUnlockedCount();
-        if (this.onStateUpdate) this.onStateUpdate({ photos: `${count}/28` });
+        if (this.onStateUpdate) this.onStateUpdate({ photos: this.getPhotosBadgeText() });
         if (this.onLogMessage) {
           this.onLogMessage(`[RAG RETRIEVAL] Foto #${String(hotspot.photoId).padStart(2, '0')} desbloqueada al mirar '${hotspot.name}' (${this.currentLocation.name})`);
         }
@@ -633,6 +645,94 @@ export class ActionDispatcher {
     }
   }
 
+  public async executeStreamingTurn(
+    promptText: string,
+    speaker: SpeakerType = 'paco',
+    npcPrefix: string = '',
+    imagePath?: string
+  ): Promise<void> {
+    this.isDialogueSpeaking = true;
+    if (this.onDialogueSpeechState) this.onDialogueSpeechState(true);
+
+    const waitingMsg = speaker === 'twinber'
+      ? "Twinber: 'Consultando códice insular y analizando en tiempo real... ⏳'"
+      : `${npcPrefix}: 'Buscando en las crónicas históricas de la isla... ⏳'`;
+
+    this.dialogueManager.startLiveAgentTurn(speaker, waitingMsg);
+
+    let receivedFirstToken = false;
+    let fullResponse = '';
+
+    await new Promise<void>((resolve) => {
+      this.apiClient.subscribeToStream(
+        promptText,
+        this.currentLocation.id,
+        imagePath,
+        (token: string) => {
+          if (!receivedFirstToken) {
+            receivedFirstToken = true;
+            const prefix = npcPrefix ? `${npcPrefix}: '` : (speaker === 'twinber' ? "Twinber: '" : "");
+            this.dialogueManager.beginLiveTokens(speaker, prefix);
+          }
+          fullResponse += token;
+          this.dialogueManager.appendStreamToken(token);
+        },
+        (meta: any) => {
+          if (meta.estado) {
+            this.syncFullGameState(meta.estado);
+          }
+          if (meta.sfx_to_play && Array.isArray(meta.sfx_to_play)) {
+            meta.sfx_to_play.forEach((sfx: string) => {
+              if (sfx === 'sfx_coin' || sfx === 'sfx_stamp') this.audioService.playCoin();
+              else if (sfx === 'sfx_photo') this.audioService.playHint();
+            });
+          }
+          const fotosNuevas = meta.fotos_nuevas || meta.fotos_desbloqueadas_nuevas;
+          if (Array.isArray(fotosNuevas) && this.photoAlbumModal) {
+            fotosNuevas.forEach((pid: number) => this.photoAlbumModal!.unlockPhoto(pid));
+          }
+          const sellosNuevos = meta.sellos_nuevos || meta.sellos_obtenidos_nuevos;
+          if (Array.isArray(sellosNuevos)) {
+            sellosNuevos.forEach((s: string) => {
+              this.stampedZones.add(s);
+              if (this.passportModal) this.passportModal.unlockStamp(s);
+            });
+          }
+          if (meta.estado && meta.estado.monedas_oro !== undefined) {
+            this.coins = meta.estado.monedas_oro;
+          }
+          if (this.onStateUpdate) {
+            this.onStateUpdate({
+              coins: this.coins,
+              passport: `${this.stampedZones.size}/10`,
+              photos: this.getPhotosBadgeText()
+            });
+          }
+        },
+        (step: ExecutionStep) => {
+          this.dialogueManager.addLiveExecutionStep(step);
+          if (this.onLogMessage) {
+            this.onLogMessage(`[AGENTE LIVE] ${step.icono} ${step.titulo}: ${step.contenido}`);
+          }
+        },
+        () => {
+          if (receivedFirstToken && npcPrefix && !fullResponse.trim().endsWith("'")) {
+            this.dialogueManager.appendStreamToken("'");
+          }
+          this.dialogueManager.finishLiveAgentTurn();
+          resolve();
+        },
+        () => {
+          if (!receivedFirstToken) {
+            this.fallbackOffline(promptText, npcPrefix || 'Paco el Pescador');
+          }
+          this.dialogueManager.finishLiveAgentTurn();
+          resolve();
+        }
+      );
+    });
+  }
+
   private async handlePassportChoice(): Promise<void> {
     const stampKey = this.currentLocation.stampKey;
     const locName = this.currentLocation.name;
@@ -646,165 +746,34 @@ export class ActionDispatcher {
       return;
     }
 
-    this.isDialogueSpeaking = true;
-    if (this.onDialogueSpeechState) this.onDialogueSpeechState(true);
-
     this.dialogueManager.enqueue([
       { speaker: 'twinber', text: "Twinber: '¿Podría sellarme el pasaporte de explorador oficial de Tenerife?'" }
     ]);
 
-    // Relojito y bloqueo de interfaz mientras el backend procesa
-    this.dialogueManager.startWaitingBackend(
+    await this.executeStreamingTurn(
+      `¿Podría sellarme el pasaporte de explorador oficial de Tenerife en ${locName}?`,
       'paco',
-      `${npcName}: 'Comprobando el registro de aduanas y sellando el pasaporte... ⏳'`
+      npcName
     );
-
-    try {
-      const res = await this.apiClient.sendAction(
-        'CONVERSAR',
-        npcName,
-        undefined,
-        `¿Podría sellarme el pasaporte de explorador oficial de Tenerife en ${locName}?`,
-        this.currentLocation.id
-      );
-
-      if (res && res.narrativa) {
-        if (res.estado) {
-          this.syncFullGameState(res.estado);
-        } else if (stampKey && !this.stampedZones.has(stampKey)) {
-          this.stampedZones.add(stampKey);
-          if (this.passportModal) this.passportModal.unlockStamp(stampKey);
-          const count = this.passportModal ? this.passportModal.getUnlockedCount() : this.stampedZones.size;
-          if (this.onStateUpdate) this.onStateUpdate({ passport: `${count}/10` });
-        }
-        this.audioService.playCoin();
-        if (this.onLogMessage) {
-          const count = this.passportModal ? this.passportModal.getUnlockedCount() : this.stampedZones.size;
-          this.onLogMessage(`[PASAPORTE] Sello oficial estampado: '${locName}' [${stampKey}] (${count}/10 sellos)`);
-        }
-        this.dialogueManager.deliverBackendResponse(
-          `${npcName}: '${res.narrativa}'`,
-          'paco'
-        );
-        return;
-      }
-    } catch {
-      // Fallback offline
-    }
-
-    const hasStamp = stampKey ? this.stampedZones.has(stampKey) : false;
-    if (!hasStamp && stampKey) {
-      this.stampedZones.add(stampKey);
-      if (this.passportModal) {
-        this.passportModal.unlockStamp(stampKey);
-      }
-      this.audioService.playCoin();
-      const count = this.passportModal ? this.passportModal.getUnlockedCount() : this.stampedZones.size;
-      if (this.onStateUpdate) {
-        this.onStateUpdate({ passport: `${count}/10` });
-      }
-      if (this.onLogMessage) {
-        this.onLogMessage(`[PASAPORTE] Sello oficial estampado: '${locName}' [${stampKey}] (${count}/10 sellos oficiales)`);
-      }
-      this.dialogueManager.deliverBackendResponse(
-        `${npcName}: '¡Por supuesto! Estampo el sello de ${locName} en tu pasaporte. ¡Ya sumas ${count} de los 10 sellos oficiales de la isla!'`,
-        'paco'
-      );
-    } else {
-      this.dialogueManager.deliverBackendResponse(
-        `${npcName}: '¡Chacho, si ya tienes estampada la marca oficial de ${locName}! Sigue explorando para completar las 10 páginas.'`,
-        'paco'
-      );
-    }
   }
 
   private async handleLoreChoice(): Promise<void> {
-    const npc = this.currentLocation.npc;
-    const npcName = npc?.name || 'Lugareño';
+    const npcName = this.currentLocation.npc?.name || 'Lugareño';
     const locName = this.currentLocation.name;
 
     if (this.onLogMessage) {
       this.onLogMessage(`[RAG RETRIEVAL // ZONA] Consulta de lore: '${locName}' -> Contexto: TENERIFE.pdf`);
     }
 
-    this.isDialogueSpeaking = true;
-    if (this.onDialogueSpeechState) this.onDialogueSpeechState(true);
-
     this.dialogueManager.enqueue([
-      { speaker: 'twinber', text: `Twinber: '¿Qué me puede contar sobre los secretos e historia de ${locName}?'` }
+      { speaker: 'twinber', text: `Twinber: '¿Qué me puede contar sobre los secretos e historia de ${locName} en Tenerife?'` }
     ]);
 
-    // Relojito y bloqueo de interfaz mientras el backend consulta el RAG y orquesta la respuesta
-    this.dialogueManager.startWaitingBackend(
+    await this.executeStreamingTurn(
+      `¿Qué me puedes contar sobre los secretos, curiosidades e historia de ${locName} en Tenerife?`,
       'paco',
-      `${npcName}: 'Buscando en las crónicas históricas y recuerdos de la isla... ⏳'`
+      npcName
     );
-
-    try {
-      const res = await this.apiClient.sendAction(
-        'CONVERSAR',
-        npcName,
-        undefined,
-        `¿Qué me puedes contar sobre los secretos, curiosidades e historia de ${locName}?`,
-        this.currentLocation.id
-      );
-
-      if (res && res.narrativa) {
-        if (res.estado) {
-          this.syncFullGameState(res.estado);
-        }
-        if (Array.isArray(res.sfx_to_play)) {
-          res.sfx_to_play.forEach((sfx: string) => {
-            if (sfx === 'sfx_photo') this.audioService.playHint();
-          });
-        }
-        const nuevasFotos = res.fotos_nuevas || res.fotos_desbloqueadas_nuevas;
-        if (Array.isArray(nuevasFotos)) {
-          nuevasFotos.forEach((pid: number) => {
-            if (this.photoAlbumModal) this.photoAlbumModal.unlockPhoto(pid);
-          });
-        }
-        if (this.onStateUpdate) {
-          this.onStateUpdate({
-            photos: `${this.photoAlbumModal?.getUnlockedCount() || 0}/28`
-          });
-        }
-        this.dialogueManager.deliverBackendResponse(
-          `${npcName}: '${res.narrativa}'`,
-          'paco'
-        );
-        return;
-      }
-    } catch {
-      // Fallback offline
-    }
-
-    let isNewPhoto = false;
-    const photoId = npc?.photoIdOnLore;
-    if (photoId && this.photoAlbumModal) {
-      isNewPhoto = this.photoAlbumModal.unlockPhoto(photoId);
-      const count = this.photoAlbumModal.getUnlockedCount();
-      if (this.onStateUpdate) this.onStateUpdate({ photos: `${count}/28` });
-      if (isNewPhoto) {
-        this.audioService.playHint();
-        if (this.onLogMessage) {
-          this.onLogMessage(`[RAG METADATA] Foto #${String(photoId).padStart(2, '0')} desbloqueada en el Álbum por diálogo con ${npcName}.`);
-        }
-      }
-    }
-
-    if (isNewPhoto && photoId) {
-      this.dialogueManager.deliverBackendResponse(
-        `${npcName}: 'Tenerife guarda incontables maravillas. Te he dejado una foto testimonial en tu Álbum de Recuerdos.'`,
-        'paco'
-      );
-    } else {
-      const lore = npc?.lookText || `Un rincón emblemático del archipiélago canario lleno de encanto, volcanes y tradición.`;
-      this.dialogueManager.deliverBackendResponse(
-        `${npcName}: '${lore}'`,
-        'paco'
-      );
-    }
   }
 
   private handleCustomChoice(userText: string): void {
@@ -813,107 +782,17 @@ export class ActionDispatcher {
       this.onLogMessage(`[PROMPT ABIERTO AL LLM] Twinber -> ${npcName}: "${userText}"`);
     }
 
-    this.isDialogueSpeaking = true;
-    if (this.onDialogueSpeechState) this.onDialogueSpeechState(true);
-
     this.dialogueManager.enqueue([
       { speaker: 'twinber', text: `Twinber: '${userText}'` }
     ]);
 
-    // Relojito y bloqueo de interfaz mientras el backend orquesta y genera el primer token
-    this.dialogueManager.startWaitingBackend(
-      'paco',
-      `${npcName}: 'Reflexionando y consultando con los sabios de la isla... ⏳'`
-    );
-
-    let fullResponse = '';
-    let receivedAnyToken = false;
-
-    if (this.onLogMessage) {
-      this.onLogMessage(`[SSE STREAMING] Conectando con Orquestador ReAct en '${this.currentLocation.id}'...`);
-    }
-
-    const eventSource = this.apiClient.subscribeToStream(
+    this.executeStreamingTurn(
       userText,
-      this.currentLocation.id,
-      undefined,
-      (token: string) => {
-        if (!receivedAnyToken) {
-          receivedAnyToken = true;
-          this.dialogueManager.startStreamingLine('paco', `${npcName}: '`);
-        }
-        fullResponse += token;
-        this.dialogueManager.appendStreamToken(token);
-      },
-      (meta: any) => {
-        // Metadatos estructurados del turno recibidos antes de [DONE]
-        if (meta.estado) {
-          this.syncFullGameState(meta.estado);
-        }
-        if (meta.sfx_to_play && Array.isArray(meta.sfx_to_play)) {
-          meta.sfx_to_play.forEach((sfx: string) => {
-            if (sfx === 'sfx_coin' || sfx === 'sfx_stamp') this.audioService.playCoin();
-            else if (sfx === 'sfx_photo') this.audioService.playHint();
-          });
-        }
-
-        const fotosNuevas = meta.fotos_nuevas || meta.fotos_desbloqueadas_nuevas;
-        if (Array.isArray(fotosNuevas)) {
-          fotosNuevas.forEach((pid: number) => {
-            if (this.photoAlbumModal) this.photoAlbumModal.unlockPhoto(pid);
-          });
-        }
-
-        const sellosNuevos = meta.sellos_nuevos || meta.sellos_obtenidos_nuevos;
-        if (Array.isArray(sellosNuevos)) {
-          sellosNuevos.forEach((s: string) => {
-            this.stampedZones.add(s);
-            if (this.passportModal) this.passportModal.unlockStamp(s);
-          });
-        }
-
-        if (meta.estado && meta.estado.monedas_oro !== undefined) {
-          this.coins = meta.estado.monedas_oro;
-        }
-
-        if (this.onStateUpdate) {
-          this.onStateUpdate({
-            coins: this.coins,
-            passport: `${this.stampedZones.size}/10`,
-            photos: `${this.photoAlbumModal?.getUnlockedCount() || 0}/28`
-          });
-        }
-      },
-      () => {
-        // onComplete
-        if (receivedAnyToken) {
-          this.dialogueManager.appendStreamToken("'");
-          this.dialogueManager.finishStreamingLine();
-          if (this.onLogMessage) {
-            this.onLogMessage(`[SSE STREAMING] Respuesta completada (${fullResponse.length} caracteres).`);
-          }
-        } else {
-          this.fallbackOffline(userText, npcName);
-        }
-      },
-      () => {
-        console.warn('[SSE STREAMING] Error en stream');
-        if (!receivedAnyToken) {
-          if (this.onLogMessage) {
-            this.onLogMessage(`[SSE OFFLINE] Backend no disponible, usando motor heurístico local.`);
-          }
-          this.fallbackOffline(userText, npcName);
-        } else {
-          this.dialogueManager.appendStreamToken("'");
-          this.dialogueManager.finishStreamingLine();
-        }
-      }
+      'paco',
+      npcName
     );
-
-    if (!eventSource) {
-      this.fallbackOffline(userText, npcName);
-    }
   }
+
 
   private fallbackOffline(userText: string, npcName: string): void {
     const lower = userText.toLowerCase();

@@ -8,9 +8,21 @@ export type ActorState = 'IDLE' | 'WALK' | 'TALK';
 
 export type SpeakerType = 'twinber' | 'paco' | 'narration';
 
+export interface ExecutionStep {
+  id: string;
+  tipo: 'GUARDRAIL' | 'PENSAMIENTO' | 'TOOL_CALL' | 'TOOL_RESULT' | 'RAG_CODICE' | 'VLM_VISION' | 'MUTACION_ESTADO' | 'NARRATIVA_FINAL';
+  titulo: string;
+  icono: string;
+  color: string;
+  contenido: string;
+  detalles?: Record<string, any>;
+  latencia_ms?: number;
+}
+
 export interface DialogueLine {
   speaker: SpeakerType;
   text: string;
+  executionSteps?: ExecutionStep[];
 }
 
 export interface InventoryItem {

@@ -1,7 +1,7 @@
 // ==============================================================================
 // APPLICATION: Gestor de Diálogos, Colas de Subtítulos y Streaming
 // ==============================================================================
-import { DialogueLine, SpeakerType } from '../domain/types';
+import { DialogueLine, SpeakerType, ExecutionStep } from '../domain/types';
 import { AudioService } from '../infrastructure/AudioService';
 
 export class DialogueManager {
@@ -36,6 +36,50 @@ export class DialogueManager {
     if (this.onSpeakerChange) this.onSpeakerChange(speaker);
   }
 
+  public startLiveAgentTurn(speaker: SpeakerType, initialWaitingText: string): void {
+    this.isStreaming = true;
+    this.isWaitingBackend = true;
+    this.waitingSpeaker = speaker;
+    this.waitingMessage = initialWaitingText;
+    this.currentLine = { speaker, text: initialWaitingText, executionSteps: [] };
+    this.displayedText = initialWaitingText;
+    this.isFullyTyped = false;
+    if (this.onSpeakerChange) this.onSpeakerChange(speaker);
+  }
+
+  public addLiveExecutionStep(step: ExecutionStep): void {
+    if (!this.currentLine) {
+      this.currentLine = { speaker: this.waitingSpeaker || 'paco', text: this.waitingMessage || 'Pensando... ⏳', executionSteps: [] };
+    }
+    if (!this.currentLine.executionSteps) {
+      this.currentLine.executionSteps = [];
+    }
+    if (!this.currentLine.executionSteps.some(s => s.id === step.id)) {
+      this.currentLine.executionSteps.push(step);
+      this.audioService.playHint();
+    }
+  }
+
+  public beginLiveTokens(speaker: SpeakerType, prefix: string): void {
+    this.isWaitingBackend = false;
+    this.isStreaming = true;
+    if (this.currentLine) {
+      this.currentLine.speaker = speaker;
+      this.currentLine.text = prefix;
+    } else {
+      this.currentLine = { speaker, text: prefix, executionSteps: [] };
+    }
+    this.displayedText = prefix;
+    this.isFullyTyped = false;
+    if (this.onSpeakerChange) this.onSpeakerChange(speaker);
+  }
+
+  public finishLiveAgentTurn(): void {
+    this.isStreaming = false;
+    this.isWaitingBackend = false;
+    this.isFullyTyped = true;
+  }
+
   public appendStreamToken(token: string): void {
     if (this.currentLine) {
       this.currentLine.text += token;
@@ -51,6 +95,12 @@ export class DialogueManager {
     this.isFullyTyped = true;
   }
 
+  public setStreamExecutionSteps(steps: ExecutionStep[]): void {
+    if (this.currentLine) {
+      this.currentLine.executionSteps = steps;
+    }
+  }
+
   public startWaitingBackend(speaker: SpeakerType, message: string): void {
     this.isWaitingBackend = true;
     this.waitingSpeaker = speaker;
@@ -58,24 +108,28 @@ export class DialogueManager {
     this.waitingDotsTimer = 0;
   }
 
-  public deliverBackendResponse(text: string, speaker: SpeakerType = 'paco'): void {
+  public deliverBackendResponse(
+    text: string,
+    speaker: SpeakerType = 'paco',
+    executionSteps?: ExecutionStep[]
+  ): void {
     this.isWaitingBackend = false;
     // Si la línea activa era la de espera ("relojito") o ya no hay línea en pantalla:
     if (this.currentLine && this.currentLine.speaker === this.waitingSpeaker && this.currentLine.text.includes('⏳')) {
-      this.currentLine = { speaker, text };
+      this.currentLine = { speaker, text, executionSteps };
       this.displayedText = '';
       this.isFullyTyped = false;
       this.charTimer = 0;
       if (this.onSpeakerChange) this.onSpeakerChange(speaker);
     } else if (!this.currentLine) {
-      this.currentLine = { speaker, text };
+      this.currentLine = { speaker, text, executionSteps };
       this.displayedText = '';
       this.isFullyTyped = false;
       this.charTimer = 0;
       if (this.onSpeakerChange) this.onSpeakerChange(speaker);
     } else {
       // Twinber aún está diciendo su frase: se encola detrás
-      this.queue.push({ speaker, text });
+      this.queue.push({ speaker, text, executionSteps });
     }
   }
 

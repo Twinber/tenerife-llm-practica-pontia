@@ -126,11 +126,13 @@ window.addEventListener('DOMContentLoaded', () => {
       ]);
 
       try {
-        const prompt = `Inspecciona visualmente el escenario en el que me encuentro. Deduce dónde estoy a partir del relieve, vegetación, mar o arquitectura, y explica qué ves.`;
-        const narrative = await actionDispatcher.inspectVisualContext(actionDispatcher.currentLocation.bgImage, prompt);
-
-        const formatted = narrative.startsWith('Twinber:') ? narrative : `Twinber: '${narrative}'`;
-        dialogueManager.deliverBackendResponse(formatted, 'twinber');
+        const prompt = `Inspecciona visualmente el escenario en el que me encuentro en Tenerife. Deduce dónde estoy a partir del relieve, vegetación, mar o arquitectura, y explica qué ves.`;
+        await actionDispatcher.executeStreamingTurn(
+          prompt,
+          'twinber',
+          '',
+          actionDispatcher.currentLocation.bgImage
+        );
       } catch (err) {
         dialogueManager.deliverBackendResponse(`Twinber: 'Parece que la bruma del mar no me deja distinguir los detalles en este momento.'`, 'twinber');
       } finally {

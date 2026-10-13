@@ -1,7 +1,7 @@
 // ==============================================================================
 // INFRASTRUCTURE: Cliente HTTP REST y Consumidor de Server-Sent Events (SSE)
 // ==============================================================================
-import { GameState } from '../domain/types';
+import { GameState, ExecutionStep } from '../domain/types';
 
 export class ApiClient {
   private baseUrl: string = '/api';
@@ -71,6 +71,7 @@ export class ApiClient {
     imagePath?: string,
     onToken?: (token: string) => void,
     onMetadata?: (meta: any) => void,
+    onStep?: (step: ExecutionStep) => void,
     onComplete?: () => void,
     onError?: () => void
   ): EventSource | null {
@@ -84,6 +85,13 @@ export class ApiClient {
         if (event.data === '[DONE]') {
           if (onComplete) onComplete();
           es.close();
+        } else if (event.data.startsWith('[STEP]')) {
+          try {
+            const step = JSON.parse(event.data.substring(6)) as ExecutionStep;
+            if (onStep) onStep(step);
+          } catch (e) {
+            console.warn('[SSE] Error parseando step:', e);
+          }
         } else if (event.data.startsWith('[META]')) {
           try {
             const meta = JSON.parse(event.data.substring(6));

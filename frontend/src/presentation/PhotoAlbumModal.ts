@@ -123,6 +123,10 @@ export class PhotoAlbumModal {
     return this.unlockedIds.size;
   }
 
+  public getTotalCount(): number {
+    return this.photos.length;
+  }
+
   private renderSinglePhoto(): void {
     this.counterElem.innerText = `${this.unlockedIds.size}/${this.photos.length}`;
     this.pageIndicatorElem.innerText = `FOTO ${this.currentPhotoIndex + 1} / ${this.photos.length}`;
