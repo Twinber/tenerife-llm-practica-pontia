@@ -106,7 +106,7 @@ Inspirado en los clásicos de LucasArts (*The Secret of Monkey Island*, *Indiana
     [x] 3.3 Vector Store persistente (ChromaDB) y Retriever con geocercado y citas (Completada)
     [x] 3.4 Herramientas climatológicas Open-Meteo, resiliencia y auditoría en disco (Completada)
     [x] 3.5 Gestor de memoria conversacional multiturno híbrida y presupuesto de tokens (Completada)
-    [ ] 3.6 Orquestador agéntico (Supervisor Loop) y Guardrails bouncer
+    [x] 3.6 Orquestador agéntico (Supervisor Loop) y Guardrails bouncer (Completada)
     [ ] 3.7 Servidor FastAPI (API REST y Server-Sent Events)
     [ ] 3.8 Cuaderno maestro reproducible de entrega (notebook_principal.ipynb):
         * Celdas ordenadas de extracción, indexación en ChromaDB y pruebas de consulta.

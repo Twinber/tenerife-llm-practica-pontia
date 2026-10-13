@@ -8,6 +8,7 @@ from src.domain.weather_models import CalimaResponse, StarlightResponse, Weather
 from src.domain.state_models import GameState, InventoryItem, TurnResult
 from src.domain.audit_models import AuditEvent
 from src.domain.memory_models import ChatMessage, ConversationMemorySnapshot
+from src.domain.guardrail_models import GuardrailDecision
 
 __all__ = [
     "DocumentChunk",
@@ -22,4 +23,5 @@ __all__ = [
     "AuditEvent",
     "ChatMessage",
     "ConversationMemorySnapshot",
+    "GuardrailDecision",
 ]
