@@ -265,10 +265,7 @@ window.addEventListener('DOMContentLoaded', () => {
       telemetryView.log("Reiniciando partida en el backend...");
       actionDispatcher.apiClient.resetGame().then(() => {
         telemetryView.log("Partida reseteada. Recargando estado...");
-        actionDispatcher.stampedZones.clear();
-        actionDispatcher.coins = 15;
-        if (actionDispatcher.passportModal) actionDispatcher.passportModal.close();
-        if (actionDispatcher.photoAlbumModal) actionDispatcher.photoAlbumModal.close();
+        actionDispatcher.resetLocalState();
         actionDispatcher.syncWithBackend();
       });
       return;

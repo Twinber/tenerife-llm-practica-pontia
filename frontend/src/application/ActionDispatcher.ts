@@ -57,6 +57,8 @@ export class ActionDispatcher {
     items?: Array<{ name: string; icon: string; count?: number }>;
   }) => void;
 
+  private readonly STORAGE_KEY = 'twinber_adventure_state_v1';
+
   constructor(
     twinber: Actor,
     paco: Actor,
@@ -71,20 +73,89 @@ export class ActionDispatcher {
     this.dialogueManager.onDialogueFinished = () => {
       this.handleDialogueFinished();
     };
+
+    // Restaurar progreso y saldo de monedas guardado
+    this.loadStateFromStorage();
+  }
+
+  public saveStateToStorage(): void {
+    try {
+      const state = {
+        coins: this.coins,
+        bananaCount: this.bananaCount,
+        acquiredItems: this.acquiredItems,
+        purchasedFromNpcs: Array.from(this.purchasedFromNpcs),
+        stampedZones: Array.from(this.stampedZones)
+      };
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.warn('[Storage] Error guardando estado en localStorage:', e);
+    }
+  }
+
+  public loadStateFromStorage(): boolean {
+    try {
+      const raw = localStorage.getItem(this.STORAGE_KEY);
+      if (!raw) return false;
+      const data = JSON.parse(raw);
+      if (typeof data.coins === 'number' && data.coins >= 0 && data.coins <= 15) {
+        this.coins = data.coins;
+      }
+      if (typeof data.bananaCount === 'number') {
+        this.bananaCount = data.bananaCount;
+      }
+      if (Array.isArray(data.acquiredItems)) {
+        this.acquiredItems = data.acquiredItems;
+      }
+      if (Array.isArray(data.purchasedFromNpcs)) {
+        this.purchasedFromNpcs = new Set(data.purchasedFromNpcs);
+      }
+      if (Array.isArray(data.stampedZones)) {
+        data.stampedZones.forEach((s: string) => {
+          this.stampedZones.add(s);
+          if (this.passportModal) this.passportModal.unlockStamp(s);
+        });
+      }
+      if (this.onStateUpdate) {
+        this.onStateUpdate({
+          coins: this.coins,
+          items: this.acquiredItems,
+          bananas: this.bananaCount,
+          passport: `${this.stampedZones.size}/10`,
+          photos: this.getPhotosBadgeText()
+        });
+      }
+      return true;
+    } catch (e) {
+      console.warn('[Storage] Error cargando estado desde localStorage:', e);
+      return false;
+    }
+  }
+
+  public clearStorage(): void {
+    try {
+      localStorage.removeItem(this.STORAGE_KEY);
+    } catch (e) {
+      console.warn('[Storage] Error limpiando localStorage:', e);
+    }
   }
 
   public syncFullGameState(state: any): void {
     if (!state) return;
-    const coins = state.coins !== undefined ? state.coins : state.monedas_oro;
-    if (coins !== undefined) this.coins = coins;
+    const backendCoins = state.coins !== undefined ? state.coins : state.monedas_oro;
+    if (typeof backendCoins === 'number') {
+      // Regla de economía cerrada: respetar las monedas gastadas localmente
+      this.coins = Math.min(this.coins, backendCoins);
+      this.saveStateToStorage();
+    }
 
     const stamps = state.passportStamps || state.sellos_obtenidos;
     if (Array.isArray(stamps)) {
-      this.stampedZones.clear();
       stamps.forEach((s: string) => {
         this.stampedZones.add(s);
         if (this.passportModal) this.passportModal.unlockStamp(s);
       });
+      this.saveStateToStorage();
     }
 
     const photos = state.photos || state.fotos_desbloqueadas;
@@ -97,6 +168,8 @@ export class ActionDispatcher {
     if (this.onStateUpdate) {
       this.onStateUpdate({
         coins: this.coins,
+        items: this.acquiredItems,
+        bananas: this.bananaCount,
         passport: `${this.stampedZones.size}/10`,
         photos: this.getPhotosBadgeText()
       });
@@ -110,11 +183,18 @@ export class ActionDispatcher {
   }
 
   public async syncWithBackend(): Promise<void> {
+    // Sincronizar estado local persistido (monedas gastadas) hacia el backend
+    if (this.coins < 15 || this.acquiredItems.length > 0) {
+      this.apiClient.updateState({
+        monedas_oro: this.coins
+      });
+    }
+
     try {
       const state = await this.apiClient.fetchState();
       if (state) {
         if (this.onLogMessage) {
-          this.onLogMessage(`[API SYNC] Conectado con FastAPI. Enclave: ${(state as any).ubicacion_actual || state.currentLocationId}, Monedas: ${state.coins ?? (state as any).monedas_oro}`);
+          this.onLogMessage(`[API SYNC] Conectado con FastAPI. Enclave: ${(state as any).ubicacion_actual || state.currentLocationId}, Monedas: ${this.coins}`);
         }
         this.syncFullGameState(state);
       }
@@ -136,7 +216,8 @@ export class ActionDispatcher {
         undefined,
         promptText || `Observo atentamente el paisaje a mi alrededor en ${locName}. ¿Qué reconozco visualmente, qué arquitectura o relieve observo y qué enclave de Tenerife es?`,
         this.currentLocation.id,
-        imagePath
+        imagePath,
+        this.coins
       );
 
       if (res && res.narrativa) {
@@ -627,6 +708,23 @@ export class ActionDispatcher {
             this.onDialogueModeChange(true, npcName, undefined, npc.twinBrotherName);
           }
         }
+        this.saveStateToStorage();
+
+        // Notificar inmediatamente al backend la deducción de monedas y el objeto adquirido
+        let itemId = 'item_gofio';
+        if (item.name.includes('Plátano')) itemId = 'item_platano';
+        else if (item.name.includes('Comanda')) itemId = 'item_comanda';
+        else if (item.name.includes('Billete')) itemId = 'item_billete';
+        const iconName = icon.split('/').pop() || 'item_gofio.svg';
+
+        this.apiClient.updateState({
+          monedas_oro: this.coins,
+          item_adquirido_id: itemId,
+          item_adquirido_nombre: item.name,
+          item_adquirido_icono: iconName,
+          item_adquirido_cantidad: 1
+        });
+
         this.audioService.playCoin();
         if (this.onLogMessage) {
           this.onLogMessage(`[COMERCIO] Adquirido '${item.name}' por ${item.price} monedas. Saldo restante: ${this.coins}`);
@@ -647,6 +745,26 @@ export class ActionDispatcher {
         { speaker: 'twinber', text: "Twinber: '¿Tiene algo a la venta por aquí?'" },
         { speaker: 'paco', text: `${npcName}: 'No tengo artículos a la venta en este momento, muchacho.'` }
       ]);
+    }
+  }
+
+  public resetLocalState(): void {
+    this.clearStorage();
+    this.coins = 15;
+    this.bananaCount = 0;
+    this.acquiredItems = [];
+    this.purchasedFromNpcs.clear();
+    this.stampedZones.clear();
+    if (this.passportModal) this.passportModal.close();
+    if (this.photoAlbumModal) this.photoAlbumModal.close();
+    if (this.onStateUpdate) {
+      this.onStateUpdate({
+        coins: 15,
+        items: [],
+        bananas: 0,
+        passport: '0/10',
+        photos: this.getPhotosBadgeText()
+      });
     }
   }
 
@@ -673,6 +791,7 @@ export class ActionDispatcher {
         promptText,
         this.currentLocation.id,
         imagePath,
+        this.coins,
         (token: string) => {
           if (!receivedFirstToken) {
             receivedFirstToken = true;
@@ -702,9 +821,11 @@ export class ActionDispatcher {
               this.stampedZones.add(s);
               if (this.passportModal) this.passportModal.unlockStamp(s);
             });
+            this.saveStateToStorage();
           }
           if (meta.estado && meta.estado.monedas_oro !== undefined) {
-            this.coins = meta.estado.monedas_oro;
+            this.coins = Math.min(this.coins, meta.estado.monedas_oro);
+            this.saveStateToStorage();
           }
           if (this.onStateUpdate) {
             this.onStateUpdate({

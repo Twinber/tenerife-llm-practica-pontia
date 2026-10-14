@@ -62,6 +62,20 @@ class ActionRequest(BaseModel):
     texto_libre: Optional[str] = Field(default=None, description="Pregunta directa o texto libre del jugador")
     ubicacion: Optional[str] = Field(default=None, description="ID del enclave actual de la pantalla")
     image_path: Optional[str] = Field(default=None, description="Ruta relativa o absoluta de la imagen a inspeccionar")
+    monedas: Optional[int] = Field(default=None, ge=0, le=15, description="Saldo de monedas de oro actual del explorador")
+
+
+class StateUpdateRequest(BaseModel):
+    """
+    Contrato para sincronización directa de estado iniciada por el cliente.
+    Permite registrar compras en tiendas de NPCs, deducción de monedas y viajes.
+    """
+    monedas_oro: Optional[int] = Field(default=None, ge=0, le=15, description="Saldo de monedas restante")
+    ubicacion_actual: Optional[str] = Field(default=None, description="Nuevo enclave")
+    item_adquirido_id: Optional[str] = Field(default=None, description="ID del objeto comprado (ej. item_gofio)")
+    item_adquirido_nombre: Optional[str] = Field(default=None, description="Nombre del objeto")
+    item_adquirido_icono: Optional[str] = Field(default=None, description="Icono SVG del objeto")
+    item_adquirido_cantidad: Optional[int] = Field(default=1, ge=1)
 
 
 class TelemetryResponse(BaseModel):
@@ -128,15 +142,55 @@ async def get_state() -> GameState:
     return session.state
 
 
+@app.patch("/api/state", response_model=GameState)
+@app.post("/api/state", response_model=GameState)
+async def update_state(update: StateUpdateRequest) -> GameState:
+    """
+    Sincroniza mutaciones de estado iniciadas por el cliente (compras en tiendas, viajes, deducción de monedas).
+    """
+    if update.monedas_oro is not None and 0 <= update.monedas_oro <= 15:
+        session.state.monedas_oro = update.monedas_oro
+        for item in session.state.inventario:
+            if item.id == "item_monedas":
+                item.cantidad = update.monedas_oro
+    if update.ubicacion_actual is not None:
+        session.state.ubicacion_actual = update.ubicacion_actual
+    if update.item_adquirido_id and update.item_adquirido_nombre:
+        existente = next((it for it in session.state.inventario if it.id == update.item_adquirido_id), None)
+        if existente:
+            existente.cantidad += update.item_adquirido_cantidad or 1
+        else:
+            session.state.inventario.append(InventoryItem(
+                id=update.item_adquirido_id,
+                nombre=update.item_adquirido_nombre,
+                icono=update.item_adquirido_icono or "item_gofio.svg",
+                tipo="CONSUMIBLE" if "platano" in update.item_adquirido_id else "CLAVE",
+                cantidad=update.item_adquirido_cantidad or 1
+            ))
+    session.orchestrator.audit_logger.log_state_mutation(
+        nombre_operacion="client_state_sync",
+        argumentos=update.model_dump(exclude_none=True),
+        resultado_resumen=f"Estado sincronizado: monedas={session.state.monedas_oro}, enclave={session.state.ubicacion_actual}",
+        latencia_ms=0.0,
+        estado="SUCCESS"
+    )
+    return session.state
+
+
 @app.post("/api/action", response_model=TurnResult)
 async def handle_action(req: ActionRequest) -> TurnResult:
     """
     Procesa una interacción contextual (observar hotspot, conversar con NPC) o consulta libre del jugador.
     Ejecuta el bucle agéntico ReAct y retorna el TurnResult con narrativa y mutaciones.
     """
-    # Sincronizar ubicación si el frontend indica que el jugador viajó
+    # Sincronizar ubicación y monedas si el frontend las proporciona
     if req.ubicacion and req.ubicacion != session.state.ubicacion_actual:
         session.state.ubicacion_actual = req.ubicacion
+    if req.monedas is not None and 0 <= req.monedas <= 15:
+        session.state.monedas_oro = req.monedas
+        for item in session.state.inventario:
+            if item.id == "item_monedas":
+                item.cantidad = req.monedas
 
     # Determinar el tipo de acción (contextual inteligente o compatible con llamadas previas)
     tipo = (req.tipo_accion or req.verbo or "OBSERVAR").upper()
@@ -171,7 +225,8 @@ async def handle_action(req: ActionRequest) -> TurnResult:
 async def stream_action(
     texto: str = Query(..., description="Texto o consulta del jugador"),
     ubicacion: Optional[str] = Query(None, description="Enclave actual"),
-    image_path: Optional[str] = Query(None, description="Imagen opcional para visión")
+    image_path: Optional[str] = Query(None, description="Imagen opcional para visión"),
+    monedas: Optional[int] = Query(None, ge=0, le=15, description="Saldo de monedas actual del explorador")
 ) -> StreamingResponse:
     """
     Endpoint de streaming en tiempo real mediante Server-Sent Events (SSE).
@@ -180,6 +235,11 @@ async def stream_action(
     """
     if ubicacion and ubicacion != session.state.ubicacion_actual:
         session.state.ubicacion_actual = ubicacion
+    if monedas is not None and 0 <= monedas <= 15:
+        session.state.monedas_oro = monedas
+        for item in session.state.inventario:
+            if item.id == "item_monedas":
+                item.cantidad = monedas
 
     async def sse_generator() -> AsyncGenerator[str, None]:
         loop = asyncio.get_running_loop()
