@@ -132,6 +132,9 @@ sed "s/tenerife\.example\.com/${K8S_DOMAIN}/g" "${PROJECT_ROOT}/k8s/05-ingress.y
 
 # Reinicio rodante y verificación
 echo ""
+echo "🔄 Forzando reinicio rodante del pod con la nueva imagen..."
+ssh "${K8S_SSH_TARGET}" "kubectl rollout restart deployment/tenerife-game -n '${NAMESPACE}'"
+
 echo "⏳ Verificando estado final del despliegue rodante..."
 ssh "${K8S_SSH_TARGET}" "kubectl rollout status deployment/tenerife-game -n '${NAMESPACE}' --timeout=60s"
 
