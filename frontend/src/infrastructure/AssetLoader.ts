@@ -26,13 +26,13 @@ export class AssetLoader {
       }
     }
 
-    // Iconos de Inventario
+    // Iconos de Inventario Oficiales (SVG)
     const items = [
       'item_monedas', 'item_pasaporte', 'item_album', 'item_mapa',
       'item_gofio', 'item_comanda', 'item_billete', 'item_platano'
     ];
     for (const item of items) {
-      this.loadImage(`/assets/img/items/${item}.png`);
+      this.loadImage(`/assets/img/items/${item}.svg`);
     }
   }
 
