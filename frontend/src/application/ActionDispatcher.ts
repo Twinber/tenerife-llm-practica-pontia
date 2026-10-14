@@ -49,6 +49,7 @@ export class ActionDispatcher {
 
   public onDialogueModeChange?: (active: boolean, npcName?: string, shopItem?: { name: string; price: number }, twinBrotherName?: string) => void;
   public onDialogueSpeechState?: (isSpeaking: boolean) => void;
+  public onLocationChanged?: (location: LocationSceneDef) => void;
   public onStateUpdate?: (updates: {
     photos?: string;
     passport?: string;
@@ -380,6 +381,9 @@ export class ActionDispatcher {
 
   public async changeLocation(targetLocation: LocationSceneDef, isTeleport: boolean = false): Promise<void> {
     this.currentLocation = targetLocation;
+    if (this.onLocationChanged) {
+      this.onLocationChanged(targetLocation);
+    }
 
     const setupActors = () => {
       // 1. Reposicionar y configurar NPC

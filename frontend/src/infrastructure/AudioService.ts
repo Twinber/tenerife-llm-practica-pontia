@@ -26,6 +26,12 @@ export const AMBIENT_PLAYLIST: MusicTrack[] = [
   }
 ];
 
+export interface CreditsGagCallbacks {
+  onHomenajeStart?: () => void;
+  onScratch?: (durationMs: number) => void;
+  onOriginalMusicStart?: () => void;
+}
+
 export class AudioService {
   private ctx: AudioContext | null = null;
   public isMuted: boolean = false;
@@ -280,5 +286,161 @@ export class AudioService {
     setTimeout(() => this.beep(659, 'triangle', 0.09, 0.10), 90);
     setTimeout(() => this.beep(784, 'triangle', 0.11, 0.12), 180);
     setTimeout(() => this.beep(1046, 'sine', 0.28, 0.14), 280);
+  }
+
+  // ----------------------------------------------------------------------------
+  // GAG CÓMICO: HOMENAJE MP3 (10s) + DERAPE / SCRATCH MP3 + MÚSICA OFICIAL
+  // ----------------------------------------------------------------------------
+  private gagTimers: number[] = [];
+  private isCreditsGagRunning: boolean = false;
+  private gagHomenajeAudio: HTMLAudioElement | null = null;
+  private gagScratchAudio: HTMLAudioElement | null = null;
+
+  public stopCreditsGag(): void {
+    this.isCreditsGagRunning = false;
+    this.gagTimers.forEach(t => window.clearTimeout(t));
+    this.gagTimers = [];
+
+    if (this.gagHomenajeAudio) {
+      this.gagHomenajeAudio.pause();
+      this.gagHomenajeAudio.currentTime = 0;
+      this.gagHomenajeAudio = null;
+    }
+    if (this.gagScratchAudio) {
+      this.gagScratchAudio.pause();
+      this.gagScratchAudio.currentTime = 0;
+      this.gagScratchAudio = null;
+    }
+  }
+
+  public playCreditsThemeWithGag(callbacks: CreditsGagCallbacks): void {
+    this.stopCreditsGag();
+    this.isCreditsGagRunning = true;
+
+    // Pausar cualquier pista de música ambiental previa
+    if (this.bgMusic) {
+      this.bgMusic.pause();
+    }
+    if (this.musicPauseTimer) {
+      window.clearTimeout(this.musicPauseTimer);
+      this.musicPauseTimer = null;
+    }
+    this.isMusicActive = false;
+
+    const scratchDurationMs = 2115; // Duración exacta de abrupt-record-scratch.mp3
+    const homenajeDurationMs = 15000; // 15 segundos exactos solicitados
+
+    if (this.isMuted) {
+      callbacks.onHomenajeStart?.();
+      const t1 = window.setTimeout(() => {
+        if (this.isCreditsGagRunning) callbacks.onScratch?.(scratchDurationMs);
+      }, homenajeDurationMs);
+      const t2 = window.setTimeout(() => {
+        if (this.isCreditsGagRunning) callbacks.onOriginalMusicStart?.();
+      }, homenajeDurationMs + scratchDurationMs);
+      this.gagTimers.push(t1, t2);
+      return;
+    }
+
+    try {
+      // 1. Preparar audio del tema de homenaje (15 segundos)
+      const homenaje = new Audio('/assets/music/Homenaje_song.mp3');
+      homenaje.preload = 'auto';
+      homenaje.volume = this.musicVolume;
+      homenaje.currentTime = 0;
+      this.gagHomenajeAudio = homenaje;
+
+      let homenajeStarted = false;
+      const notifyHomenajeStarted = () => {
+        if (homenajeStarted || !this.isCreditsGagRunning) return;
+        homenajeStarted = true;
+
+        // Notificar que la música de homenaje está sonando para comenzar el scroll
+        callbacks.onHomenajeStart?.();
+
+        // 2. A los 15 segundos exactos desde que suena: cortar y disparar el derrape / scratch
+        const tScratch = window.setTimeout(() => {
+          if (!this.isCreditsGagRunning) return;
+
+          if (this.gagHomenajeAudio) {
+            this.gagHomenajeAudio.pause();
+            this.gagHomenajeAudio.currentTime = 0;
+            this.gagHomenajeAudio = null;
+          }
+
+          // Reproducir efecto derrape / disco rayado
+          const scratch = new Audio('/assets/music/abrupt-record-scratch.mp3');
+          scratch.preload = 'auto';
+          scratch.volume = Math.min(1.0, this.musicVolume * 1.35);
+          scratch.currentTime = 0;
+          this.gagScratchAudio = scratch;
+
+          scratch.play().catch(e => {
+            console.warn('[AudioService] Autoplay blocked for Scratch SFX:', e);
+          });
+
+          // Notificar el inicio del scratch con su duración exacta para la animación invertida
+          callbacks.onScratch?.(scratchDurationMs);
+
+          // Pre-cargar la pista oficial durante el derrape para que esté lista
+          this.musicIndex = 0;
+          const track0 = AMBIENT_PLAYLIST[0];
+          if (!this.bgMusic) {
+            this.bgMusic = new Audio();
+            this.bgMusic.addEventListener('ended', () => this.onMusicTrackEnded());
+            this.bgMusic.addEventListener('error', () => this.onMusicTrackEnded());
+          }
+          this.bgMusic.preload = 'auto';
+          this.bgMusic.src = track0.url;
+          this.bgMusic.currentTime = 0;
+          this.bgMusic.load();
+
+          // 3. Tras el derrape (exactamente scratchDurationMs), arrancar música oficial
+          const tOriginal = window.setTimeout(() => {
+            if (!this.isCreditsGagRunning) return;
+
+            if (this.gagScratchAudio) {
+              this.gagScratchAudio = null;
+            }
+
+            if (!this.isMuted && this.bgMusic) {
+              this.bgMusic.volume = this.musicVolume;
+
+              let officialStarted = false;
+              const notifyOfficialStarted = () => {
+                if (officialStarted || !this.isCreditsGagRunning) return;
+                officialStarted = true;
+                this.isMusicActive = true;
+                if (this.onMusicTrackChange) {
+                  this.onMusicTrackChange(track0, 0);
+                }
+                callbacks.onOriginalMusicStart?.();
+              };
+
+              this.bgMusic.addEventListener('playing', notifyOfficialStarted, { once: true });
+              this.bgMusic.play()
+                .then(() => notifyOfficialStarted())
+                .catch(() => notifyOfficialStarted());
+            } else {
+              callbacks.onOriginalMusicStart?.();
+            }
+          }, scratchDurationMs);
+          this.gagTimers.push(tOriginal);
+        }, homenajeDurationMs);
+        this.gagTimers.push(tScratch);
+      };
+
+      homenaje.addEventListener('playing', notifyHomenajeStarted, { once: true });
+      homenaje.play().then(() => {
+        notifyHomenajeStarted();
+      }).catch(e => {
+        console.warn('[AudioService] Autoplay blocked for Homenaje song:', e);
+        notifyHomenajeStarted();
+      });
+
+    } catch (err) {
+      console.warn('[AudioService] Error al reproducir gag de créditos:', err);
+      callbacks.onHomenajeStart?.();
+    }
   }
 }

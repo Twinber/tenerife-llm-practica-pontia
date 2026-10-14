@@ -2181,3 +2181,344 @@ html, body {
   flex-shrink: 0;
 }
 
+/* ==============================================================================
+   CRÉDITOS CINEMATOGRÁFICOS RETRO (1990 LUCASARTS SCUMM STYLE)
+   ============================================================================== */
+.hud-btn-credits {
+  background: linear-gradient(180deg, #5a3800 0%, #2e1c00 100%) !important;
+  color: #ffdd44 !important;
+  border: 1px solid #ffaa00 !important;
+  font-weight: bold;
+  box-shadow: 0 0 8px rgba(255, 170, 0, 0.45);
+  animation: hudBtnCreditsGlow 2s infinite ease-in-out;
+}
+.hud-btn-credits:hover {
+  background: linear-gradient(180deg, #7c4c00 0%, #442600 100%) !important;
+  color: #ffffff !important;
+  border-color: #ffe066 !important;
+  box-shadow: 0 0 14px rgba(255, 224, 102, 0.75);
+}
+@keyframes hudBtnCreditsGlow {
+  0%, 100% {
+    box-shadow: 0 0 6px rgba(255, 170, 0, 0.35);
+    border-color: #ffaa00;
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(255, 204, 0, 0.8);
+    border-color: #ffea55;
+  }
+}
+
+.modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(4, 6, 18, 0.88);
+  backdrop-filter: blur(6px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-backdrop.hidden {
+  display: none !important;
+}
+
+.credits-window {
+  width: 92%;
+  max-width: 860px;
+  height: 86%;
+  max-height: 560px;
+  background: rgba(8, 14, 30, 0.94);
+  border: 3px solid #ffcc00;
+  box-shadow: 0 0 35px rgba(255, 204, 0, 0.35), 0 0 60px rgba(0, 0, 0, 0.95), inset 0 0 20px rgba(0, 0, 0, 0.8);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.credits-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: linear-gradient(180deg, #182245 0%, #0c1328 100%);
+  border-bottom: 2px solid #ffaa00;
+  flex-shrink: 0;
+}
+.credits-title {
+  font-size: 10px;
+  font-weight: bold;
+  color: #ffdd44;
+  letter-spacing: 0.8px;
+  text-shadow: 1px 1px #000;
+}
+.credits-close-btn {
+  background: #881122;
+  border: 1px solid #ff4455;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 4px 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.1s;
+}
+.credits-close-btn:hover {
+  background: #cc1133;
+  box-shadow: 0 0 8px #ff4455;
+}
+
+.credits-viewport {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+  background: radial-gradient(circle at center top, rgba(16, 26, 60, 0.7) 0%, rgba(4, 7, 18, 0.95) 100%);
+  padding: 0 24px;
+  scroll-behavior: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ffaa00 rgba(0, 0, 0, 0.5);
+}
+.credits-viewport::-webkit-scrollbar {
+  width: 6px;
+}
+.credits-viewport::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.5);
+}
+.credits-viewport::-webkit-scrollbar-thumb {
+  background: #ffaa00;
+  border-radius: 3px;
+}
+
+.credits-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: #dddddd;
+  font-size: 12px;
+  line-height: 1.7;
+  width: 100%;
+}
+.credits-spacer-top {
+  height: 80px;
+}
+.credits-spacer-bottom {
+  height: 260px;
+}
+
+.credits-banner-main {
+  margin-bottom: 24px;
+}
+.credits-pixel-logo {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffea55;
+  text-shadow: 2px 2px 0 #000, 0 0 14px rgba(255, 234, 85, 0.65);
+  letter-spacing: 1.5px;
+  margin-bottom: 10px;
+}
+.credits-subtitle {
+  font-size: 13px;
+  color: #00e5ff;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+  text-shadow: 1px 1px #000;
+}
+.credits-tech-badge {
+  font-size: 10.5px;
+  color: #aaccff;
+  letter-spacing: 0.6px;
+}
+.credits-divider {
+  width: 60%;
+  border: 0;
+  border-top: 1px dashed rgba(255, 204, 0, 0.45);
+  margin: 32px auto;
+}
+.credits-section {
+  width: 100%;
+  max-width: 680px;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.credits-section-title {
+  font-size: 11.5px;
+  color: #ffaa00;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  font-weight: bold;
+  text-shadow: 1px 1px #000;
+}
+.credits-name-lead {
+  font-size: 19px;
+  font-weight: bold;
+  color: #ffffff;
+  letter-spacing: 1.5px;
+  text-shadow: 2px 2px 0 #000, 0 0 14px rgba(0, 229, 255, 0.7);
+  margin-bottom: 8px;
+}
+.credits-name {
+  font-size: 15px;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 6px;
+  text-shadow: 1px 1px #000;
+}
+.credits-role-desc {
+  font-size: 12px;
+  color: #b0c4de;
+  line-height: 1.6;
+}
+.credits-text-bold {
+  font-size: 13.5px;
+  font-weight: bold;
+  color: #ffffff;
+}
+.credits-text-highlight {
+  font-size: 16px;
+  font-weight: bold;
+  color: #00ffcc;
+  text-shadow: 1px 1px 0 #000, 0 0 10px rgba(0, 255, 204, 0.5);
+  margin: 6px 0;
+}
+.credits-text-sub {
+  font-size: 12px;
+  color: #c0d0f0;
+}
+.credits-institution {
+  font-size: 13px;
+  color: #ffaa00;
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+.credits-tools-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 640px;
+  margin-top: 10px;
+}
+.credits-tool-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.tool-label {
+  font-size: 10.5px;
+  color: #ffcc00;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.tool-val {
+  font-size: 13.5px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 1px 1px #000;
+}
+
+.credits-cast-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 640px;
+  margin-top: 10px;
+}
+.cast-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.cast-name {
+  font-size: 14.5px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 1px 1px #000;
+}
+.cast-role {
+  font-size: 11.5px;
+  color: #00e5ff;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.credits-quote {
+  font-size: 12px;
+  font-style: italic;
+  color: #b8d0ee;
+  margin: 10px 0;
+  line-height: 1.7;
+  max-width: 600px;
+}
+.credits-humor-note {
+  font-size: 11px;
+  color: #ffdd44;
+  font-style: italic;
+  margin: 32px 0 14px 0;
+  line-height: 1.6;
+}
+.credits-end-seal {
+  font-size: 14px;
+  font-weight: bold;
+  color: #00ffcc;
+  letter-spacing: 1.2px;
+  text-shadow: 0 0 12px rgba(0, 255, 204, 0.7);
+  margin-top: 20px;
+}
+.credits-final-copyright {
+  font-size: 12px;
+  font-weight: bold;
+  color: #ffaa00;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 28px;
+  text-shadow: 1px 1px #000;
+}
+
+.credits-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #060a1a;
+  border-top: 1px solid #1a2a55;
+  flex-shrink: 0;
+}
+.credits-btn {
+  background: #16244f;
+  border: 1px solid #3d58a6;
+  color: #cce0ff;
+  font-family: inherit;
+  font-size: 9px;
+  padding: 5px 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.1s;
+}
+.credits-btn:hover {
+  background: #283e85;
+  color: #ffffff;
+  border-color: #00e5ff;
+}
+.credits-tip {
+  font-size: 8.5px;
+  color: #7799bb;
+}
+
+

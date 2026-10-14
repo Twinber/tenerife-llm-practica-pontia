@@ -16,6 +16,7 @@ import { PhotoAlbumModal } from './presentation/PhotoAlbumModal';
 import { PassportModal } from './presentation/PassportModal';
 import { IslandMapModal } from './presentation/IslandMapModal';
 import { AnimationViewerModal } from './presentation/AnimationViewerModal';
+import { CreditsModal } from './presentation/CreditsModal';
 import { LOCATIONS_CATALOG } from './domain/locationsData';
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -142,6 +143,33 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Modal de Créditos Cinematográficos (1990 LucasArts Style)
+  const creditsModal = new CreditsModal(audioService);
+  const btnCredits = document.getElementById('btn-credits') as HTMLButtonElement;
+
+  const updateCreditsButtonVisibility = (locationId: string) => {
+    if (btnCredits) {
+      if (locationId === 'pico_teide') {
+        btnCredits.classList.remove('hidden');
+      } else {
+        btnCredits.classList.add('hidden');
+      }
+    }
+  };
+
+  actionDispatcher.onLocationChanged = (loc) => {
+    updateCreditsButtonVisibility(loc.id);
+  };
+  // Comprobación inicial según ubicación activa
+  updateCreditsButtonVisibility(actionDispatcher.currentLocation.id);
+
+  if (btnCredits) {
+    btnCredits.addEventListener('click', () => {
+      audioService.playClick();
+      creditsModal.open();
+    });
+  }
+
   // Sincronizar estado inicial con el backend FastAPI
   actionDispatcher.syncWithBackend();
 
@@ -177,6 +205,7 @@ window.addEventListener('DOMContentLoaded', () => {
   (window as any).__actionDispatcher = actionDispatcher;
   (window as any).__dialogueManager = dialogueManager;
   (window as any).__animationViewerModal = animationViewerModal;
+  (window as any).__creditsModal = creditsModal;
   (window as any).__showAnims = (filter?: string) => animationViewerModal.open(filter);
   (window as any).__hideAnims = () => animationViewerModal.close();
 
@@ -192,6 +221,12 @@ window.addEventListener('DOMContentLoaded', () => {
     if (cmd === 'SHOW_ANIMS' || cmd === 'SHOW_ANIMATIONS' || cmd === 'ANIMS' || cmd === 'ANIMACIONES' || cmd === 'VER_ANIMACIONES') {
       animationViewerModal.open(arg || undefined);
       telemetryView.log(`Desplegando laboratorio visual de animaciones (SHOW_ANIMS${arg ? ` [${arg}]` : ''})...`);
+      return;
+    }
+
+    if (cmd === 'CREDITOS' || cmd === 'CREDITS' || cmd === 'VER_CREDITOS') {
+      creditsModal.open();
+      telemetryView.log("Desplegando créditos cinematográficos de la aventura...");
       return;
     }
 
@@ -279,6 +314,7 @@ window.addEventListener('DOMContentLoaded', () => {
           • <b>ESTADO</b>: Consulta el GameState determinista activo en FastAPI.<br>
           • <b>RESET</b>: Reinicia la partida y limpia la memoria conversacional.<br>
           • <b>SHOW_ANIMS [FILTRO]</b>: Laboratorio visual de animaciones (Twinber + 13 NPCs).<br>
+          • <b>CREDITOS</b>: Despliega los créditos cinematográficos de la aventura (LucasArts 1990).<br>
           • <b>MAPA</b>: Abre el mapa de carreteras de Tenerife (o pulsa la tecla 'M').<br>
           • <b>LISTAR_DESTINOS</b>: Muestra todos los 13 enclaves con sus NPCs, tiendas, sellos y fotos.<br>
           • <b>VIAJAR &lt;DESTINO&gt;</b>: Salto inmediato (Ej: VIAJAR la_orotava ó VIAJAR Masca).<br>
