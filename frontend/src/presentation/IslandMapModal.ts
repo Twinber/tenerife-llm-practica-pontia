@@ -295,7 +295,8 @@ export class IslandMapModal {
         } else if (validation.allowed) {
           this.setBannerText(`🟢 DESTINO DESBLOQUEADO: ${loc.name} (${loc.zone}) — Haz clic para iniciar el viaje en guagua.`);
         } else {
-          this.setBannerText(`🔒 DESTINO BLOQUEADO: ${loc.name} — ${validation.reason}`);
+          const cleanReason = (validation.reason || '').replace(/^🔒\s*/, '');
+          this.setBannerText(`🔒 BLOQUEADO: ${loc.name} — ${cleanReason}`);
         }
       });
 
@@ -317,9 +318,10 @@ export class IslandMapModal {
           this.audioService.playError();
           pinGroup.classList.add('pin-shake');
           setTimeout(() => pinGroup.classList.remove('pin-shake'), 450);
-          this.setBannerText(`🚫 ACCESO DENEGADO: ${validation.reason}`);
+          const cleanReason = (validation.reason || '').replace(/^🔒\s*/, '');
+          this.setBannerText(`🚫 ACCESO DENEGADO: ${cleanReason}`);
           if (this.onLogMessage) {
-            this.onLogMessage(`[VIAJE RESTRINGIDO] Intento de viajar a '${loc.name}': ${validation.reason}`);
+            this.onLogMessage(`[VIAJE RESTRINGIDO] Intento de viajar a '${loc.name}': ${cleanReason}`);
           }
           return;
         }

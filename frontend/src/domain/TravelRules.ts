@@ -50,16 +50,17 @@ export class TravelRules {
       if (!hasPlatano) missingItems.push('"Plátano de Canarias" (Frutero / Paco / Ayoze, 1 💰)');
 
       if (missingItems.length > 0) {
+        const itemNoun = missingItems.length === 1 ? 'Falta' : 'Faltan';
         if (origin.id !== 'las_canadas') {
           return {
             allowed: false,
-            reason: `🔒 Para ascender a la cumbre (3.718m) debes partir de la base de Las Cañadas y portar el equipo completo. Te falta: ${missingItems.join(', ')}.`,
+            reason: `🔒 Exige partir de Las Cañadas con el equipo completo. ${itemNoun}: ${missingItems.join(', ')}.`,
             badge: 'EQUIPO INCOMPLETO'
           };
         }
         return {
           allowed: false,
-          reason: `🔒 El Operario del Teleférico no te permitirá abordar la cabina sin el equipo completo de expedición. Te falta: ${missingItems.join(', ')}.`,
+          reason: `🔒 El Operario exige el equipo completo para abordar la cabina. ${itemNoun}: ${missingItems.join(', ')}.`,
           badge: 'EQUIPO INCOMPLETO'
         };
       }
