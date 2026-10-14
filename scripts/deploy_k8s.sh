@@ -50,12 +50,10 @@ echo "      ✓ Destino SSH: ${K8S_SSH_TARGET}"
 echo "      ✓ Dominio Ingress: ${K8S_DOMAIN}"
 echo "      ✓ Credencial de OpenAI detectada (longitud: ${#OPENAI_KEY} caracteres)."
 
-# 3. Compilación de la imagen Docker local
-echo "🐳 [2/7] Verificando imagen Docker local (${IMAGE_NAME})..."
-if ! docker image inspect "${IMAGE_NAME}" >/dev/null 2>&1; then
-    docker build -t "${IMAGE_NAME}" .
-fi
-echo "      ✓ Imagen lista para transferir."
+# 3. Compilación de la imagen Docker local (aprovecha la caché de Docker en segundos)
+echo "🐳 [2/7] Compilando imagen Docker local (${IMAGE_NAME})..."
+docker build -t "${IMAGE_NAME}" .
+echo "      ✓ Imagen compilada con éxito."
 
 # 4. Inyección directa de la imagen en containerd del clúster k3s
 echo "🚀 [3/7] Transfiriendo e importando imagen a k3s containerd..."
