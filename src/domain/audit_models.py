@@ -14,7 +14,7 @@ class AuditEvent(BaseModel):
     Se persiste en disco (game_audit.log / telemetry.jsonl) y se transmite a la consola CRT (~ / T).
     """
     timestamp: str = Field(..., description="Marca temporal en formato ISO 8601")
-    tipo_evento: Literal["TOOL_CALL", "RAG_RETRIEVAL", "GUARDRAIL_CHECK", "STATE_MUTATION"] = Field(
+    tipo_evento: Literal["TOOL_CALL", "RAG_RETRIEVAL", "GUARDRAIL_CHECK", "STATE_MUTATION", "AGENT_TURN"] = Field(
         ...,
         description="Categoría del evento técnico"
     )

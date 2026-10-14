@@ -267,7 +267,7 @@ async def get_telemetry() -> TelemetryResponse:
 async def reset_game() -> GameState:
     """Reinicia la partida y limpia la memoria conversacional."""
     nuevo_estado = session.reset()
-    session.orchestrator.audit_logger.log_tool_call(
+    session.orchestrator.audit_logger.log_state_mutation(
         nombre_operacion="game_reset",
         argumentos={},
         resultado_resumen="Partida reiniciada a estado inicial.",

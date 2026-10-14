@@ -52,24 +52,114 @@ class AuditLogger:
         latencia_ms: float,
         estado: str = "SUCCESS",
         tokens_input: Optional[int] = None,
-        tokens_output: Optional[int] = None
+        tokens_output: Optional[int] = None,
+        tipo_evento: str = "TOOL_CALL"
     ) -> AuditEvent:
         """
-        Método de conveniencia para registrar una llamada a herramienta (Function Calling).
+        Método de conveniencia para registrar una llamada a herramienta (Function Calling)
+        o cualquier otro evento tipado en el log de auditoría.
         """
         event = AuditEvent(
             timestamp=datetime.now(timezone.utc).isoformat(),
-            tipo_evento="TOOL_CALL",
+            tipo_evento=tipo_evento,  # type: ignore[arg-type]
             nombre_operacion=nombre_operacion,
             argumentos=argumentos,
             resultado_resumen=resultado_resumen,
             latencia_ms=round(latencia_ms, 2),
-            estado=estado,
+            estado=estado,  # type: ignore[arg-type]
             tokens_input=tokens_input,
             tokens_output=tokens_output
         )
         self.log_event(event)
         return event
+
+    def log_guardrail_check(
+        self,
+        nombre_operacion: str,
+        argumentos: dict[str, Any],
+        resultado_resumen: str,
+        latencia_ms: float,
+        estado: str = "SUCCESS",
+        tokens_input: Optional[int] = None,
+        tokens_output: Optional[int] = None
+    ) -> AuditEvent:
+        """Registra una evaluación de seguridad o filtro de moderación (Guardrail Bouncer)."""
+        return self.log_tool_call(
+            nombre_operacion=nombre_operacion,
+            argumentos=argumentos,
+            resultado_resumen=resultado_resumen,
+            latencia_ms=latencia_ms,
+            estado=estado,
+            tokens_input=tokens_input,
+            tokens_output=tokens_output,
+            tipo_evento="GUARDRAIL_CHECK"
+        )
+
+    def log_rag_retrieval(
+        self,
+        nombre_operacion: str,
+        argumentos: dict[str, Any],
+        resultado_resumen: str,
+        latencia_ms: float,
+        estado: str = "SUCCESS",
+        tokens_input: Optional[int] = None,
+        tokens_output: Optional[int] = None
+    ) -> AuditEvent:
+        """Registra una recuperación documental en la base de conocimiento vectorial (RAG)."""
+        return self.log_tool_call(
+            nombre_operacion=nombre_operacion,
+            argumentos=argumentos,
+            resultado_resumen=resultado_resumen,
+            latencia_ms=latencia_ms,
+            estado=estado,
+            tokens_input=tokens_input,
+            tokens_output=tokens_output,
+            tipo_evento="RAG_RETRIEVAL"
+        )
+
+    def log_state_mutation(
+        self,
+        nombre_operacion: str,
+        argumentos: dict[str, Any],
+        resultado_resumen: str,
+        latencia_ms: float = 0.0,
+        estado: str = "SUCCESS",
+        tokens_input: Optional[int] = None,
+        tokens_output: Optional[int] = None
+    ) -> AuditEvent:
+        """Registra una mutación determinista de estado del juego (sellos, fotos, reset)."""
+        return self.log_tool_call(
+            nombre_operacion=nombre_operacion,
+            argumentos=argumentos,
+            resultado_resumen=resultado_resumen,
+            latencia_ms=latencia_ms,
+            estado=estado,
+            tokens_input=tokens_input,
+            tokens_output=tokens_output,
+            tipo_evento="STATE_MUTATION"
+        )
+
+    def log_agent_turn(
+        self,
+        nombre_operacion: str,
+        argumentos: dict[str, Any],
+        resultado_resumen: str,
+        latencia_ms: float,
+        estado: str = "SUCCESS",
+        tokens_input: Optional[int] = None,
+        tokens_output: Optional[int] = None
+    ) -> AuditEvent:
+        """Registra la ejecución y consumo de tokens de un turno agéntico completo."""
+        return self.log_tool_call(
+            nombre_operacion=nombre_operacion,
+            argumentos=argumentos,
+            resultado_resumen=resultado_resumen,
+            latencia_ms=latencia_ms,
+            estado=estado,
+            tokens_input=tokens_input,
+            tokens_output=tokens_output,
+            tipo_evento="AGENT_TURN"
+        )
 
     def get_recent_events(
         self,

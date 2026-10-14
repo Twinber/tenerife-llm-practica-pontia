@@ -224,6 +224,16 @@ class AgentOrchestrator:
                     "fotos_totales": len(state.fotos_desbloqueadas)
                 }
             ))
+            self.audit_logger.log_state_mutation(
+                nombre_operacion="game_state_update",
+                argumentos={
+                    "sellos_nuevos": list(sellos_desbloqueados_en_turno),
+                    "fotos_nuevas": list(fotos_desbloqueadas_en_turno)
+                },
+                resultado_resumen=" | ".join(mutaciones_desc),
+                latencia_ms=0.0,
+                estado="SUCCESS"
+            )
 
     def process_turn(
         self,
@@ -364,6 +374,8 @@ class AgentOrchestrator:
         sellos_desbloqueados_en_turno: list[str] = []
         sfx_list: list[str] = []
         narrativa_final = ""
+        turn_tokens_input = 0
+        turn_tokens_output = 0
 
         def should_require_tools(text: str, has_img: bool) -> bool:
             if has_img:
@@ -392,10 +404,14 @@ class AgentOrchestrator:
                     temperature=self.settings.TEMPERATURE,
                     top_p=self.settings.TOP_P,
                     max_tokens=self.settings.MAX_TOKENS,
-                    stream=True
+                    stream=True,
+                    stream_options={"include_usage": True}
                 )
                 narrativa_final = ""
                 for chunk in stream_resp:
+                    if hasattr(chunk, "usage") and chunk.usage:
+                        turn_tokens_input += getattr(chunk.usage, "prompt_tokens", 0) or 0
+                        turn_tokens_output += getattr(chunk.usage, "completion_tokens", 0) or 0
                     delta = chunk.choices[0].delta if chunk.choices else None
                     if delta and delta.content:
                         narrativa_final += delta.content
@@ -419,6 +435,10 @@ class AgentOrchestrator:
                 top_p=self.settings.TOP_P,
                 max_tokens=self.settings.MAX_TOKENS
             )
+
+            if hasattr(resp, "usage") and resp.usage:
+                turn_tokens_input += getattr(resp.usage, "prompt_tokens", 0) or 0
+                turn_tokens_output += getattr(resp.usage, "completion_tokens", 0) or 0
 
             assistant_msg = resp.choices[0].message
 
@@ -504,7 +524,7 @@ class AgentOrchestrator:
                         ))
 
                         # Auditoría persistente de la consulta RAG
-                        self.audit_logger.log_tool_call(
+                        self.audit_logger.log_rag_retrieval(
                             nombre_operacion="search_guide",
                             argumentos={"query": query, "enclave": enclave_arg},
                             resultado_resumen=f"{len(rag_results)} citas de {', '.join(set(r.lugar for r in rag_results))} (Págs: {', '.join(str(r.pagina) for r in rag_results)})",
@@ -601,13 +621,15 @@ class AgentOrchestrator:
 
         total_latency_ms = (time.perf_counter() - start_turn_time) * 1000.0
 
-        # Registro de auditoría del turno completo
-        self.audit_logger.log_tool_call(
+        # Registro de auditoría del turno completo con telemetría de tokens
+        self.audit_logger.log_agent_turn(
             nombre_operacion="agent_supervisor_turn",
             argumentos={"ubicacion": loc_actual, "multimodal": bool(image_data_url)},
             resultado_resumen=narrativa_final[:100],
             latencia_ms=total_latency_ms,
-            estado="SUCCESS"
+            estado="SUCCESS",
+            tokens_input=turn_tokens_input if turn_tokens_input > 0 else None,
+            tokens_output=turn_tokens_output if turn_tokens_output > 0 else None
         )
 
         return TurnResult(

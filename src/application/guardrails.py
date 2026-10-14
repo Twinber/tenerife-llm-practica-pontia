@@ -88,12 +88,17 @@ class BouncerGuardrail:
             estado = "SUCCESS" if decision.es_valido else "BLOCKED"
             resumen = "Entrada permitida" if decision.es_valido else f"Bloqueado ({decision.motivo_bloqueo}): {decision.respuesta_tematica}"
 
-            self.audit_logger.log_tool_call(
+            tokens_in = resp.usage.prompt_tokens if hasattr(resp, "usage") and resp.usage else None
+            tokens_out = resp.usage.completion_tokens if hasattr(resp, "usage") and resp.usage else None
+
+            self.audit_logger.log_guardrail_check(
                 nombre_operacion="guardrail_bouncer",
                 argumentos={"texto_longitud": len(clean_text)},
                 resultado_resumen=resumen[:100],
                 latencia_ms=latency_ms,
-                estado=estado
+                estado=estado,
+                tokens_input=tokens_in,
+                tokens_output=tokens_out
             )
 
             return decision
@@ -109,12 +114,14 @@ class BouncerGuardrail:
                 respuesta_tematica=None
             )
 
-            self.audit_logger.log_tool_call(
+            self.audit_logger.log_guardrail_check(
                 nombre_operacion="guardrail_bouncer",
                 argumentos={"texto_longitud": len(clean_text)},
                 resultado_resumen=f"Fallback por error de red: {exc}",
                 latencia_ms=latency_ms,
-                estado="FALLBACK"
+                estado="FALLBACK",
+                tokens_input=None,
+                tokens_output=None
             )
 
             return fallback_decision

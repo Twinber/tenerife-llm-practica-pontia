@@ -239,7 +239,7 @@ window.addEventListener('DOMContentLoaded', () => {
             • Tokens memoria híbrida: <b>${data.memoria_snapshot.tokens_historial_total} / ${data.memoria_snapshot.presupuesto_max_tokens}</b><br>
             • Mensajes en ventana reciente: <b>${data.memoria_snapshot.mensajes_recientes.length}</b><br>
             • Últimos eventos de auditoría:<br>
-            ${data.eventos_recientes.slice(0, 5).map((e: any) => `  - [${e.tipo_evento}] ${e.nombre_operacion} (${e.latencia_ms.toFixed(1)}ms) -> ${e.resultado_resumen}`).join('<br>')}
+            ${data.eventos_recientes.slice(0, 5).map((e: any) => `  - [${e.tipo_evento}] ${e.nombre_operacion} (${e.latencia_ms.toFixed(1)}ms${e.tokens_input != null ? `, ${e.tokens_input}in/${e.tokens_output}out` : ''}) -> ${e.resultado_resumen}`).join('<br>')}
           </div>
         `);
       });
