@@ -87,6 +87,7 @@ export class ApiClient {
     location?: string,
     imagePath?: string,
     coins?: number,
+    items?: string[] | any[],
     onToken?: (token: string) => void,
     onMetadata?: (meta: any) => void,
     onStep?: (step: ExecutionStep) => void,
@@ -98,6 +99,7 @@ export class ApiClient {
       if (location) params.append('ubicacion', location);
       if (imagePath) params.append('image_path', imagePath);
       if (typeof coins === 'number') params.append('monedas', coins.toString());
+      if (items && items.length > 0) params.append('items', JSON.stringify(items));
 
       const es = new EventSource(`${this.baseUrl}/stream?${params.toString()}`);
       es.onmessage = (event) => {

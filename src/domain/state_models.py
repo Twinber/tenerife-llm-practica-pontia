@@ -182,6 +182,31 @@ class GameState(BaseModel):
         """Comprueba si Twinber porta un determinado objeto en su inventario."""
         return any(item.id == item_id for item in self.inventario)
 
+    def tiene_equipo_cumbre(self) -> tuple[bool, list[str]]:
+        """
+        Comprueba si Twinber dispone de los 4 ítems indispensables para coronar el Teide (3.718m):
+        1. Billete del Teleférico (item_billete)
+        2. Saco de Gofio (item_gofio)
+        3. Comanda del Guachinche (item_comanda)
+        4. Plátano de Canarias (item_platano)
+        Retorna (True, []) si posee todos, o (False, [lista_faltantes]).
+        """
+        reqs = [
+            ("item_billete", "Billete del Teleférico"),
+            ("item_gofio", "Saco de Gofio"),
+            ("item_comanda", "Comanda del Guachinche"),
+            ("item_platano", "Plátano de Canarias"),
+        ]
+        faltantes = []
+        for i_id, i_nom in reqs:
+            tiene = any(
+                it.id == i_id or i_nom.lower() in it.nombre.lower() or (i_id == "item_platano" and "platano" in it.id)
+                for it in self.inventario
+            )
+            if not tiene:
+                faltantes.append(i_nom)
+        return (len(faltantes) == 0, faltantes)
+
 
 class ExecutionStep(BaseModel):
     """

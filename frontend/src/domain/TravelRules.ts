@@ -35,24 +35,43 @@ export class TravelRules {
 
     const stampCount = stampedZones.size;
     const hasPacoStamp = stampedZones.has('Puerto de la Cruz') || stampedZones.has('puerto_cruz');
-    const hasCableCarTicket = acquiredItems.includes('Billete del Teleférico');
 
     // 2. Clímax: Pico del Teide — 3.718m
     if (target.id === 'pico_teide') {
-      if (!hasCableCarTicket) {
+      const hasTicket = acquiredItems.some(i => i.toLowerCase().includes('billete'));
+      const hasGofio = acquiredItems.some(i => i.toLowerCase().includes('gofio'));
+      const hasComanda = acquiredItems.some(i => i.toLowerCase().includes('comanda'));
+      const hasPlatano = acquiredItems.some(i => i.toLowerCase().includes('plátano') || i.toLowerCase().includes('platano'));
+
+      const missingItems: string[] = [];
+      if (!hasTicket) missingItems.push('"Billete del Teleférico" (Operario en Las Cañadas, 5 💰)');
+      if (!hasGofio) missingItems.push('"Saco de Gofio" (Chano en La Orotava, 3 💰)');
+      if (!hasComanda) missingItems.push('"Comanda del Guachinche" (Manolo en Santa Úrsula, 4 💰)');
+      if (!hasPlatano) missingItems.push('"Plátano de Canarias" (Frutero / Paco / Ayoze, 1 💰)');
+
+      if (missingItems.length > 0) {
+        if (origin.id !== 'las_canadas') {
+          return {
+            allowed: false,
+            reason: `🔒 Para ascender a la cumbre (3.718m) debes partir de la base de Las Cañadas y portar el equipo completo. Te falta: ${missingItems.join(', ')}.`,
+            badge: 'EQUIPO INCOMPLETO'
+          };
+        }
         return {
           allowed: false,
-          reason: '🔒 Para ascender al cráter somital necesitas el "Billete del Teleférico" (a la venta por el Operario en Las Cañadas).',
-          badge: 'BILLETE REQUERIDO'
+          reason: `🔒 El Operario del Teleférico no te permitirá abordar la cabina sin el equipo completo de expedición. Te falta: ${missingItems.join(', ')}.`,
+          badge: 'EQUIPO INCOMPLETO'
         };
       }
-      if (origin.id !== 'las_canadas' && !stampedZones.has('Las Cañadas del Teide') && !stampedZones.has('las_canadas') && !stampedZones.has('el_teide')) {
+
+      if (origin.id !== 'las_canadas') {
         return {
           allowed: false,
-          reason: '🔒 El teleférico parte exclusivamente desde la estación base de Las Cañadas del Teide (2.356m).',
+          reason: '🔒 El teleférico parte exclusivamente desde la estación base de Las Cañadas del Teide (2.356m). Debes viajar primero allí.',
           badge: 'ESTACIÓN BASE'
         };
       }
+
       return { allowed: true };
     }
 

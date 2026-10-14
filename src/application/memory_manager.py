@@ -228,6 +228,30 @@ class ConversationMemoryManager:
                 refusal = stamp_info.get("refusal_reason", "Enclave gastronómico sin cuño oficial.")
                 estado_sello_enclave = f"SIN SELLO OFICIAL ({refusal})."
 
+            items_desc = [
+                f"{it.nombre} (x{it.cantidad})" if it.cantidad > 1 else it.nombre
+                for it in game_state.inventario
+            ]
+            inventario_str = ", ".join(items_desc) if items_desc else "Equipo básico inicial (Monedas, Pasaporte, Álbum, Mapa)"
+
+            cumbre_ok, faltantes_cumbre = game_state.tiene_equipo_cumbre()
+            if cumbre_ok:
+                estado_cumbre_str = "COMPLETO (Posee los 4 ítems: 'Billete del Teleférico', 'Saco de Gofio', 'Comanda del Guachinche' y 'Plátano de Canarias'). ¡Autorizado para subir a la cúspide si se encuentra en Las Cañadas!"
+            else:
+                faltantes_detalle = []
+                for f in faltantes_cumbre:
+                    if f == "Billete del Teleférico":
+                        faltantes_detalle.append('"Billete del Teleférico" (5 monedas, Operario en Las Cañadas)')
+                    elif f == "Saco de Gofio":
+                        faltantes_detalle.append('"Saco de Gofio" (3 monedas, Chano en La Orotava)')
+                    elif f == "Comanda del Guachinche":
+                        faltantes_detalle.append('"Comanda del Guachinche" (4 monedas, Manolo en Santa Úrsula)')
+                    elif f == "Plátano de Canarias":
+                        faltantes_detalle.append('"Plátano de Canarias" (1 moneda, Frutero en El Médano / Paco / Ayoze)')
+                    else:
+                        faltantes_detalle.append(f'"{f}"')
+                estado_cumbre_str = f"INCOMPLETO (Faltan: {', '.join(faltantes_detalle)})."
+
             estado_str = (
                 f"\n\n=== ESTADO DETERMINISTA DEL EXPLORADOR (INVARIANTE) ===\n"
                 f"- Enclave actual: {loc}\n"
@@ -236,6 +260,8 @@ class ConversationMemoryManager:
                 f"- Monedas de oro: {game_state.monedas_oro} / 15\n"
                 f"- Sellos visados en pasaporte ({len(game_state.sellos_obtenidos)}/10 oficiales): {', '.join(game_state.sellos_obtenidos) or 'Ninguno aún'}\n"
                 f"- Fotos desbloqueadas en álbum ({len(game_state.fotos_desbloqueadas)}/37): {game_state.fotos_desbloqueadas}\n"
+                f"- Objetos en inventario: {inventario_str}\n"
+                f"- Estado del equipo de expedición al Teide (3.718m): {estado_cumbre_str}\n"
                 f"- Turnos jugados: {game_state.turnos_jugados}\n"
                 f"========================================================"
             )

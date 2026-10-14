@@ -76,6 +76,10 @@ class StateUpdateRequest(BaseModel):
     item_adquirido_nombre: Optional[str] = Field(default=None, description="Nombre del objeto")
     item_adquirido_icono: Optional[str] = Field(default=None, description="Icono SVG del objeto")
     item_adquirido_cantidad: Optional[int] = Field(default=1, ge=1)
+    items_adquiridos: Optional[list[dict[str, Any]]] = Field(
+        default=None,
+        description="Lista de objetos adquiridos para resincronización completa desde el cliente"
+    )
 
 
 class TelemetryResponse(BaseModel):
@@ -153,8 +157,32 @@ async def update_state(update: StateUpdateRequest) -> GameState:
         for item in session.state.inventario:
             if item.id == "item_monedas":
                 item.cantidad = update.monedas_oro
-    if update.ubicacion_actual is not None:
-        session.state.ubicacion_actual = update.ubicacion_actual
+
+    if update.items_adquiridos:
+        for it_raw in update.items_adquiridos:
+            nom = it_raw.get("name") or it_raw.get("nombre")
+            if not nom:
+                continue
+            cnt = it_raw.get("count") or it_raw.get("cantidad") or 1
+            i_id = "item_gofio"
+            if "platano" in nom.lower() or "plátano" in nom.lower():
+                i_id = "item_platano"
+            elif "comanda" in nom.lower():
+                i_id = "item_comanda"
+            elif "billete" in nom.lower():
+                i_id = "item_billete"
+            existente = next((it for it in session.state.inventario if it.id == i_id or it.nombre.lower() == nom.lower()), None)
+            if existente:
+                existente.cantidad = cnt
+            else:
+                session.state.inventario.append(InventoryItem(
+                    id=i_id,
+                    nombre=nom,
+                    icono=f"{i_id}.svg",
+                    tipo="CONSUMIBLE" if i_id == "item_platano" else "CLAVE",
+                    cantidad=cnt
+                ))
+
     if update.item_adquirido_id and update.item_adquirido_nombre:
         existente = next((it for it in session.state.inventario if it.id == update.item_adquirido_id), None)
         if existente:
@@ -167,6 +195,18 @@ async def update_state(update: StateUpdateRequest) -> GameState:
                 tipo="CONSUMIBLE" if "platano" in update.item_adquirido_id else "CLAVE",
                 cantidad=update.item_adquirido_cantidad or 1
             ))
+
+    if update.ubicacion_actual is not None:
+        if update.ubicacion_actual == "pico_teide":
+            ok_cumbre, faltantes = session.state.tiene_equipo_cumbre()
+            if ok_cumbre and session.state.ubicacion_actual == "las_canadas":
+                session.state.ubicacion_actual = update.ubicacion_actual
+            else:
+                logger.warning("Bloqueado intento de viaje a cumbre: ok_cumbre=%s, ubicacion_actual=%s, faltantes=%s",
+                               ok_cumbre, session.state.ubicacion_actual, faltantes)
+        else:
+            session.state.ubicacion_actual = update.ubicacion_actual
+
     session.orchestrator.audit_logger.log_state_mutation(
         nombre_operacion="client_state_sync",
         argumentos=update.model_dump(exclude_none=True),
@@ -185,7 +225,12 @@ async def handle_action(req: ActionRequest) -> TurnResult:
     """
     # Sincronizar ubicación y monedas si el frontend las proporciona
     if req.ubicacion and req.ubicacion != session.state.ubicacion_actual:
-        session.state.ubicacion_actual = req.ubicacion
+        if req.ubicacion == "pico_teide":
+            ok_cumbre, _ = session.state.tiene_equipo_cumbre()
+            if ok_cumbre and session.state.ubicacion_actual == "las_canadas":
+                session.state.ubicacion_actual = req.ubicacion
+        else:
+            session.state.ubicacion_actual = req.ubicacion
     if req.monedas is not None and 0 <= req.monedas <= 15:
         session.state.monedas_oro = req.monedas
         for item in session.state.inventario:
@@ -226,15 +271,51 @@ async def stream_action(
     texto: str = Query(..., description="Texto o consulta del jugador"),
     ubicacion: Optional[str] = Query(None, description="Enclave actual"),
     image_path: Optional[str] = Query(None, description="Imagen opcional para visión"),
-    monedas: Optional[int] = Query(None, ge=0, le=15, description="Saldo de monedas actual del explorador")
+    monedas: Optional[int] = Query(None, ge=0, le=15, description="Saldo de monedas actual del explorador"),
+    items: Optional[str] = Query(None, description="JSON serializado con nombres o dicts de items adquiridos")
 ) -> StreamingResponse:
     """
     Endpoint de streaming en tiempo real mediante Server-Sent Events (SSE).
     Envía los eventos agénticos ([STEP]) conforme se ejecutan en el bucle ReAct,
     seguidos de los tokens de la narrativa final y metadatos de sincronización ([META]).
     """
+    if items:
+        try:
+            parsed_items = json.loads(items)
+            if isinstance(parsed_items, list):
+                for it_raw in parsed_items:
+                    nom = it_raw.get("name") if isinstance(it_raw, dict) else str(it_raw)
+                    if not nom:
+                        continue
+                    cnt = it_raw.get("count", 1) if isinstance(it_raw, dict) else 1
+                    i_id = "item_gofio"
+                    if "platano" in nom.lower() or "plátano" in nom.lower():
+                        i_id = "item_platano"
+                    elif "comanda" in nom.lower():
+                        i_id = "item_comanda"
+                    elif "billete" in nom.lower():
+                        i_id = "item_billete"
+                    existente = next((it for it in session.state.inventario if it.id == i_id or it.nombre.lower() == nom.lower()), None)
+                    if existente:
+                        existente.cantidad = cnt
+                    else:
+                        session.state.inventario.append(InventoryItem(
+                            id=i_id,
+                            nombre=nom,
+                            icono=f"{i_id}.svg",
+                            tipo="CONSUMIBLE" if i_id == "item_platano" else "CLAVE",
+                            cantidad=cnt
+                        ))
+        except Exception as e:
+            logger.warning("Error parseando items en stream_action: %s", e)
+
     if ubicacion and ubicacion != session.state.ubicacion_actual:
-        session.state.ubicacion_actual = ubicacion
+        if ubicacion == "pico_teide":
+            ok_cumbre, _ = session.state.tiene_equipo_cumbre()
+            if ok_cumbre and session.state.ubicacion_actual == "las_canadas":
+                session.state.ubicacion_actual = ubicacion
+        else:
+            session.state.ubicacion_actual = ubicacion
     if monedas is not None and 0 <= monedas <= 15:
         session.state.monedas_oro = monedas
         for item in session.state.inventario:

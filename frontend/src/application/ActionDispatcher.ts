@@ -187,7 +187,8 @@ export class ActionDispatcher {
     // Sincronizar estado local persistido (monedas gastadas) hacia el backend
     if (this.coins < 15 || this.acquiredItems.length > 0) {
       this.apiClient.updateState({
-        monedas_oro: this.coins
+        monedas_oro: this.coins,
+        items_adquiridos: this.acquiredItems
       });
     }
 
@@ -796,6 +797,7 @@ export class ActionDispatcher {
         this.currentLocation.id,
         imagePath,
         this.coins,
+        this.acquiredItems,
         (token: string) => {
           if (!receivedFirstToken) {
             receivedFirstToken = true;
@@ -947,8 +949,29 @@ export class ActionDispatcher {
       reply = `${npcName}: 'No lo creo caballero, tal vez haya conocido a mi hermano gemelo ${this.currentLocation.npc.twinBrotherName}.'`;
     } else if (lower.includes('gofio') || lower.includes('comer') || lower.includes('molino') || lower.includes('comida') || lower.includes('papas') || lower.includes('mojo')) {
       reply = `${npcName}: '¡Para comer bien pide unas papas arrugadas con mojo y sube a La Orotava al Molino de Chano por buen gofio recién molido!'`;
-    } else if (lower.includes('teide') || lower.includes('volcan') || lower.includes('volcán') || lower.includes('cumbre') || lower.includes('subir') || lower.includes('pico')) {
-      reply = `${npcName}: 'El padre Teide vigila a 3.718 metros. Toma la guagua a Las Cañadas y luego la cabina del teleférico.'`;
+    } else if (lower.includes('teide') || lower.includes('volcan') || lower.includes('volcán') || lower.includes('cumbre') || lower.includes('cuspide') || lower.includes('cúspide') || lower.includes('subir') || lower.includes('pico') || lower.includes('desbloquear')) {
+      const hasTicket = this.acquiredItems.some(i => i.name.toLowerCase().includes('billete'));
+      const hasGofio = this.acquiredItems.some(i => i.name.toLowerCase().includes('gofio'));
+      const hasComanda = this.acquiredItems.some(i => i.name.toLowerCase().includes('comanda'));
+      const hasPlatano = this.acquiredItems.some(i => i.name.toLowerCase().includes('plátano') || i.name.toLowerCase().includes('platano'));
+
+      const missing: string[] = [];
+      if (!hasTicket) missing.push('"Billete del Teleférico" (5 💰, Operario en Las Cañadas)');
+      if (!hasGofio) missing.push('"Saco de Gofio" (3 💰, Chano en La Orotava)');
+      if (!hasComanda) missing.push('"Comanda del Guachinche" (4 💰, Manolo en Santa Úrsula)');
+      if (!hasPlatano) missing.push('"Plátano de Canarias" (1 💰, Frutero local)');
+
+      const stamps = this.stampedZones.size;
+      let advice = `${npcName}: '¡Para coronar la cumbre del Teide (3.718m) necesitas prepararte a conciencia! `;
+      if (stamps < 4) {
+        advice += `Primero, la dorsal TF-21 exige al menos 4 sellos en tu pasaporte (llevas ${stamps}/4). `;
+      }
+      if (missing.length === 0) {
+        advice += `¡Ya llevas el equipo completo de expedición! Dirígete a la estación base de Las Cañadas para tomar la cabina a la cúspide.'`;
+      } else {
+        advice += `Además, necesitas los 4 ítems de expedición indispensables. Te faltan: ${missing.join(', ')}.'`;
+      }
+      reply = advice;
     } else if (lower.includes('tiempo') || lower.includes('clima') || lower.includes('alisios') || lower.includes('calima') || lower.includes('viento')) {
       reply = `${npcName}: 'Los vientos alisios soplan frescos del norte. En el sur reina el sol y en la cumbre el aire es limpio y transparente.'`;
     } else if (lower.includes('dinero') || lower.includes('monedas') || lower.includes('perras') || lower.includes('comprar')) {
