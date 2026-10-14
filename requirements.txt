@@ -10,3 +10,5 @@ python-multipart>=0.0.9
 playwright>=1.42.0
 pillow>=10.2.0
 tiktoken>=0.7.0
+matplotlib>=3.8.0
+pandas>=2.2.0

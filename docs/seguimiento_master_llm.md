@@ -1,6 +1,6 @@
 # Plan Maestro de Aprendizaje y Seguimiento: Módulo LLMs & Evaluación Final
 
-**Estudiante:** Twinber  
+**Estudiante:** Daniel Aguilera González  
 **Materia:** Large Language Models (Máster en IA, Cloud Computing & DevOps)  
 **Tutor:** Antigravity (Google DeepMind)  
 **Objetivo de Calificación:** Sobresaliente (10 / 10 + 20% Bonus)  

@@ -6,6 +6,10 @@ El proyecto implementa una **Arquitectura Limpia (Clean Architecture)** desacopl
 
 Repositorio oficial: [https://github.com/Twinber/tenerife-llm-practica-pontia](https://github.com/Twinber/tenerife-llm-practica-pontia)
 
+* **Estudiante / Alumno:** Daniel Aguilera González
+* **Profesor / Evaluador:** Alberto Ruiz-Arteaga González
+* **Máster:** Máster en IA, Cloud Computing & DevOps (Módulo Large Language Models)
+
 ---
 
 ## ⚡ Guía Rápida para el Evaluador (Un Solo Comando con Makefile)
@@ -184,4 +188,4 @@ Fondos píxel art VGA (1280x720 px) que recorren la diversidad de Tenerife:
 | **Servidor API & Streaming** | Endpoints REST y Server-Sent Events (SSE) en FastAPI con entrega unificada de SPA. | ✅ **100% Completada** |
 | **Suite de Validación E2E** | Suite automatizada de 9 etapas que valida todo el sistema de extremo a extremo. | ✅ **100% Verificada (9/9)** |
 | **Makefile de Evaluación** | Comandos `make install`, `make run`, `make test` para el evaluador. | ✅ **100% Operativo** |
-| **Notebook de Entrega** | Cuaderno reproducible `notebook_principal.ipynb` con benchmarks y memorias. | ⏳ **Fase 5 (Siguiente)** |
+| **Notebook de Entrega** | Cuaderno reproducible `entrega_final_asistente_tenerife.ipynb` con benchmarks, memorias y apéndice interactivo. | ✅ **100% Generado y Pre-ejecutado** |

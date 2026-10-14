@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Retro Circular Badge -->
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0a1128"/>
+      <stop offset="50%" stop-color="#1c2541"/>
+      <stop offset="100%" stop-color="#3a506b"/>
+    </linearGradient>
+    <linearGradient id="goldBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffe066"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Deep Atlantic Night Background -->
+  <circle cx="32" cy="32" r="30" fill="url(#skyGrad)" stroke="url(#goldBorder)" stroke-width="3"/>
+
+  <!-- Twinkling Starlight -->
+  <circle cx="16" cy="14" r="1" fill="#00e5ff"/>
+  <circle cx="48" cy="12" r="1.2" fill="#ffffff"/>
+  <circle cx="34" cy="9" r="0.8" fill="#ffe066"/>
+  <circle cx="24" cy="22" r="1" fill="#00e5ff"/>
+  <circle cx="50" cy="24" r="1" fill="#ffffff"/>
+
+  <!-- Teide Volcano with Volcanic Rock & Shading -->
+  <polygon points="18,54 38,20 44,20 56,54" fill="#b45309"/>
+  <polygon points="40,20 44,20 56,54 40,54" fill="#78350f"/>
+
+  <!-- Snowy Peak of Teide -->
+  <polygon points="36,25 38,20 44,20 46,25 43,28 40,26" fill="#f8fafc"/>
+
+  <!-- Ocean Waves -->
+  <path d="M 6 50 Q 18 46 32 50 T 58 50 L 58 58 Q 45 61 32 61 Q 19 61 6 58 Z" fill="#0284c7" opacity="0.9"/>
+  <path d="M 12 53 Q 22 51 34 53 T 54 53" stroke="#38bdf8" stroke-width="1.5" fill="none"/>
+
+  <!-- Canary Island Date Palm -->
+  <!-- Trunk -->
+  <path d="M 15 54 Q 17 44 19 36 L 21 36 Q 19 44 18 54 Z" fill="#713f12"/>
+  <!-- Fronds -->
+  <path d="M 20 36 C 14 34 8 36 6 40" stroke="#22c55e" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 20 36 C 12 30 9 24 9 22" stroke="#16a34a" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 20 36 C 18 28 17 21 16 19" stroke="#4ade80" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 20 36 C 24 28 26 22 27 20" stroke="#22c55e" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 20 36 C 26 31 31 30 33 33" stroke="#16a34a" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 20 36 C 27 38 31 41 33 44" stroke="#4ade80" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+
+  <!-- Inner Gold Trim -->
+  <circle cx="32" cy="32" r="28" fill="none" stroke="#fef08a" stroke-width="0.8" opacity="0.6"/>
+</svg>
