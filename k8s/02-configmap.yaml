@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tenerife-config
+  namespace: tenerife-game
+data:
+  OPENAI_MODEL_MAIN: "gpt-4o-mini"
+  OPENAI_MODEL_FAST: "gpt-4o-mini"
+  OPENAI_EMBEDDING_MODEL: "text-embedding-3-small"
+  CHROMA_PERSIST_DIRECTORY: "/app/chroma_db"
+  GAME_AUDIT_LOG_PATH: "/app/game_audit.log"
+  ASSETS_DIR: "/app/assets"
+  PORT: "8080"

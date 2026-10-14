@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tenerife-game
+  namespace: tenerife-game
+  labels:
+    app: tenerife-game
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tenerife-game
+  template:
+    metadata:
+      labels:
+        app: tenerife-game
+    spec:
+      containers:
+        - name: web
+          image: docker.io/library/tenerife-game:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: tenerife-config
+            - secretRef:
+                name: tenerife-secrets
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "200Mi"
+            limits:
+              cpu: "600m"
+              memory: "450Mi"
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          volumeMounts:
+            - name: acme-challenge
+              mountPath: /app/frontend/dist/.well-known/acme-challenge
+      volumes:
+        - name: acme-challenge
+          hostPath:
+            path: /tmp/acme-challenge/.well-known/acme-challenge
+            type: DirectoryOrCreate

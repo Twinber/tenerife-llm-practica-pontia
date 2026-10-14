@@ -1,0 +1,45 @@
+# ==============================================================================
+# DOCKERIGNORE: Ignorar archivos innecesarios para el build del contenedor
+# ==============================================================================
+
+# Control de versiones y configuraciones de editor
+.git
+.gitignore
+.idea
+.vscode
+*.swp
+*.swo
+
+# Entornos virtuales y dependencias locales
+.venv
+venv
+ENV
+env
+node_modules
+frontend/node_modules
+
+# Secretos y variables de entorno (NUNCA incluir en la imagen)
+.env
+.env.*
+*.env
+
+# Caches y temporales
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.coverage
+htmlcov
+.ipynb_checkpoints
+*-checkpoint.ipynb
+
+# Base de datos vectorial y logs (Se auto-generan en runtime según Opción B)
+chroma_db/
+*.log
+game_audit.log
+data/pdf_pages/
+
+# Capturas de pantalla y documentación pesada
+screenshots/
+docs/img/

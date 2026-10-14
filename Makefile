@@ -22,6 +22,8 @@ help:
 	@echo "  make run        -> [RECOMENDADO] Levanta el juego completo en http://localhost:$(PORT)"
 	@echo "  make dev        -> Levanta Backend (--reload) y Frontend (Vite HMR) en paralelo"
 	@echo "  make test       -> Ejecuta la suite E2E completa (9 etapas agénticas)"
+	@echo "  make docker-build -> Compila la imagen Docker local tenerife-game:latest"
+	@echo "  make deploy     -> Despliega automáticamente en Kubernetes (k3s)"
 	@echo "  make clean      -> Limpia caches de Python, temporales y build de frontend"
 	@echo "======================================================================"
 	@echo ""
@@ -79,3 +81,14 @@ clean:
 	@find . -type d -name ".pytest_cache" -exec rm -rf {} +
 	@find . -type f -name "*.pyc" -delete
 	@echo "✅ Limpieza finalizada."
+
+# 7. Compilación de Contenedor Docker Multi-Stage
+docker-build:
+	@echo "🐳 Compilando imagen Docker local tenerife-game:latest..."
+	@docker build -t tenerife-game:latest .
+	@echo "✅ Imagen Docker compilada con éxito."
+
+# 8. Despliegue Automatizado en Kubernetes (k3s)
+deploy:
+	@echo "🚀 Iniciando pipeline de despliegue en Kubernetes..."
+	@./scripts/deploy_k8s.sh

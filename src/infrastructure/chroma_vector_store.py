@@ -53,6 +53,18 @@ class ChromaVectorStore:
             self.settings.OPENAI_EMBEDDING_MODEL
         )
 
+        # Auto-ingesta Self-Healing: Si la colección está vacía, auto-ingesta semántica desde TENERIFE.pdf
+        if self.collection.count() == 0:
+            logger.info("ChromaDB vacío (count=0). Iniciando auto-ingesta semántica desde TENERIFE.pdf...")
+            try:
+                from src.infrastructure.pdf_extractor import PDFExtractor
+                extractor = PDFExtractor()
+                chunks = extractor.extract_chunks()
+                self.index_chunks(chunks)
+                logger.info("✅ Auto-ingesta completada con éxito: %d chunks indexados en ChromaDB.", len(chunks))
+            except Exception as e:
+                logger.error("❌ Error en auto-ingesta de ChromaDB: %s", e)
+
     def count(self) -> int:
         """Retorna el número de documentos indexados en la colección."""
         return self.collection.count()

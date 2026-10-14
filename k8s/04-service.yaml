@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tenerife-game-svc
+  namespace: tenerife-game
+spec:
+  type: ClusterIP
+  selector:
+    app: tenerife-game
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

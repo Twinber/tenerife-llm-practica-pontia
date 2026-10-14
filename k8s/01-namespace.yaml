@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tenerife-game
+  labels:
+    app.kubernetes.io/name: tenerife-game
