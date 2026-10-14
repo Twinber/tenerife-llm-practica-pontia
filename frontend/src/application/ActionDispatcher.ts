@@ -1,7 +1,7 @@
 // ==============================================================================
 // APPLICATION: Orquestador de Acciones SCUMM (Verbos, Hotspots e Inventario)
 // ==============================================================================
-import { VerbType, SpeakerType, ExecutionStep } from '../domain/types';
+import { VerbType, SpeakerType, ExecutionStep, DialogueLine } from '../domain/types';
 import { Actor } from '../domain/Actor';
 import { DialogueManager } from './DialogueManager';
 import { AudioService } from '../infrastructure/AudioService';
@@ -25,7 +25,7 @@ export class ActionDispatcher {
   private twinber: Actor;
   private paco: Actor;
   public dialogueManager: DialogueManager;
-  private audioService: AudioService;
+  public audioService: AudioService;
 
   public get isWaitingBackend(): boolean {
     return this.dialogueManager.isWaitingBackend;
@@ -455,14 +455,19 @@ export class ActionDispatcher {
       }
     }
 
-    const lines: Array<{ speaker: 'twinber' | 'paco'; text: string }> = [
-      { speaker: 'twinber', text: `Twinber: '${hotspot.lookText}'` }
+    const attachedPhotos = (hotspot.photoId && this.photoAlbumModal?.isUnlocked(hotspot.photoId))
+      ? [hotspot.photoId]
+      : undefined;
+
+    const lines: DialogueLine[] = [
+      { speaker: 'twinber', text: `Twinber: '${hotspot.lookText}'`, photos: attachedPhotos }
     ];
 
     if (unlockedPhoto && hotspot.photoId) {
       lines.push({
         speaker: 'twinber',
-        text: `Twinber: '¡Foto #${String(hotspot.photoId).padStart(2, '0')} agregada a mi Álbum de Recuerdos! Usa el Álbum para verla a tamaño completo.'`
+        text: `Twinber: '¡Foto #${String(hotspot.photoId).padStart(2, '0')} agregada a mi Álbum de Recuerdos! Pulsa sobre la foto para verla en el Álbum.'`,
+        photos: [hotspot.photoId]
       });
     }
 
@@ -707,6 +712,21 @@ export class ActionDispatcher {
               passport: `${this.stampedZones.size}/10`,
               photos: this.getPhotosBadgeText()
             });
+          }
+
+          // Adjuntar fotos desbloqueadas a la línea narrativa actual para mostrarlas en el grid
+          const fotosToShow: number[] = [];
+          if (Array.isArray(fotosNuevas) && fotosNuevas.length > 0) {
+            fotosToShow.push(...fotosNuevas);
+          } else if (Array.isArray(meta.fotos_relacionadas)) {
+            meta.fotos_relacionadas.forEach((pid: number) => {
+              if (this.photoAlbumModal?.isUnlocked(pid) && !fotosToShow.includes(pid)) {
+                fotosToShow.push(pid);
+              }
+            });
+          }
+          if (fotosToShow.length > 0) {
+            this.dialogueManager.attachPhotosToCurrentLine(fotosToShow);
           }
         },
         (step: ExecutionStep) => {

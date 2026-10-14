@@ -6,6 +6,7 @@ import { AssetLoader } from '../infrastructure/AssetLoader';
 import { DialogueManager } from '../application/DialogueManager';
 import { ActionDispatcher } from '../application/ActionDispatcher';
 import { HotspotLocationDef } from '../domain/locationsData';
+import photosData from '../domain/photosData.json';
 
 export class ViewportView {
   private viewportElem: HTMLElement;
@@ -20,6 +21,7 @@ export class ViewportView {
   private actionDispatcher: ActionDispatcher;
   public isTraceExpanded: boolean = false;
   private lastStepsHash: string = '';
+  private lastPhotosHash: string = '';
 
   constructor(
     twinber: Actor,
@@ -48,6 +50,7 @@ export class ViewportView {
     window.addEventListener('keydown', (e) => {
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+      if (this.actionDispatcher.photoAlbumModal?.isOpen()) return;
 
       if ((e.key === ' ' || e.key === 'Enter') && this.dialogueManager.currentLine) {
         e.preventDefault();
@@ -62,7 +65,8 @@ export class ViewportView {
       if (
         target.closest('.agent-trace-container') ||
         target.closest('.step-details-toggle') ||
-        target.closest('.trace-step-json')
+        target.closest('.trace-step-json') ||
+        target.closest('#dialogue-photos-container')
       ) {
         return;
       }
@@ -233,13 +237,15 @@ export class ViewportView {
       let bubble = this.dialogueContainer.querySelector('.dialogue-bubble') as HTMLElement;
       let traceBox = this.dialogueContainer.querySelector('#agent-trace-container') as HTMLElement;
       let body = this.dialogueContainer.querySelector('.dialogue-body') as HTMLElement;
+      let photosBox = this.dialogueContainer.querySelector('#dialogue-photos-container') as HTMLElement;
       let btn = document.getElementById('btn-dialogue-continue') as HTMLButtonElement;
 
-      if (!bubble || !body || !btn) {
+      if (!bubble || !body || !btn || !photosBox) {
         this.dialogueContainer.innerHTML = `
           <div class="dialogue-bubble ${speaker}${this.isTraceExpanded ? ' has-expanded-trace' : ''}">
             <div id="agent-trace-container" class="agent-trace-container" style="display: none;"></div>
             <div class="dialogue-body">${this.dialogueManager.displayedText}</div>
+            <div id="dialogue-photos-container" class="dialogue-photos-container" style="display: none;"></div>
             <button id="btn-dialogue-continue" class="dialogue-continue-btn ${isWaiting ? 'waiting' : (isTyped ? 'ready' : 'typing')}">
               ${isWaiting ? '<span class="dialogue-clock-icon">⏳</span> PENSANDO...' : (isTyped ? '▶ CONTINUAR [ESPACIO]' : '...')}
             </button>
@@ -248,8 +254,10 @@ export class ViewportView {
         bubble = this.dialogueContainer.querySelector('.dialogue-bubble') as HTMLElement;
         traceBox = this.dialogueContainer.querySelector('#agent-trace-container') as HTMLElement;
         body = this.dialogueContainer.querySelector('.dialogue-body') as HTMLElement;
+        photosBox = this.dialogueContainer.querySelector('#dialogue-photos-container') as HTMLElement;
         btn = document.getElementById('btn-dialogue-continue') as HTMLButtonElement;
         this.lastStepsHash = '';
+        this.lastPhotosHash = '';
 
         if (btn) {
           btn.onclick = (e) => {
@@ -293,6 +301,27 @@ export class ViewportView {
         }
       }
 
+      // Actualizar Grid de Fotos Desbloqueadas al final de la narración
+      const photos = this.dialogueManager.currentLine.photos;
+      const showPhotos = !!(photos && photos.length > 0 && !isWaiting && (isTyped || !this.dialogueManager.isStreaming));
+      const currentPhotosHash = showPhotos && photos ? photos.join('|') : 'none';
+      if (this.lastPhotosHash !== currentPhotosHash) {
+        this.lastPhotosHash = currentPhotosHash;
+        if (photosBox) {
+          if (showPhotos && photos && photos.length > 0) {
+            photosBox.style.display = 'block';
+            photosBox.innerHTML = this.renderPhotosGridHtml(photos);
+            this.bindPhotosGridEvents(photosBox);
+            if (bubble) {
+              bubble.scrollTop = bubble.scrollHeight;
+            }
+          } else {
+            photosBox.style.display = 'none';
+            photosBox.innerHTML = '';
+          }
+        }
+      }
+
       // Actualizar botón de continuar
       if (btn) {
         const targetBtnClass = `dialogue-continue-btn ${isWaiting ? 'waiting' : (isTyped ? 'ready' : 'typing')}`;
@@ -310,6 +339,7 @@ export class ViewportView {
       if (this.dialogueContainer.innerHTML !== '') {
         this.dialogueContainer.innerHTML = '';
         this.lastStepsHash = '';
+        this.lastPhotosHash = '';
       }
     }
   }
@@ -415,5 +445,58 @@ export class ViewportView {
         ${itemsHtml}
       </div>
     `;
+  }
+
+  private renderPhotosGridHtml(photoIds: number[]): string {
+    const matchedPhotos = photoIds
+      .map(id => photosData.find(p => p.id === id))
+      .filter((p): p is typeof photosData[0] => !!p);
+
+    if (matchedPhotos.length === 0) return '';
+
+    const headerText = matchedPhotos.length === 1
+      ? 'FOTO DESBLOQUEADA // PULSA PARA ABRIR EN EL ÁLBUM'
+      : `${matchedPhotos.length} FOTOS DESBLOQUEADAS // PULSA PARA ABRIR EN EL ÁLBUM`;
+
+    const cardsHtml = matchedPhotos.map(p => `
+      <div class="dialogue-photo-card" data-photo-id="${p.id}" title="${this.escapeHtml(p.title)} (${this.escapeHtml(p.enclave)}) — Clic para examinar en el Álbum">
+        <img src="${p.filename}" alt="${this.escapeHtml(p.title)}" class="dialogue-photo-thumb" loading="lazy" />
+        <span class="dialogue-photo-badge">#${String(p.id).padStart(2, '0')}</span>
+        <div class="dialogue-photo-overlay">
+          <span class="dialogue-photo-title">${this.escapeHtml(p.title)}</span>
+        </div>
+        <div class="dialogue-photo-hover-hint">
+          <span>VER EN ÁLBUM</span>
+        </div>
+      </div>
+    `).join('');
+
+    return `
+      <div class="dialogue-photos-header">
+        <span class="photos-camera-icon">📸</span>
+        <span>${headerText}</span>
+      </div>
+      <div class="dialogue-photos-grid">
+        ${cardsHtml}
+      </div>
+    `;
+  }
+
+  private bindPhotosGridEvents(container: HTMLElement): void {
+    const cards = container.querySelectorAll('.dialogue-photo-card');
+    cards.forEach(card => {
+      card.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const photoIdStr = card.getAttribute('data-photo-id');
+        if (photoIdStr) {
+          const photoId = parseInt(photoIdStr, 10);
+          this.actionDispatcher.audioService.playClick();
+          if (this.actionDispatcher.photoAlbumModal) {
+            this.actionDispatcher.photoAlbumModal.unlockPhoto(photoId);
+            this.actionDispatcher.photoAlbumModal.open(photoId);
+          }
+        }
+      });
+    });
   }
 }

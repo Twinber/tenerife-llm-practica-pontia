@@ -23,6 +23,7 @@ export interface DialogueLine {
   speaker: SpeakerType;
   text: string;
   executionSteps?: ExecutionStep[];
+  photos?: number[];
 }
 
 export interface InventoryItem {

@@ -223,6 +223,10 @@ class TurnResult(BaseModel):
         default_factory=list,
         description="IDs de fotografías recién desbloqueadas en este turno"
     )
+    fotos_relacionadas: list[int] = Field(
+        default_factory=list,
+        description="IDs de fotografías referenciadas o asociadas a las citas documentales de este turno"
+    )
     sellos_nuevos: list[str] = Field(
         default_factory=list,
         description="IDs de sellos recién estampados en este turno"

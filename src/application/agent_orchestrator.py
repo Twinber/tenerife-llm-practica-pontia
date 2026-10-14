@@ -175,12 +175,63 @@ class AgentOrchestrator:
 
         return f"data:{mime_type};base64,{b64_data}"
 
+    def _apply_state_mutations(
+        self,
+        state: GameState,
+        user_input: str,
+        fotos_desbloqueadas_en_turno: list[int],
+        sellos_desbloqueados_en_turno: list[str],
+        sfx_list: list[str],
+        pasos_ejecucion: list[ExecutionStep],
+        record_step: Callable[[ExecutionStep], None]
+    ) -> None:
+        """Aplica mutaciones deterministas a GameState y registra el ExecutionStep si hubo novedades."""
+        loc_actual = state.ubicacion_actual
+        if is_passport_stamp_request(user_input):
+            stamp_info = OFFICIAL_ENCLAVE_STAMPS.get(loc_actual)
+            if stamp_info and stamp_info.get("stampable"):
+                stamp_key = stamp_info["stamp_key"]
+                if stamp_key and stamp_key not in state.sellos_obtenidos and stamp_key not in sellos_desbloqueados_en_turno:
+                    state.sellos_obtenidos.append(stamp_key)
+                    sellos_desbloqueados_en_turno.append(stamp_key)
+                    if "sfx_stamp" not in sfx_list:
+                        sfx_list.append("sfx_stamp")
+
+        for f_id in fotos_desbloqueadas_en_turno:
+            if f_id not in state.fotos_desbloqueadas:
+                state.fotos_desbloqueadas.append(f_id)
+                if "sfx_photo" not in sfx_list:
+                    sfx_list.append("sfx_photo")
+
+        mutaciones_desc = []
+        if sellos_desbloqueados_en_turno:
+            mutaciones_desc.append(f"Sello estampado: {sellos_desbloqueados_en_turno[0]}")
+        if fotos_desbloqueadas_en_turno:
+            mutaciones_desc.append(f"Fotos desbloqueadas: {fotos_desbloqueadas_en_turno}")
+
+        if mutaciones_desc and not any(p.tipo == "MUTACION_ESTADO" for p in pasos_ejecucion):
+            record_step(ExecutionStep(
+                id=f"step-{len(pasos_ejecucion)+1}",
+                tipo="MUTACION_ESTADO",
+                titulo="Mutación Determinista de Estado (GameState)",
+                icono="⚙️",
+                color="#00e676",
+                contenido=" | ".join(mutaciones_desc),
+                detalles={
+                    "sellos_nuevos": sellos_desbloqueados_en_turno,
+                    "fotos_nuevas": fotos_desbloqueadas_en_turno,
+                    "sellos_totales": len(state.sellos_obtenidos),
+                    "fotos_totales": len(state.fotos_desbloqueadas)
+                }
+            ))
+
     def process_turn(
         self,
         user_input: str,
         game_state: Optional[GameState] = None,
         image_path: Optional[str] = None,
-        on_step: Optional[Callable[[ExecutionStep], None]] = None
+        on_step: Optional[Callable[[ExecutionStep], None]] = None,
+        on_token: Optional[Callable[[str], None]] = None
     ) -> TurnResult:
         """
         Ejecuta un turno completo de juego:
@@ -188,10 +239,11 @@ class AgentOrchestrator:
         2. Ensamblado del System Prompt y memoria con GameState.
         3. Bucle ReAct con tools (RAG, Weather, Starlight, Calima).
         4. Mutación determinista del juego (sellos, fotos, monedas).
-        5. Retorno de TurnResult estructurado.
+        5. Retorno de TurnResult estructurado y emisión de tokens en tiempo real.
         """
         start_turn_time = time.perf_counter()
         state = game_state.model_copy(deep=True) if game_state else GameState()
+        loc_actual = state.ubicacion_actual
         pasos_ejecucion: list[ExecutionStep] = []
 
         def record_step(step: ExecutionStep) -> None:
@@ -231,6 +283,11 @@ class AgentOrchestrator:
                 },
                 latencia_ms=round(lat_guard_ms, 1)
             ))
+            if on_token:
+                try:
+                    on_token(rechazo_texto)
+                except Exception:
+                    pass
             return TurnResult(
                 narrativa=rechazo_texto,
                 estado=state,
@@ -303,6 +360,7 @@ class AgentOrchestrator:
         # 3. BUCLE REACT AUTÓNOMO (TOOL CALLING)
         citas_recuperadas: list[RespuestaCodiceRAG] = []
         fotos_desbloqueadas_en_turno: list[int] = []
+        fotos_relacionadas_en_turno: list[int] = []
         sellos_desbloqueados_en_turno: list[str] = []
         sfx_list: list[str] = []
         narrativa_final = ""
@@ -325,6 +383,28 @@ class AgentOrchestrator:
         iteration = 0
         while iteration < self.MAX_TOOL_ITERATIONS:
             iteration += 1
+
+            # Si ya se ejecutaron herramientas en iteraciones previas, transmitimos la síntesis en tiempo real
+            if iteration > 1:
+                stream_resp = self.client.chat.completions.create(
+                    model=self.settings.OPENAI_MODEL_MAIN,
+                    messages=messages,
+                    temperature=self.settings.TEMPERATURE,
+                    top_p=self.settings.TOP_P,
+                    max_tokens=self.settings.MAX_TOKENS,
+                    stream=True
+                )
+                narrativa_final = ""
+                for chunk in stream_resp:
+                    delta = chunk.choices[0].delta if chunk.choices else None
+                    if delta and delta.content:
+                        narrativa_final += delta.content
+                        if on_token:
+                            try:
+                                on_token(delta.content)
+                            except Exception as e:
+                                logger.warning("Error notificando on_token: %s", e)
+                break
 
             # Si la consulta versa sobre conocimiento documental o clima, exigimos tool call
             # en la primera iteración para evitar atajos perezosos o alucinaciones de páginas.
@@ -385,6 +465,8 @@ class AgentOrchestrator:
                         # Registrar fotos desbloqueables y citas
                         for res in rag_results:
                             for f_id in res.fotos_asociadas:
+                                if f_id not in fotos_relacionadas_en_turno:
+                                    fotos_relacionadas_en_turno.append(f_id)
                                 if f_id not in state.fotos_desbloqueadas and f_id not in fotos_desbloqueadas_en_turno:
                                     fotos_desbloqueadas_en_turno.append(f_id)
 
@@ -455,58 +537,49 @@ class AgentOrchestrator:
                         "content": tool_output_str
                     })
 
+                # Mutaciones deterministas de estado inmediatamente tras las herramientas
+                self._apply_state_mutations(
+                    state=state,
+                    user_input=user_input,
+                    fotos_desbloqueadas_en_turno=fotos_desbloqueadas_en_turno,
+                    sellos_desbloqueados_en_turno=sellos_desbloqueados_en_turno,
+                    sfx_list=sfx_list,
+                    pasos_ejecucion=pasos_ejecucion,
+                    record_step=record_step
+                )
+
             else:
-                # El modelo terminó su razonamiento y generó la respuesta narrativa final
+                # El modelo terminó su razonamiento en la iteración 1 sin herramientas
                 narrativa_final = assistant_msg.content or ""
+                self._apply_state_mutations(
+                    state=state,
+                    user_input=user_input,
+                    fotos_desbloqueadas_en_turno=fotos_desbloqueadas_en_turno,
+                    sellos_desbloqueados_en_turno=sellos_desbloqueados_en_turno,
+                    sfx_list=sfx_list,
+                    pasos_ejecucion=pasos_ejecucion,
+                    record_step=record_step
+                )
+                if on_token and narrativa_final:
+                    palabras = narrativa_final.split(" ")
+                    for i, p in enumerate(palabras):
+                        token = p + (" " if i < len(palabras) - 1 else "")
+                        try:
+                            on_token(token)
+                        except Exception:
+                            pass
+                        time.sleep(0.015)
                 break
 
         if not narrativa_final:
             narrativa_final = "Twinber observa la escena mientras reflexiona sobre el siguiente paso en la isla."
+            if on_token:
+                try:
+                    on_token(narrativa_final)
+                except Exception:
+                    pass
 
-        # 4. MUTACIONES DETERMINISTAS DEL ESTADO DE JUEGO (GAMESTATE)
-        # Sello del enclave actual: ÚNICAMENTE si el jugador solicitó sellar el pasaporte
-        loc_actual = state.ubicacion_actual
-        if is_passport_stamp_request(user_input):
-            stamp_info = OFFICIAL_ENCLAVE_STAMPS.get(loc_actual)
-            if stamp_info and stamp_info.get("stampable"):
-                stamp_key = stamp_info["stamp_key"]
-                if stamp_key and stamp_key not in state.sellos_obtenidos and stamp_key not in sellos_desbloqueados_en_turno:
-                    state.sellos_obtenidos.append(stamp_key)
-                    sellos_desbloqueados_en_turno.append(stamp_key)
-                    if "sfx_stamp" not in sfx_list:
-                        sfx_list.append("sfx_stamp")
-
-        # Fotos recién desbloqueadas
-        for f_id in fotos_desbloqueadas_en_turno:
-            if f_id not in state.fotos_desbloqueadas:
-                state.fotos_desbloqueadas.append(f_id)
-                if "sfx_photo" not in sfx_list:
-                    sfx_list.append("sfx_photo")
-
-        # Registrar paso de Mutación de Estado si hubo cambios
-        mutaciones_desc = []
-        if sellos_desbloqueados_en_turno:
-            mutaciones_desc.append(f"Sello estampado: {sellos_desbloqueados_en_turno[0]}")
-        if fotos_desbloqueadas_en_turno:
-            mutaciones_desc.append(f"Fotos desbloqueadas: {fotos_desbloqueadas_en_turno}")
-
-        if mutaciones_desc:
-            record_step(ExecutionStep(
-                id=f"step-{len(pasos_ejecucion)+1}",
-                tipo="MUTACION_ESTADO",
-                titulo="Mutación Determinista de Estado (GameState)",
-                icono="⚙️",
-                color="#00e676",
-                contenido=" | ".join(mutaciones_desc),
-                detalles={
-                    "sellos_nuevos": sellos_desbloqueados_en_turno,
-                    "fotos_nuevas": fotos_desbloqueadas_en_turno,
-                    "sellos_totales": len(state.sellos_obtenidos),
-                    "fotos_totales": len(state.fotos_desbloqueadas)
-                }
-            ))
-
-        # Registrar paso final de Narrativa
+        # Registrar paso final de Narrativa (AHORA que la narración ha terminado de transmitirse)
         record_step(ExecutionStep(
             id=f"step-{len(pasos_ejecucion)+1}",
             tipo="NARRATIVA_FINAL",
@@ -543,6 +616,7 @@ class AgentOrchestrator:
             visual_asset=image_path,
             citas=citas_recuperadas,
             fotos_nuevas=fotos_desbloqueadas_en_turno,
+            fotos_relacionadas=fotos_relacionadas_en_turno,
             sellos_nuevos=sellos_desbloqueados_en_turno,
             sfx_to_play=sfx_list,
             pasos_ejecucion=pasos_ejecucion

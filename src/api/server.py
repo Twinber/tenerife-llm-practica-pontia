@@ -188,13 +188,17 @@ async def stream_action(
         def on_step_callback(step: ExecutionStep) -> None:
             loop.call_soon_threadsafe(queue.put_nowait, ("STEP", step))
 
+        def on_token_callback(token: str) -> None:
+            loop.call_soon_threadsafe(queue.put_nowait, ("TOKEN", token))
+
         def run_sync_turn() -> None:
             try:
                 turn_res = session.orchestrator.process_turn(
                     user_input=texto,
                     game_state=session.state,
                     image_path=image_path,
-                    on_step=on_step_callback
+                    on_step=on_step_callback,
+                    on_token=on_token_callback
                 )
                 loop.call_soon_threadsafe(queue.put_nowait, ("DONE_RESULT", turn_res))
             except Exception as exc:
@@ -210,6 +214,9 @@ async def stream_action(
             if evt_type == "STEP":
                 step_obj: ExecutionStep = payload
                 yield f"data: [STEP]{step_obj.model_dump_json()}\n\n"
+            elif evt_type == "TOKEN":
+                token_str: str = payload
+                yield f"data: [TOKEN]{json.dumps(token_str)}\n\n"
             elif evt_type == "DONE_RESULT":
                 turn_result = payload
                 break
@@ -220,16 +227,12 @@ async def stream_action(
 
         if turn_result:
             session.state = turn_result.estado
-            palabras = turn_result.narrativa.split(" ")
-
-            for palabra in palabras:
-                yield f"data: {palabra} \n\n"
-                await asyncio.sleep(0.018)
 
             # Evento de metadatos estructurados del turno (sellos, fotos, sfx, estado, pasos_ejecucion)
             meta = {
                 "type": "turn_metadata",
                 "fotos_nuevas": turn_result.fotos_nuevas,
+                "fotos_relacionadas": turn_result.fotos_relacionadas,
                 "sellos_nuevos": turn_result.sellos_nuevos,
                 "sfx_to_play": turn_result.sfx_to_play,
                 "pasos_ejecucion": [p.model_dump() for p in turn_result.pasos_ejecucion],

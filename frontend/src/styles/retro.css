@@ -295,6 +295,141 @@ html, body {
   border-radius: 2px;
 }
 
+/* ==============================================================================
+   MINI GRID DE FOTOS DESBLOQUEADAS AL FINAL DE LA NARRACIÓN
+   ============================================================================== */
+.dialogue-photos-container {
+  margin-top: 6px;
+  padding: 8px 10px;
+  background: rgba(0, 15, 30, 0.7);
+  border: 1px dashed rgba(0, 229, 255, 0.4);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: fadeInPhotos 0.25s ease-out;
+}
+
+@keyframes fadeInPhotos {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dialogue-photos-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: #ffd700;
+  text-shadow: 1px 1px #000;
+  letter-spacing: 0.5px;
+}
+
+.dialogue-photos-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.dialogue-photo-card {
+  position: relative;
+  width: 78px;
+  height: 58px;
+  background: #001122;
+  border: 2px solid #00e5ff;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.85);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.dialogue-photo-card:hover {
+  transform: translateY(-2px) scale(1.06);
+  border-color: #ffd700;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.85), 0 4px 12px rgba(0, 0, 0, 0.95);
+}
+
+.dialogue-photo-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.dialogue-photo-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #00ffcc;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 1px 4px;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 229, 255, 0.5);
+  pointer-events: none;
+  text-shadow: 1px 1px #000;
+}
+
+.dialogue-photo-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 70%, transparent 100%);
+  padding: 2px 4px;
+  pointer-events: none;
+}
+
+.dialogue-photo-title {
+  color: #ffffff;
+  font-size: 7.5px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  text-shadow: 1px 1px #000;
+}
+
+.dialogue-photo-hover-hint {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 229, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.dialogue-photo-card:hover .dialogue-photo-hover-hint {
+  opacity: 1;
+}
+
+.dialogue-photo-hover-hint span {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.85);
+  padding: 2px 4px;
+  border-radius: 2px;
+  border: 1px solid #ffd700;
+  text-align: center;
+}
+
 .dialogue-continue-btn {
   background: #112255;
   border: 1px solid #4466cc;

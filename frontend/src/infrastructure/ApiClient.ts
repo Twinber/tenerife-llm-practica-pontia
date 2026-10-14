@@ -99,6 +99,13 @@ export class ApiClient {
           } catch (e) {
             console.warn('[SSE] Error parseando metadata:', e);
           }
+        } else if (event.data.startsWith('[TOKEN]')) {
+          try {
+            const token = JSON.parse(event.data.substring(7));
+            if (onToken) onToken(token);
+          } catch (e) {
+            if (onToken) onToken(event.data.substring(7));
+          }
         } else {
           if (onToken) onToken(event.data);
         }

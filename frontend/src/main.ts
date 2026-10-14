@@ -321,8 +321,18 @@ window.addEventListener('DOMContentLoaded', () => {
     btnAudio.addEventListener('click', () => {
       const isMuted = audioService.toggleMute();
       btnAudio.innerText = isMuted ? '🔇 MUTE' : '🔊 AUDIO';
+      const curTrack = audioService.getCurrentTrack();
+      btnAudio.title = isMuted ? 'Audio silenciado [Clic para activar]' : `Banda Sonora: ${curTrack.title} [Clic para silenciar]`;
     });
   }
+
+  // Notificación de cambio de pista ambiental
+  audioService.onMusicTrackChange = (track, index) => {
+    telemetryView.log(`[BANDA SONORA]: Sonando tema (${index + 1}/3): "${track.title}"`);
+    if (btnAudio && !audioService.isMuted) {
+      btnAudio.title = `Banda Sonora: ${track.title} (${index + 1}/3) [Clic para silenciar]`;
+    }
+  };
 
   // 5. Conectar bucle de renderizado y arrancar motor
   gameEngine.onTick = () => {
@@ -332,7 +342,7 @@ window.addEventListener('DOMContentLoaded', () => {
   telemetryView.log('Twinber Frontend Clean Architecture inicializado (Vite + TypeScript).');
   telemetryView.log('Consola CLI lista. Escribe AYUDA, LISTAR_DESTINOS o SHOW_ANIMS.');
   // Exponer API interna en window para telemetría y depuración
-  (window as any).__twinber = { actionDispatcher, gameEngine, telemetryView, animationViewerModal };
+  (window as any).__twinber = { actionDispatcher, gameEngine, telemetryView, animationViewerModal, audioService };
 
   gameEngine.start();
 });

@@ -101,6 +101,19 @@ export class DialogueManager {
     }
   }
 
+  public attachPhotosToCurrentLine(photos: number[]): void {
+    if (this.currentLine) {
+      if (!this.currentLine.photos) {
+        this.currentLine.photos = [];
+      }
+      for (const p of photos) {
+        if (!this.currentLine.photos.includes(p)) {
+          this.currentLine.photos.push(p);
+        }
+      }
+    }
+  }
+
   public startWaitingBackend(speaker: SpeakerType, message: string): void {
     this.isWaitingBackend = true;
     this.waitingSpeaker = speaker;
@@ -111,25 +124,26 @@ export class DialogueManager {
   public deliverBackendResponse(
     text: string,
     speaker: SpeakerType = 'paco',
-    executionSteps?: ExecutionStep[]
+    executionSteps?: ExecutionStep[],
+    photos?: number[]
   ): void {
     this.isWaitingBackend = false;
     // Si la línea activa era la de espera ("relojito") o ya no hay línea en pantalla:
     if (this.currentLine && this.currentLine.speaker === this.waitingSpeaker && this.currentLine.text.includes('⏳')) {
-      this.currentLine = { speaker, text, executionSteps };
+      this.currentLine = { speaker, text, executionSteps, photos };
       this.displayedText = '';
       this.isFullyTyped = false;
       this.charTimer = 0;
       if (this.onSpeakerChange) this.onSpeakerChange(speaker);
     } else if (!this.currentLine) {
-      this.currentLine = { speaker, text, executionSteps };
+      this.currentLine = { speaker, text, executionSteps, photos };
       this.displayedText = '';
       this.isFullyTyped = false;
       this.charTimer = 0;
       if (this.onSpeakerChange) this.onSpeakerChange(speaker);
     } else {
       // Twinber aún está diciendo su frase: se encola detrás
-      this.queue.push({ speaker, text, executionSteps });
+      this.queue.push({ speaker, text, executionSteps, photos });
     }
   }
 
